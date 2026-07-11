@@ -856,6 +856,58 @@ export default function Dashboard() {
 
   const renderDetailModal = () => {
      if (!selectedDetailItem || !detailType) return null;
+
+     const submitApprovalFromModal = async (no: string) => {
+        let supabaseSuccess = false;
+        try {
+           const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+           if (!isMockUrl) {
+              const isNoNumeric = !isNaN(Number(no));
+              const queryField = isNoNumeric ? 'no' : 'id';
+              const queryVal = isNoNumeric ? Number(no) : no;
+
+              const { error } = await supabase
+                 .from('archives')
+                 .update({
+                    gedung: approvalLocation.gedung,
+                    lorong: approvalLocation.lorong,
+                    rak: approvalLocation.rak,
+                    status: "Aktif"
+                 })
+                 .eq(queryField, queryVal);
+
+              if (!error) {
+                 supabaseSuccess = true;
+              }
+           }
+        } catch (err) {
+           console.warn(err);
+        }
+
+        if (supabaseSuccess) {
+           setSuccessMessage("Status berkas diperbarui di database!");
+           fetchArchives();
+        } else {
+           setArchives(prev => prev.map(item => {
+              if (item.no === no) {
+                 return {
+                    ...item,
+                    gedung: approvalLocation.gedung,
+                    lorong: approvalLocation.lorong,
+                    rak: approvalLocation.rak,
+                    status: "Aktif"
+                 };
+              }
+              return item;
+           }));
+           setSuccessMessage("Status berkas diperbarui (Simulasi)!");
+        }
+
+        closeDetailModal();
+        setApprovalLocation({ gedung: "A", lorong: "", rak: "" });
+        setTimeout(() => setSuccessMessage(""), 1500);
+     };
+
      return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
            <div className="bg-canvas border border-hairline rounded-sm shadow-2xl max-w-[550px] w-full relative overflow-hidden text-ink animate-in fade-in zoom-in duration-200">
@@ -920,23 +972,82 @@ export default function Dashboard() {
                           </div>
                        </div>
 
-                       <div className="border-t border-hairline pt-4 space-y-3">
-                          <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Lokasi Fisik Penyimpanan</h5>
-                          <div className="grid grid-cols-3 gap-3 text-center bg-canvas-soft border border-hairline p-3 rounded-xs">
-                             <div>
-                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Gedung</p>
-                                <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.gedung || "-"}</p>
+                       {selectedDetailItem.status === 'Menunggu ACC' && role === 'pic_gedung' ? (
+                          <div className="border-t border-hairline pt-4 space-y-3">
+                             <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Tentukan Lokasi Fisik Penyimpanan</h5>
+                             <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                   <label className="block text-[10px] font-semibold text-ink mb-1">Gedung</label>
+                                   <input 
+                                      type="text"
+                                      value={approvalLocation.gedung}
+                                      onChange={(e) => setApprovalLocation(prev => ({ ...prev, gedung: e.target.value }))}
+                                      placeholder="e.g. A"
+                                      className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
+                                   />
+                                </div>
+                                <div>
+                                   <label className="block text-[10px] font-semibold text-ink mb-1">Lorong</label>
+                                   <input 
+                                      type="text"
+                                      value={approvalLocation.lorong}
+                                      onChange={(e) => setApprovalLocation(prev => ({ ...prev, lorong: e.target.value }))}
+                                      placeholder="e.g. 20"
+                                      className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
+                                   />
+                                </div>
+                                <div>
+                                   <label className="block text-[10px] font-semibold text-ink mb-1">Rak</label>
+                                   <input 
+                                      type="text"
+                                      value={approvalLocation.rak}
+                                      onChange={(e) => setApprovalLocation(prev => ({ ...prev, rak: e.target.value }))}
+                                      placeholder="e.g. RAK G"
+                                      className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
+                                   />
+                                </div>
                              </div>
-                             <div>
-                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Lorong</p>
-                                <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.lorong || "-"}</p>
-                             </div>
-                             <div>
-                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Rak</p>
-                                <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
+                             <div className="flex gap-2 pt-2">
+                                <button 
+                                   onClick={async (e) => {
+                                      e.preventDefault();
+                                      await submitApprovalFromModal(selectedDetailItem.no);
+                                   }}
+                                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xs text-[12px]"
+                                >
+                                   Setujui & Simpan Lokasi
+                                </button>
+                                <button 
+                                   onClick={async (e) => {
+                                      e.preventDefault();
+                                      await handleReject(selectedDetailItem.no);
+                                      closeDetailModal();
+                                   }}
+                                   className="border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-2.5 rounded-xs text-[12px]"
+                                >
+                                   Tolak Pengajuan
+                                </button>
                              </div>
                           </div>
-                       </div>
+                       ) : (
+                          <div className="border-t border-hairline pt-4 space-y-3">
+                             <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Lokasi Fisik Penyimpanan</h5>
+                             <div className="grid grid-cols-3 gap-3 text-center bg-canvas-soft border border-hairline p-3 rounded-xs">
+                                <div>
+                                   <p className="text-ink-mute text-[10px] uppercase font-semibold">Gedung</p>
+                                   <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.gedung || "-"}</p>
+                                </div>
+                                <div>
+                                   <p className="text-ink-mute text-[10px] uppercase font-semibold">Lorong</p>
+                                   <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.lorong || "-"}</p>
+                                </div>
+                                <div>
+                                   <p className="text-ink-mute text-[10px] uppercase font-semibold">Rak</p>
+                                   <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
+                                </div>
+                             </div>
+                          </div>
+                       )}
 
                        <div className="border-t border-hairline pt-4">
                           <a 
@@ -990,6 +1101,56 @@ export default function Dashboard() {
                              </div>
                           )}
                        </div>
+
+                       {role === 'pic_gedung' && (
+                          <div className="border-t border-hairline pt-4 flex gap-2">
+                             {!selectedDetailItem.approved ? (
+                                <>
+                                   <button 
+                                      onClick={async () => {
+                                         await handleApproveUser(selectedDetailItem.id);
+                                         closeDetailModal();
+                                      }}
+                                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-xs text-[12px] flex items-center justify-center gap-1.5"
+                                   >
+                                      <UserCheck size={14} /> ACC Akses
+                                   </button>
+                                   <button 
+                                      onClick={async () => {
+                                         await handleRejectUser(selectedDetailItem.id);
+                                         closeDetailModal();
+                                      }}
+                                      className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium py-2 rounded-xs text-[12px] flex items-center justify-center gap-1.5"
+                                   >
+                                      <UserX size={14} /> Tolak
+                                   </button>
+                                </>
+                             ) : (
+                                selectedDetailItem.email !== user?.email && (
+                                   <>
+                                      <button 
+                                         onClick={() => {
+                                            handleResetUserPassword(selectedDetailItem.name, selectedDetailItem.email);
+                                            closeDetailModal();
+                                         }}
+                                         className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-2 rounded-xs text-[12px] flex items-center justify-center gap-1.5 font-semibold"
+                                      >
+                                         <Key size={14} /> Reset Password
+                                      </button>
+                                      <button 
+                                         onClick={async () => {
+                                            await handleRejectUser(selectedDetailItem.id);
+                                            closeDetailModal();
+                                         }}
+                                         className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute py-2 rounded-xs text-[12px] flex items-center justify-center gap-1.5"
+                                      >
+                                         <Trash2 size={14} /> Cabut Akses
+                                      </button>
+                                   </>
+                                )
+                             )}
+                          </div>
+                       )}
                     </div>
                  )}
 
@@ -1039,6 +1200,43 @@ export default function Dashboard() {
                              <p className="text-ink mt-1 bg-canvas-soft border border-hairline p-3 rounded-xs whitespace-pre-wrap">{selectedDetailItem.purpose}</p>
                           </div>
                        </div>
+
+                       {role === 'pic_gedung' && (
+                          <div className="border-t border-hairline pt-4 flex gap-2">
+                             {selectedDetailItem.status === 'Menunggu ACC' ? (
+                                <>
+                                   <button 
+                                      onClick={async () => {
+                                         await handleApproveRequest(selectedDetailItem.id);
+                                         closeDetailModal();
+                                      }}
+                                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-xs text-[12px]"
+                                   >
+                                      Setujui
+                                   </button>
+                                   <button 
+                                      onClick={async () => {
+                                         await handleRejectRequest(selectedDetailItem.id);
+                                         closeDetailModal();
+                                      }}
+                                      className="flex-1 border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-2 rounded-xs text-[12px]"
+                                   >
+                                      Tolak
+                                   </button>
+                                </>
+                             ) : selectedDetailItem.status === 'Disetujui' && selectedDetailItem.type === 'peminjaman' ? (
+                                <button 
+                                   onClick={async () => {
+                                      await handleCompleteRequest(selectedDetailItem.id);
+                                      closeDetailModal();
+                                   }}
+                                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xs text-[12px]"
+                                >
+                                   Kembali (Selesai)
+                                </button>
+                             ) : null}
+                          </div>
+                       )}
                     </div>
                  )}
               </div>
