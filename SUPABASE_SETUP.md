@@ -19,13 +19,14 @@ Jalankan perintah SQL berikut di **Supabase SQL Editor** untuk membuat tabel pro
 
 ```sql
 -- ========================================================
--- 1. TABEL PROFIL USER (Menyimpan Role RBAC)
+-- 1. TABEL PROFIL USER (Menyimpan Role RBAC & ACC Status)
 -- ========================================================
 create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   name text not null,
   email text not null,
   role text not null check (role in ('pic_gedung', 'admin_dept', 'user')),
+  approved boolean default false not null, -- ACC Status (default: false)
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -36,16 +37,48 @@ alter table public.profiles enable row level security;
 create policy "User can read own profile" on public.profiles
   for select using (auth.uid() = id);
 
+-- Policy agar PIC Gedung dapat melihat semua profiles & melakukan update (ACC)
+create policy "PIC Gedung can read all profiles" on public.profiles
+  for select to authenticated using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() 
+      and profiles.role = 'pic_gedung'
+    )
+  );
+
+create policy "PIC Gedung can update profiles" on public.profiles
+  for update to authenticated using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() 
+      and profiles.role = 'pic_gedung'
+    )
+  );
+
 -- Trigger otomatis untuk membuat baris profil baru saat user mendaftar di auth.users
 create or replace function public.handle_new_user()
 returns trigger as $$
+declare
+  new_role text;
+  is_approved boolean;
 begin
-  insert into public.profiles (id, name, email, role)
+  new_role := coalesce(new.raw_user_meta_data->>'role', 'user');
+  
+  -- PIC Gedung otomatis disetujui (approved = true), role lainnya menunggu ACC (approved = false)
+  if new_role = 'pic_gedung' then
+    is_approved := true;
+  else
+    is_approved := false;
+  end if;
+
+  insert into public.profiles (id, name, email, role, approved)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
-    coalesce(new.raw_user_meta_data->>'role', 'user') -- Default role jika tidak ditentukan
+    new_role,
+    is_approved
   );
   return new;
 end;

@@ -9,6 +9,7 @@ interface UserProfile {
   email: string;
   role: Role;
   name: string;
+  approved: boolean;
 }
 
 interface RoleContextType {
@@ -55,17 +56,26 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
            }
 
            if (authData.user) {
-              // Ambil profile role dari tabel profiles
+              // Ambil profile role & approved status dari tabel profiles
               const { data: profile, error: profileError } = await supabase
                  .from('profiles')
-                 .select('role, name')
+                 .select('role, name, approved')
                  .eq('id', authData.user.id)
                  .single();
 
               if (profileError) {
                  return { 
                     success: false, 
-                    error: "Login berhasil di Auth, tetapi gagal memuat data peran dari tabel 'profiles'. Pastikan query tabel SQL di panduan SUPABASE_SETUP.md sudah dijalankan." 
+                    error: "Login berhasil di Auth, tetapi gagal memuat profil dari database. Pastikan skema tabel profiles dan approved sudah dijalankan di Supabase SQL Editor." 
+                 };
+              }
+
+              // BLOKIR LOGIN JIKA USER BELUM DI-ACC OLEH PIC
+              if (!profile.approved) {
+                 await supabase.auth.signOut();
+                 return {
+                    success: false,
+                    error: "Akun Anda belum disetujui (ACC) oleh Admin PIC Gedung Arsip. Hubungi PIC untuk melakukan aktivasi akun."
                  };
               }
 
@@ -73,7 +83,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
                  const realUser: UserProfile = {
                     email: authData.user.email || email,
                     role: profile.role as Role,
-                    name: profile.name || email.split("@")[0]
+                    name: profile.name || email.split("@")[0],
+                    approved: profile.approved
                  };
                  localStorage.setItem("arsip_session", JSON.stringify(realUser));
                  setUser(realUser);
@@ -89,10 +100,21 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         // JIKA FETCH ERROR (Gagal Terhubung / Offline), AKTIFKAN FALLBACK SIMULASI LOKAL AGAR WEB TIDAK CRASH
         const errString = e.toString() || "";
         if (errString.includes("Failed to fetch") || errString.includes("TypeError")) {
+           // Jika email demo admin, otomatis approved, lainnya butuh acc
+           const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur");
+           
+           if (!isApproved && selectedRole === 'user') {
+              return {
+                 success: false,
+                 error: "Mode Simulasi: Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung. Silakan login menggunakan email admin/pic untuk melakukan ACC."
+              };
+           }
+
            const mockUser: UserProfile = {
               email: email,
               role: selectedRole,
-              name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1)
+              name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
+              approved: true
            };
            localStorage.setItem("arsip_session", JSON.stringify(mockUser));
            setUser(mockUser);
@@ -107,10 +129,19 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      }
 
      // FALLBACK SIMULASI MURNI JIKA URL MOCK
+     const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur");
+     if (!isApproved && selectedRole === 'user') {
+        return {
+           success: false,
+           error: "Mode Simulasi: Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung. Silakan login menggunakan email admin/pic untuk melakukan ACC."
+        };
+     }
+
      const mockUser: UserProfile = {
         email: email,
         role: selectedRole,
-        name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1)
+        name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
+        approved: true
      };
 
      localStorage.setItem("arsip_session", JSON.stringify(mockUser));
@@ -136,13 +167,18 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
            };
         }
 
+        // SignUp ke Supabase Auth dengan metadata nama, role, dan default approved = false
+        // PIC Gedung diset otomatis approved = true agar bisa menyetujui user lain
+        const isPic = selectedRole === 'pic_gedung';
+        
         const { data, error } = await supabase.auth.signUp({
            email,
            password,
            options: {
               data: {
                  name,
-                 role: selectedRole
+                 role: selectedRole,
+                 approved: isPic ? true : false
               }
            }
         });

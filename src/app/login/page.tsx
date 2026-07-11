@@ -25,7 +25,6 @@ export default function Login() {
         const res = await login(email, selectedRole, password);
         if (res.success) {
            if (res.error) {
-              // Jika login sukses tetapi ada pesan peringatan (e.g. Supabase offline & fallback aktif)
               setInfoMessage(res.error);
               setTimeout(() => {
                  router.push("/dashboard");
@@ -103,6 +102,15 @@ export default function Login() {
                      className="w-full bg-canvas border border-hairline text-[14px] rounded-xs pl-9 pr-3 py-2.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                   />
                </div>
+               {/* Lupa Kata Sandi Redirect to WhatsApp */}
+               <a 
+                  href="https://wa.me/628123456789?text=Halo%20Admin%20Arsip%20Semen%20Tonasa,%20saya%20ingin%20mengajukan%20permohonan%20reset%20password%20untuk%20akun%20saya." 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-[11px] text-primary hover:underline block text-right mt-1 font-semibold"
+               >
+                  Lupa kata sandi? Hubungi Admin
+               </a>
             </div>
 
             {/* Role Simulation Dropdown */}

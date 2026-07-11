@@ -17,7 +17,10 @@ import {
   Edit3, 
   Trash2,
   ExternalLink,
-  Download
+  Download,
+  UserCheck,
+  UserX,
+  Users
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -34,6 +37,14 @@ export default function Dashboard() {
      lorong: "",
      rak: ""
   });
+
+  // Users List State for Manajemen User (PIC Gedung ONLY)
+  const [usersList, setUsersList] = useState<any[]>([
+     { id: "1", name: "Adrian Bahri", email: "adrian@sementonasa.co.id", role: "admin_dept", approved: true, created_at: "2026-07-10T10:00:00Z" },
+     { id: "2", name: "Syukur", email: "syukur@sementonasa.co.id", role: "pic_gedung", approved: true, created_at: "2026-07-09T09:00:00Z" },
+     { id: "3", name: "Budi Santoso", email: "budi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:00:00Z" },
+     { id: "4", name: "Dewi Lestari", email: "dewi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:15:00Z" }
+  ]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -224,6 +235,25 @@ export default function Dashboard() {
      }
   };
 
+  // Fetch Users for PIC Gedung
+  const fetchUsers = async () => {
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .order('created_at', { ascending: false });
+           
+           if (!error && data) {
+              setUsersList(data);
+           }
+        }
+     } catch (e) {
+        console.warn("Failed to fetch profiles from Supabase, using mock fallback:", e);
+     }
+  };
+
   // Redirect to login if not authenticated
   useEffect(() => {
      const savedSession = localStorage.getItem("arsip_session");
@@ -233,6 +263,13 @@ export default function Dashboard() {
         fetchArchives();
      }
   }, [user, router]);
+
+  // Fetch profiles list when PIC navigates to Manajemen User
+  useEffect(() => {
+     if (activeMenu === "Manajemen User" && role === 'pic_gedung') {
+        fetchUsers();
+     }
+  }, [activeMenu, role]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
      const { name, value } = e.target;
@@ -283,7 +320,6 @@ export default function Dashboard() {
         console.warn("Supabase insertion skipped, falling back to mock insert:", err);
      }
 
-     // FALLBACK LOCAL STATE MUTATION
      if (supabaseSuccess) {
         setSuccessMessage(role === 'pic_gedung' ? "Arsip berhasil disimpan di Database!" : "Pengajuan dikirim ke Database!");
         fetchArchives();
@@ -338,7 +374,6 @@ export default function Dashboard() {
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
-           // Jika 'no' adalah serial/integer di DB, parse ke number
            const isNoNumeric = !isNaN(Number(selectedApprovalId));
            const queryField = isNoNumeric ? 'no' : 'id';
            const queryVal = isNoNumeric ? Number(selectedApprovalId) : selectedApprovalId;
@@ -355,12 +390,10 @@ export default function Dashboard() {
 
            if (!error) {
               supabaseSuccess = true;
-           } else {
-              console.error("Supabase update error:", error);
            }
         }
      } catch (err) {
-        console.warn("Supabase update skipped, falling back to mock update:", err);
+        console.warn(err);
      }
 
      if (supabaseSuccess) {
@@ -421,6 +454,66 @@ export default function Dashboard() {
            return item;
         }));
         setSuccessMessage("Pengajuan ditolak (Simulasi).");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  // Approve User Registration (PIC Gedung ONLY)
+  const handleApproveUser = async (userId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('profiles')
+              .update({ approved: true })
+              .eq('id', userId);
+           
+           if (!error) {
+              supabaseSuccess = true;
+           } else {
+              console.error(error);
+           }
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pendaftaran pengguna disetujui (ACC)!");
+        fetchUsers();
+     } else {
+        setUsersList(prev => prev.map(u => u.id === userId ? { ...u, approved: true } : u));
+        setSuccessMessage("Pendaftaran disetujui (Simulasi)!");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  // Reject / Delete user registration request (PIC Gedung ONLY)
+  const handleRejectUser = async (userId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('profiles')
+              .delete()
+              .eq('id', userId);
+           
+           if (!error) {
+              supabaseSuccess = true;
+           }
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pendaftaran pengguna ditolak & dihapus!");
+        fetchUsers();
+     } else {
+        setUsersList(prev => prev.filter(u => u.id !== userId));
+        setSuccessMessage("Pendaftaran ditolak (Simulasi)!");
      }
      setTimeout(() => setSuccessMessage(""), 1500);
   };
@@ -533,6 +626,7 @@ export default function Dashboard() {
            )}
 
            <form onSubmit={handleSubmit} className="bg-canvas border border-hairline rounded-sm p-6 md:p-8 space-y-6">
+              {/* Form inputs... */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-2">
                     <label className="block text-[13px] font-medium text-ink">Kode Klasifikasi</label>
@@ -900,9 +994,154 @@ export default function Dashboard() {
      );
   }
 
-  // 3. VIEW: DASHBOARD (HOME SCREEN FOR ADMINS)
+  // 3. PERSETUJUAN USER / MANAJEMEN USER (PIC Gedung ONLY) (New Tab implementation)
+  if (activeMenu === "Manajemen User" && role === 'pic_gedung') {
+     const pendingUsers = usersList.filter(u => !u.approved);
+     const approvedUsers = usersList.filter(u => u.approved);
+
+     return (
+        <div className="space-y-8 max-w-full mx-auto pb-10">
+           <div>
+              <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+                 Manajemen & Persetujuan Pengguna
+              </h2>
+              <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                 Berikan persetujuan akses (ACC) bagi staf departemen yang mendaftar baru sebelum mereka dapat menggunakan sistem.
+              </p>
+           </div>
+
+           {successMessage && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+                 <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
+                    <Check size={14} strokeWidth={3} />
+                 </div>
+                 <span className="text-[14px] font-medium">{successMessage}</span>
+              </div>
+           )}
+
+           {/* SECTION 1: MENUNGGU PERSETUJUAN */}
+           <div className="space-y-3">
+              <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2">
+                 <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                 Menunggu Persetujuan ({pendingUsers.length})
+              </h3>
+              <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+                 <table className="w-full text-left text-[12px] border-collapse min-w-[700px]">
+                    <thead>
+                       <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
+                          <th className="p-3">Nama Lengkap</th>
+                          <th className="p-3">Email Instansi</th>
+                          <th className="p-3">Jabatan Diajukan</th>
+                          <th className="p-3 text-center">Tanggal Daftar</th>
+                          <th className="p-3 text-center">Tindakan</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline">
+                       {pendingUsers.length > 0 ? (
+                          pendingUsers.map((item) => (
+                             <tr key={item.id} className="hover:bg-canvas-soft/50 transition-colors text-ink">
+                                <td className="p-3 font-medium text-ink">{item.name}</td>
+                                <td className="p-3 font-mono text-ink-mute">{item.email}</td>
+                                <td className="p-3">
+                                   <span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize">
+                                      {item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                                   </span>
+                                </td>
+                                <td className="p-3 text-center text-ink-mute font-mono">
+                                   {new Date(item.created_at).toLocaleDateString('id-ID')}
+                                </td>
+                                <td className="p-3">
+                                   <div className="flex items-center justify-center gap-2">
+                                      <button 
+                                         onClick={() => handleApproveUser(item.id)}
+                                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded-sm text-[11px] flex items-center gap-1"
+                                      >
+                                         <UserCheck size={12} /> ACC Akses
+                                      </button>
+                                      <button 
+                                         onClick={() => handleRejectUser(item.id)}
+                                         className="border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium px-3 py-1 rounded-sm text-[11px] flex items-center gap-1"
+                                      >
+                                         <UserX size={12} /> Tolak
+                                      </button>
+                                   </div>
+                                </td>
+                             </tr>
+                          ))
+                       ) : (
+                          <tr>
+                             <td colSpan={5} className="p-6 text-center text-ink-mute text-[13px]">
+                                Tidak ada pendaftaran pengguna baru yang menunggu persetujuan saat ini.
+                             </td>
+                          </tr>
+                       )}
+                    </tbody>
+                 </table>
+              </div>
+           </div>
+
+           {/* SECTION 2: PENGGUNA AKTIF */}
+           <div className="space-y-3 pt-4">
+              <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2">
+                 <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
+                 Daftar Pengguna Aktif ({approvedUsers.length})
+              </h3>
+              <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+                 <table className="w-full text-left text-[12px] border-collapse min-w-[700px]">
+                    <thead>
+                       <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
+                          <th className="p-3">Nama Lengkap</th>
+                          <th className="p-3">Email Instansi</th>
+                          <th className="p-3">Jabatan</th>
+                          <th className="p-3 text-center">Status</th>
+                          <th className="p-3 text-center">Hapus</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline">
+                       {approvedUsers.map((item) => (
+                          <tr key={item.id} className="hover:bg-canvas-soft/50 transition-colors text-ink">
+                             <td className="p-3 font-medium text-ink">{item.name}</td>
+                             <td className="p-3 font-mono text-ink-mute">{item.email}</td>
+                             <td className="p-3">
+                                <span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize">
+                                   {item.role === 'pic_gedung' ? 'Admin PIC Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                                </span>
+                             </td>
+                             <td className="p-3 text-center">
+                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                                   Aktif (Disetujui)
+                                </span>
+                             </td>
+                             <td className="p-3">
+                                <div className="flex items-center justify-center">
+                                   {item.role !== 'pic_gedung' ? (
+                                      <button 
+                                         onClick={() => handleRejectUser(item.id)}
+                                         className="p-1 text-ink-mute hover:text-primary transition-colors"
+                                         title="Cabut Akses Pengguna"
+                                      >
+                                         <Trash2 size={14} />
+                                      </button>
+                                   ) : (
+                                      <span className="text-[10px] text-ink-mute-2 font-mono">-</span>
+                                   )}
+                                </div>
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
+              </div>
+           </div>
+
+        </div>
+     );
+  }
+
+  // 4. VIEW: DASHBOARD (HOME SCREEN FOR ADMINS)
   if (activeMenu === "Dashboard" && role !== 'user') {
      const pendingCount = archives.filter(item => item.status === "Menunggu ACC").length;
+     const pendingUsersCount = usersList.filter(u => !u.approved).length;
      
      return (
         <div className="space-y-8 max-w-[1280px] mx-auto">
@@ -928,23 +1167,44 @@ export default function Dashboard() {
              </div>
            </div>
 
-           {role === 'pic_gedung' && pendingCount > 0 && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-sm p-4 flex items-center justify-between gap-4">
-                 <div className="flex items-center gap-3">
-                    <Clock className="text-amber-600" />
-                    <div>
-                       <h3 className="font-semibold text-sm">Pengajuan Berkas Baru</h3>
-                       <p className="text-xs text-amber-700 mt-0.5">Ada {pendingCount} pengajuan berkas dari departemen yang membutuhkan ACC Anda.</p>
+           {/* Alerts for Pending Submissions and Pending User Approvals */}
+           <div className="space-y-3">
+              {role === 'pic_gedung' && pendingCount > 0 && (
+                 <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                       <Clock className="text-amber-600" />
+                       <div>
+                          <h3 className="font-semibold text-sm">Pengajuan Berkas Baru</h3>
+                          <p className="text-xs text-amber-700 mt-0.5">Ada {pendingCount} pengajuan berkas dari departemen yang membutuhkan ACC Anda.</p>
+                       </div>
                     </div>
+                    <button 
+                       onClick={() => setActiveMenu("Persetujuan (ACC)")}
+                       className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                    >
+                       Periksa Sekarang
+                    </button>
                  </div>
-                 <button 
-                    onClick={() => setActiveMenu("Persetujuan (ACC)")}
-                    className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
-                 >
-                    Periksa Sekarang
-                 </button>
-              </div>
-           )}
+              )}
+
+              {role === 'pic_gedung' && pendingUsersCount > 0 && (
+                 <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                       <Users className="text-blue-600" />
+                       <div>
+                          <h3 className="font-semibold text-sm">Pendaftaran Anggota Baru</h3>
+                          <p className="text-xs text-blue-700 mt-0.5">Ada {pendingUsersCount} pengguna baru terdaftar yang memerlukan persetujuan (ACC) akses dari Anda.</p>
+                       </div>
+                    </div>
+                    <button 
+                       onClick={() => setActiveMenu("Manajemen User")}
+                       className="bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                    >
+                       Aktivasi User
+                    </button>
+                 </div>
+              )}
+           </div>
 
            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
               <div className="bg-canvas border border-hairline rounded-sm p-6 flex flex-col justify-between hover:border-hairline-strong transition-colors">
@@ -1065,7 +1325,7 @@ export default function Dashboard() {
                  className="bg-transparent border-none text-[13px] text-ink font-medium outline-none pr-6 cursor-pointer"
               >
                  <option value="Semua">Semua Status</option>
-                 <option value="Aktif">Berkas Hack/Aktif</option>
+                 <option value="Aktif">Berkas Aktif</option>
                  <option value="Inaktif">Berkas Inaktif</option>
                  <option value="Permanen">Berkas Permanen</option>
                  <option value="Dinilai Kembali">Dinilai Kembali</option>

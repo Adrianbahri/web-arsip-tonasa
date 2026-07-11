@@ -74,7 +74,7 @@ export default function Register() {
                </div>
                <div>
                   <p className="font-semibold">Registrasi Berhasil!</p>
-                  <p className="text-[11px] text-emerald-700">Akun Anda sedang didaftarkan. Mengarahkan Anda ke Halaman Login...</p>
+                  <p className="text-[11px] text-emerald-700 leading-normal">Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari Admin PIC Gedung Arsip sebelum dapat digunakan. Mengarahkan ke login...</p>
                </div>
             </div>
          )}
