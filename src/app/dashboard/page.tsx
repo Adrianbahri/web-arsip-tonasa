@@ -1306,7 +1306,8 @@ export default function Dashboard() {
               </form>
            )}
 
-           <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+           {/* Desktop Table View */}
+           <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
               <table className="w-full text-left text-[12px] border-collapse min-w-[1000px]">
                  <thead>
                     <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
@@ -1384,6 +1385,66 @@ export default function Dashboard() {
                  </tbody>
               </table>
            </div>
+
+           {/* Mobile Card List View (Mobile First Design) */}
+           <div className="block md:hidden space-y-4">
+              {pendingSubmissions.length > 0 ? (
+                 pendingSubmissions.map((archive) => (
+                    <div 
+                       key={archive.no}
+                       onClick={() => {
+                          setSelectedDetailItem(archive);
+                          setDetailType("archive");
+                       }}
+                       className="bg-canvas border border-hairline rounded-sm p-4 space-y-3 hover:border-hairline-strong transition-colors cursor-pointer"
+                    >
+                       <div className="flex justify-between items-start">
+                          <div>
+                             <span className="font-mono text-[10px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.kodeKlasifikasi}</span>
+                             <h4 className="font-bold text-[14px] text-ink mt-1.5">{archive.judulBerkas}</h4>
+                             <p className="text-[12px] text-ink-mute mt-0.5">{archive.jenisBerkas}</p>
+                          </div>
+                          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                             {archive.status}
+                          </span>
+                       </div>
+                       <div className="flex items-center justify-between text-[11px] border-t border-hairline pt-3">
+                          <div>
+                             <p className="text-ink-mute">Dept: <span className="font-medium text-ink">{archive.departemen}</span></p>
+                             <p className="text-ink-mute mt-0.5">Tahun: <span className="font-mono text-ink">{archive.tahun}</span></p>
+                          </div>
+                          <a 
+                             href={archive.linkBerkas} 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
+                             onClick={(e) => e.stopPropagation()}
+                             className="text-primary hover:underline font-semibold flex items-center gap-1"
+                          >
+                             <ExternalLink size={12} /> Lihat Berkas
+                          </a>
+                       </div>
+                       <div className="flex gap-2 pt-2 border-t border-hairline">
+                          <button 
+                             onClick={(e) => { e.stopPropagation(); handleApprove(archive.no); }}
+                             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-sm text-[12px] text-center"
+                          >
+                             ACC
+                          </button>
+                          <button 
+                             onClick={(e) => { e.stopPropagation(); handleReject(archive.no); }}
+                             className="flex-1 border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-2 rounded-sm text-[12px] text-center"
+                          >
+                             Tolak
+                          </button>
+                       </div>
+                    </div>
+                 ))
+              ) : (
+                 <div className="p-8 text-center text-ink-mute text-[14px] bg-canvas border border-hairline rounded-sm">
+                    Tidak ada pengajuan berkas masuk saat ini.
+                 </div>
+              )}
+           </div>
         </div>
      );
   }
@@ -1423,7 +1484,8 @@ export default function Dashboard() {
               </div>
            )}
 
-           <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+           {/* Desktop Table View */}
+           <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
               <table className="w-full text-left text-[12px] border-collapse min-w-[850px]">
                  <thead>
                     <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
@@ -1526,6 +1588,79 @@ export default function Dashboard() {
                  </tbody>
               </table>
            </div>
+
+           {/* Mobile Card List View (Mobile First Design) */}
+           <div className="block md:hidden space-y-3">
+              {requestsList.length > 0 ? (
+                 requestsList.map((req, idx) => (
+                    <div 
+                       key={req.id}
+                       onClick={() => {
+                          setSelectedDetailItem(req);
+                          setDetailType("request");
+                       }}
+                       className="bg-canvas border border-hairline rounded-sm p-4 space-y-3 hover:border-hairline-strong transition-colors cursor-pointer"
+                    >
+                       <div className="flex justify-between items-start">
+                          <div>
+                             <h4 className="font-semibold text-[14px] text-ink">{req.user_name}</h4>
+                             <span className={`inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-xs capitalize mt-1 ${
+                                req.type === 'peminjaman' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'
+                             }`}>
+                                {req.type === 'peminjaman' ? <BookOpen size={10} /> : <MapPin size={10} />}
+                                {req.type}
+                             </span>
+                          </div>
+                          <span className={`border text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                             req.status === 'Disetujui' ? 'bg-[#def7ec] text-[#03543f]' : req.status === 'Selesai' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'
+                          }`}>
+                             {req.status}
+                          </span>
+                       </div>
+                       <div className="text-[12px] text-ink border-t border-hairline pt-2.5">
+                          <p className="font-semibold text-ink-mute text-[9px] uppercase">Detail Pengajuan:</p>
+                          <p className="font-medium mt-0.5 truncate">{req.type === 'peminjaman' ? req.archive_title : "Kunjungan Gedung Arsip"}</p>
+                          <p className="text-ink-mute font-mono text-[11px] mt-1">
+                             {req.type === 'peminjaman' ? `Sewa: ${req.date} s/d ${req.time_or_return}` : `Jadwal: ${req.date} (${req.time_or_return})`}
+                          </p>
+                       </div>
+                       {role === 'pic_gedung' && (
+                          <div className="flex gap-2 pt-2 border-t border-hairline">
+                             {req.status === 'Menunggu ACC' ? (
+                                <>
+                                   <button 
+                                      onClick={(e) => { e.stopPropagation(); handleApproveRequest(req.id); }}
+                                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-1.5 rounded-sm text-[11px]"
+                                   >
+                                      Setujui
+                                   </button>
+                                   <button 
+                                      onClick={(e) => { e.stopPropagation(); handleRejectRequest(req.id); }}
+                                      className="flex-1 border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-1.5 rounded-sm text-[11px]"
+                                   >
+                                      Tolak
+                                   </button>
+                                </>
+                             ) : req.status === 'Disetujui' && req.type === 'peminjaman' ? (
+                                <button 
+                                   onClick={(e) => { e.stopPropagation(); handleCompleteRequest(req.id); }}
+                                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 rounded-sm text-[11px]"
+                                >
+                                   Kembali (Selesai)
+                                </button>
+                             ) : (
+                                <span className="text-[11px] text-ink-mute-2 w-full text-center py-1 font-mono">-</span>
+                             )}
+                          </div>
+                       )}
+                    </div>
+                 ))
+              ) : (
+                 <div className="p-8 text-center text-ink-mute text-[14px] bg-canvas border border-hairline rounded-sm">
+                    Tidak ada riwayat pengajuan layanan saat ini.
+                 </div>
+              )}
+           </div>
         </div>
      );
   }
@@ -1561,7 +1696,9 @@ export default function Dashboard() {
                  <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
                  Menunggu Persetujuan ({pendingUsers.length})
               </h3>
-              <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+              
+              {/* Desktop View */}
+              <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
                  <table className="w-full text-left text-[12px] border-collapse min-w-[700px]">
                     <thead>
                        <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
@@ -1622,6 +1759,53 @@ export default function Dashboard() {
                     </tbody>
                  </table>
               </div>
+
+              {/* Mobile Card List View (Mobile First Design) */}
+              <div className="block md:hidden space-y-3">
+                 {pendingUsers.length > 0 ? (
+                    pendingUsers.map((item) => (
+                       <div 
+                          key={item.id}
+                          onClick={() => {
+                             setSelectedDetailItem(item);
+                             setDetailType("user");
+                          }}
+                          className="bg-canvas border border-hairline rounded-sm p-4 space-y-3 hover:border-hairline-strong transition-colors cursor-pointer"
+                       >
+                          <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 rounded-full border border-hairline overflow-hidden">
+                                <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-[14px] text-ink truncate">{item.name}</h4>
+                                <p className="font-mono text-[11px] text-ink-mute truncate">{item.email}</p>
+                             </div>
+                             <span className="font-mono text-[10px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize">
+                                {item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                             </span>
+                          </div>
+                          <div className="flex gap-2 pt-2 border-t border-hairline">
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); handleApproveUser(item.id); }}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-sm text-[11px] flex items-center justify-center gap-1"
+                             >
+                                <UserCheck size={12} /> ACC Akses
+                             </button>
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); handleRejectUser(item.id); }}
+                                className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium py-2 rounded-sm text-[11px] flex items-center justify-center gap-1"
+                             >
+                                <UserX size={12} /> Tolak
+                             </button>
+                          </div>
+                       </div>
+                    ))
+                 ) : (
+                    <div className="p-6 text-center text-ink-mute text-[13px] bg-canvas border border-hairline rounded-sm">
+                       Tidak ada pendaftaran pengguna baru yang menunggu persetujuan.
+                    </div>
+                 )}
+              </div>
            </div>
 
            {/* SECTION 2: PENGGUNA AKTIF */}
@@ -1630,7 +1814,9 @@ export default function Dashboard() {
                  <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
                  Daftar Pengguna Aktif ({approvedUsers.length})
               </h3>
-              <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+              
+              {/* Desktop View */}
+              <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
                  <table className="w-full text-left text-[12px] border-collapse min-w-[700px]">
                     <thead>
                        <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
@@ -1693,6 +1879,54 @@ export default function Dashboard() {
                     </tbody>
                  </table>
               </div>
+
+              {/* Mobile Card List View (Mobile First Design) */}
+              <div className="block md:hidden space-y-3">
+                 {approvedUsers.map((item) => (
+                    <div 
+                       key={item.id}
+                       onClick={() => {
+                          setSelectedDetailItem(item);
+                          setDetailType("user");
+                       }}
+                       className="bg-canvas border border-hairline rounded-sm p-4 space-y-3 hover:border-hairline-strong transition-colors cursor-pointer"
+                    >
+                       <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full border border-hairline overflow-hidden">
+                             <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                             <h4 className="font-semibold text-[14px] text-ink truncate">{item.name}</h4>
+                             <p className="font-mono text-[11px] text-ink-mute truncate">{item.email}</p>
+                             <span className="font-mono text-[9px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize mt-1 inline-block">
+                                {item.role === 'pic_gedung' ? 'Admin PIC Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                             </span>
+                          </div>
+                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2 py-0.5 rounded-full font-medium">
+                             Aktif
+                          </span>
+                       </div>
+                       {item.role !== 'pic_gedung' && (
+                          <div className="flex gap-2 pt-2 border-t border-hairline">
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
+                                className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                title="Reset Password"
+                             >
+                                <Key size={12} /> Reset Password
+                             </button>
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); handleRejectUser(item.id); }}
+                                className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                title="Cabut Akses"
+                             >
+                                <Trash2 size={12} /> Cabut Akses
+                             </button>
+                          </div>
+                       )}
+                    </div>
+                 ))}
+              </div>
            </div>
 
         </div>
@@ -1716,7 +1950,7 @@ export default function Dashboard() {
               <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
-                  </div>
+                 </div>
                  <span className="text-[14px] font-medium leading-relaxed">{successMessage}</span>
               </div>
            )}
@@ -2011,8 +2245,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* FLAT TABLE */}
-      <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
          <table className="w-full text-left text-[12px] border-collapse min-w-[1250px]">
             <thead>
                <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
@@ -2105,6 +2339,83 @@ export default function Dashboard() {
          </table>
       </div>
 
+      {/* Mobile Card List View (Mobile First Design) */}
+      <div className="block md:hidden space-y-3">
+         {filteredArchives.length > 0 ? (
+            filteredArchives.map((archive) => (
+               <div 
+                  key={archive.no}
+                  onClick={() => {
+                     setSelectedDetailItem(archive);
+                     setDetailType("archive");
+                  }}
+                  className="bg-canvas border border-hairline rounded-sm p-4 space-y-3 hover:border-hairline-strong transition-colors cursor-pointer"
+               >
+                  <div className="flex justify-between items-start">
+                     <div>
+                        <span className="font-mono text-[10px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.kodeKlasifikasi}</span>
+                        <h4 className="font-bold text-[14px] text-ink mt-1">{archive.judulBerkas}.pdf</h4>
+                     </div>
+                     <span className={`border text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        archive.status === 'Aktif' 
+                        ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
+                        : archive.status === 'Inaktif'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                     }`}>
+                        {archive.status}
+                     </span>
+                  </div>
+                  <div className="text-[12px] text-ink border-t border-hairline pt-2.5 grid grid-cols-2 gap-2">
+                     <div>
+                        <p className="text-ink-mute text-[9px] uppercase">Departemen</p>
+                        <p className="font-medium text-[11px] mt-0.5">{archive.departemen}</p>
+                     </div>
+                     <div>
+                        <p className="text-ink-mute text-[9px] uppercase">Tahun</p>
+                        <p className="font-mono text-[11px] mt-0.5">{archive.tahun}</p>
+                     </div>
+                     <div className="col-span-2">
+                        <p className="text-ink-mute text-[9px] uppercase">Letak Fisik Penyimpanan</p>
+                        <p className="font-medium text-[11px] mt-0.5">Gedung {archive.gedung || "-"} / Lorong {archive.lorong || "-"} / {archive.rak || "-"}</p>
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-hairline">
+                     <a 
+                        href={archive.linkBerkas} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-primary hover:underline font-semibold text-[11px] flex items-center gap-1"
+                     >
+                        <ExternalLink size={12} /> Buka Berkas
+                     </a>
+                     {role !== 'user' && (
+                        <div className="flex gap-2">
+                           <button 
+                              onClick={(e) => { e.stopPropagation(); }} 
+                              className="flex items-center gap-1 border border-hairline hover:bg-canvas-soft px-2 py-1 rounded-xs text-[10px] text-ink font-medium"
+                           >
+                              <Edit3 size={10} /> Edit
+                           </button>
+                           <button 
+                              onClick={(e) => { e.stopPropagation(); }} 
+                              className="flex items-center gap-1 border border-transparent bg-red-50 hover:bg-red-100 text-primary px-2 py-1 rounded-xs text-[10px] font-medium"
+                           >
+                              <Trash2 size={10} /> Hapus
+                           </button>
+                        </div>
+                     )}
+                  </div>
+               </div>
+            ))
+         ) : (
+            <div className="p-8 text-center text-ink-mute text-[14px] bg-canvas border border-hairline rounded-sm">
+               Tidak ada arsip berkas yang cocok dengan filter atau pencarian.
+            </div>
+         )}
+      </div>
+
       {/* FOOTER */}
       <div className="flex justify-between items-center text-ink-mute text-[13px] pt-2">
          <span>Showing 1-{filteredArchives.length} of {filteredArchives.length}</span>
@@ -2171,7 +2482,9 @@ export default function Dashboard() {
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
                                  selectedDetailItem.status === 'Aktif' 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : 'bg-amber-50 text-amber-700 border-amber-200'
+                                 : selectedDetailItem.status === 'Inaktif'
+                                 ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                 : 'bg-red-50 text-red-700 border border-red-200'
                               }`}>
                                  {selectedDetailItem.status}
                               </span>
@@ -2236,7 +2549,7 @@ export default function Dashboard() {
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
                                  selectedDetailItem.approved 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : 'bg-amber-50 text-amber-700 border-amber-200'
+                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                               }`}>
                                  {selectedDetailItem.approved ? 'Disetujui' : 'Menunggu ACC'}
                               </span>
@@ -2277,7 +2590,7 @@ export default function Dashboard() {
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
                                  : selectedDetailItem.status === 'Selesai'
                                  ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                 : 'bg-amber-50 text-amber-700 border-amber-200'
+                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                               }`}>
                                  {selectedDetailItem.status}
                               </span>
