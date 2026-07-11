@@ -9,7 +9,8 @@ import {
   LogOut, 
   ShieldAlert,
   ClipboardCheck,
-  Key
+  Key,
+  Calendar
 } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -21,11 +22,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
      return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 
-  // Simplified Menu items - Ganti Password is removed from main menu list
+  // Simplified Menu items with new Layanan Arsip (peminjaman & kunjungan) accessible to all roles
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, roles: ["pic_gedung", "admin_dept"] },
     { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["pic_gedung"] },
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["pic_gedung", "admin_dept", "user"] },
+    { name: "Layanan Arsip", icon: Calendar, roles: ["pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["pic_gedung"] },
   ];
 

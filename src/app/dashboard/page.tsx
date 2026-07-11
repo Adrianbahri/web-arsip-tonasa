@@ -21,13 +21,17 @@ import {
   UserCheck,
   UserX,
   Users,
-  Key
+  Key,
+  Calendar,
+  BookOpen,
+  MapPin
 } from "lucide-react";
 
 export default function Dashboard() {
   const { role, user, activeMenu, setActiveMenu } = useRole();
   const router = useRouter();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showServiceForm, setShowServiceForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +50,20 @@ export default function Dashboard() {
      { id: "3", name: "Budi Santoso", email: "budi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:00:00Z" },
      { id: "4", name: "Dewi Lestari", email: "dewi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:15:00Z" }
   ]);
+
+  // Layanan Peminjaman & Kunjungan State
+  const [requestsList, setRequestsList] = useState<any[]>([
+     { id: "req-1", user_name: "Adrian Bahri", type: "peminjaman", archive_title: "BUKTI-BUKTI / DOKUMEN TRANSAKSI - EXISTING (332)", date: "2026-07-12", time_or_return: "2026-07-19", purpose: "Pemeriksaan Audit Internal Keuangan", status: "Menunggu ACC", created_at: "2026-07-11T03:00:00Z" },
+     { id: "req-2", user_name: "Budi Santoso", type: "kunjungan", archive_title: null, date: "2026-07-14", time_or_return: "10:00 WITA", purpose: "Penelitian Struktur Gedung Arsip A", status: "Disetujui", created_at: "2026-07-11T04:10:00Z" }
+  ]);
+
+  const [serviceFormData, setServiceFormData] = useState({
+     type: "peminjaman",
+     archive_title: "",
+     date: "",
+     time_or_return: "",
+     purpose: ""
+  });
 
   // Self password change states
   const [newPassword, setNewPassword] = useState("");
@@ -261,6 +279,25 @@ export default function Dashboard() {
      }
   };
 
+  // Fetch Peminjaman & Kunjungan Requests
+  const fetchRequests = async () => {
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { data, error } = await supabase
+              .from('requests')
+              .select('*')
+              .order('created_at', { ascending: false });
+           
+           if (!error && data) {
+              setRequestsList(data);
+           }
+        }
+     } catch (err) {
+        console.warn("Failed to fetch requests from Supabase, using mock fallback:", err);
+     }
+  };
+
   // Redirect to login if not authenticated
   useEffect(() => {
      const savedSession = localStorage.getItem("arsip_session");
@@ -276,11 +313,19 @@ export default function Dashboard() {
      if (activeMenu === "Manajemen User" && role === 'pic_gedung') {
         fetchUsers();
      }
+     if (activeMenu === "Layanan Arsip") {
+        fetchRequests();
+     }
   }, [activeMenu, role]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
      const { name, value } = e.target;
      setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleServiceInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+     const { name, value } = e.target;
+     setServiceFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -527,6 +572,139 @@ export default function Dashboard() {
   const handleResetUserPassword = (name: string, email: string) => {
      setSuccessMessage(`Sukses! Kata sandi untuk ${name} (${email}) berhasil di-reset menjadi kata sandi bawaan: 'Tonasa123'. Silakan infokan ke pengguna.`);
      setTimeout(() => setSuccessMessage(""), 6000);
+  };
+
+  // Layanan Peminjaman & Kunjungan: Submit Request
+  const handleCreateServiceRequest = async (e: React.FormEvent) => {
+     e.preventDefault();
+     
+     const payload = {
+        user_name: user?.name || "Staf Tonasa",
+        type: serviceFormData.type,
+        archive_title: serviceFormData.type === "peminjaman" ? serviceFormData.archive_title : null,
+        date: serviceFormData.date,
+        time_or_return: serviceFormData.time_or_return,
+        purpose: serviceFormData.purpose,
+        status: "Menunggu ACC"
+     };
+
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('requests')
+              .insert([payload]);
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.warn("Supabase insertion skipped, fallback:", err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pengajuan peminjaman/kunjungan berhasil terkirim!");
+        fetchRequests();
+     } else {
+        const newReq = {
+           id: "req-" + (requestsList.length + 1),
+           user_name: user?.name || "Staf Tonasa",
+           type: serviceFormData.type,
+           archive_title: serviceFormData.type === "peminjaman" ? serviceFormData.archive_title : "-",
+           date: serviceFormData.date,
+           time_or_return: serviceFormData.time_or_return,
+           purpose: serviceFormData.purpose,
+           status: "Menunggu ACC",
+           created_at: new Date().toISOString()
+        };
+        setRequestsList(prev => [newReq, ...prev]);
+        setSuccessMessage("Pengajuan berhasil dikirim (Simulasi)!");
+     }
+
+     setServiceFormData({
+        type: "peminjaman",
+        archive_title: "",
+        date: "",
+        time_or_return: "",
+        purpose: ""
+     });
+     setShowServiceForm(false);
+     setTimeout(() => setSuccessMessage(""), 2000);
+  };
+
+  // Layanan Peminjaman & Kunjungan: Actions (PIC ONLY)
+  const handleApproveRequest = async (reqId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('requests')
+              .update({ status: 'Disetujui' })
+              .eq('id', reqId);
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pengajuan disetujui!");
+        fetchRequests();
+     } else {
+        setRequestsList(prev => prev.map(r => r.id === reqId ? { ...r, status: 'Disetujui' } : r));
+        setSuccessMessage("Pengajuan disetujui (Simulasi)!");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  const handleRejectRequest = async (reqId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('requests')
+              .update({ status: 'Ditolak' })
+              .eq('id', reqId);
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pengajuan ditolak!");
+        fetchRequests();
+     } else {
+        setRequestsList(prev => prev.map(r => r.id === reqId ? { ...r, status: 'Ditolak' } : r));
+        setSuccessMessage("Pengajuan ditolak (Simulasi)!");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  const handleCompleteRequest = async (reqId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('requests')
+              .update({ status: 'Selesai' })
+              .eq('id', reqId);
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Status peminjaman ditandai Selesai (Berkas Kembali)!");
+        fetchRequests();
+     } else {
+        setRequestsList(prev => prev.map(r => r.id === reqId ? { ...r, status: 'Selesai' } : r));
+        setSuccessMessage("Status peminjaman Selesai (Simulasi)!");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
   };
 
   // Update Logged-in User's Own Password
@@ -886,6 +1064,143 @@ export default function Dashboard() {
      );
   }
 
+  // 1.5 LAYANAN PEMINJAMAN / KUNJUNGAN FORM VIEW (NEW FORM FOR USERS)
+  if (showServiceForm) {
+     return (
+        <div className="space-y-6 max-w-[600px] mx-auto pb-10">
+           <div className="pb-4 border-b border-hairline flex items-center gap-4">
+              <button 
+                 onClick={() => setShowServiceForm(false)} 
+                 className="p-1.5 hover:bg-canvas-soft rounded-xs border border-hairline text-ink transition-colors"
+              >
+                 <ArrowLeft size={18} />
+              </button>
+              <div>
+                 <h2 className="text-[18px] md:text-display-md font-medium tracking-tight text-ink">
+                    Buat Pengajuan Layanan Kearsipan
+                 </h2>
+                 <p className="text-ink-mute text-[12px] md:text-[14px]">
+                    Lengkapi formulir untuk mengajukan peminjaman fisik dokumen atau kunjungan ke ruang arsip Semen Tonasa.
+                 </p>
+              </div>
+           </div>
+
+           <form onSubmit={handleCreateServiceRequest} className="bg-canvas border border-hairline rounded-sm p-6 md:p-8 space-y-5">
+              <div className="space-y-1.5">
+                 <label className="block text-[13px] font-medium text-ink">Jenis Layanan</label>
+                 <select 
+                    name="type"
+                    value={serviceFormData.type}
+                    onChange={handleServiceInputChange}
+                    className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2.5 focus:outline-none focus:border-ink text-ink"
+                 >
+                    <option value="peminjaman">Peminjaman Berkas Fisik</option>
+                    <option value="kunjungan">Kunjungan Gedung/Ruang Arsip</option>
+                 </select>
+              </div>
+
+              {serviceFormData.type === 'peminjaman' ? (
+                 <>
+                    <div className="space-y-1.5">
+                       <label className="block text-[13px] font-medium text-ink">Judul & Kode Berkas Yang Ingin Dipinjam</label>
+                       <input 
+                          type="text" 
+                          name="archive_title"
+                          required
+                          value={serviceFormData.archive_title}
+                          onChange={handleServiceInputChange}
+                          placeholder="e.g. Bukti Pembayaran Payment Register (PR-332)"
+                          className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2.5 focus:outline-none focus:border-ink text-ink"
+                       />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1.5">
+                          <label className="block text-[13px] font-medium text-ink">Tanggal Peminjaman</label>
+                          <input 
+                             type="date" 
+                             name="date"
+                             required
+                             value={serviceFormData.date}
+                             onChange={handleServiceInputChange}
+                             className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink font-mono"
+                          />
+                       </div>
+                       <div className="space-y-1.5">
+                          <label className="block text-[13px] font-medium text-ink">Rencana Tanggal Pengembalian</label>
+                          <input 
+                             type="date" 
+                             name="time_or_return"
+                             required
+                             value={serviceFormData.time_or_return}
+                             onChange={handleServiceInputChange}
+                             className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink font-mono"
+                          />
+                       </div>
+                    </div>
+                 </>
+              ) : (
+                 <>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1.5">
+                          <label className="block text-[13px] font-medium text-ink">Tanggal Kunjungan</label>
+                          <input 
+                             type="date" 
+                             name="date"
+                             required
+                             value={serviceFormData.date}
+                             onChange={handleServiceInputChange}
+                             className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink font-mono"
+                          />
+                       </div>
+                       <div className="space-y-1.5">
+                          <label className="block text-[13px] font-medium text-ink">Waktu Kunjungan (Jam)</label>
+                          <input 
+                             type="text" 
+                             name="time_or_return"
+                             required
+                             value={serviceFormData.time_or_return}
+                             onChange={handleServiceInputChange}
+                             placeholder="e.g. 10:00 WITA"
+                             className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                          />
+                       </div>
+                    </div>
+                 </>
+              )}
+
+              <div className="space-y-1.5">
+                 <label className="block text-[13px] font-medium text-ink">Tujuan / Keperluan Pengajuan</label>
+                 <textarea 
+                    name="purpose"
+                    required
+                    value={serviceFormData.purpose}
+                    onChange={handleServiceInputChange}
+                    rows={3}
+                    placeholder="Tuliskan tujuan peminjaman atau kunjungan secara detail..."
+                    className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                 ></textarea>
+              </div>
+
+              <div className="pt-4 border-t border-hairline flex justify-end gap-3">
+                 <button 
+                    type="button" 
+                    onClick={() => setShowServiceForm(false)} 
+                    className="btn-outline"
+                 >
+                    Batal
+                 </button>
+                 <button 
+                    type="submit" 
+                    className="btn-primary"
+                 >
+                    Kirim Pengajuan
+                 </button>
+              </div>
+           </form>
+        </div>
+     );
+  }
+
   // 2. PERSETUJUAN (ACC) PAGE VIEW (PIC Gedung ONLY)
   if (activeMenu === "Persetujuan (ACC)" && role === 'pic_gedung') {
      const pendingSubmissions = archives.filter(item => item.status === "Menunggu ACC");
@@ -1045,6 +1360,140 @@ export default function Dashboard() {
                        <tr>
                           <td colSpan={10} className="p-8 text-center text-ink-mute text-[14px]">
                              Tidak ada pengajuan berkas masuk saat ini.
+                          </td>
+                       </tr>
+                    )}
+                 </tbody>
+              </table>
+           </div>
+        </div>
+     );
+  }
+
+  // 2.5 LAYANAN ARSIP (PEMINJAMAN & KUNJUNGAN LIST VIEW FOR ALL ROLES)
+  if (activeMenu === "Layanan Arsip") {
+     return (
+        <div className="space-y-6 max-w-full mx-auto pb-10">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                 <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+                    Layanan Peminjaman & Kunjungan Arsip
+                 </h2>
+                 <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                    {role === 'pic_gedung' 
+                     ? "Kelola permohonan peminjaman dokumen fisik dan registrasi kunjungan gedung kearsipan."
+                     : "Lihat status pengajuan peminjaman berkas atau buat pengajuan kunjungan fisik baru."}
+                 </p>
+              </div>
+
+              {role !== 'pic_gedung' && (
+                 <button 
+                    onClick={() => setShowServiceForm(true)}
+                    className="bg-primary hover:bg-primary-deep text-[14px] text-on-primary font-semibold px-4 py-2.5 rounded-sm transition-colors flex items-center gap-2 self-start md:self-auto"
+                 >
+                    <Plus size={16} /> Buat Pengajuan Layanan
+                 </button>
+              )}
+           </div>
+
+           {successMessage && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+                 <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
+                    <Check size={14} strokeWidth={3} />
+                 </div>
+                 <span className="text-[14px] font-medium leading-relaxed">{successMessage}</span>
+              </div>
+           )}
+
+           <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+              <table className="w-full text-left text-[12px] border-collapse min-w-[850px]">
+                 <thead>
+                    <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
+                       <th className="p-3 w-16 text-center">No</th>
+                       <th className="p-3">Pemohon</th>
+                       <th className="p-3">Jenis Layanan</th>
+                       <th className="p-3">Detail Berkas / Rencana</th>
+                       <th className="p-3 text-center">Tanggal / Waktu</th>
+                       <th className="p-3">Keperluan</th>
+                       <th className="p-3 text-center">Status</th>
+                       {role === 'pic_gedung' && <th className="p-3 text-center">Tindakan</th>}
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-hairline">
+                    {requestsList.length > 0 ? (
+                       requestsList.map((req, idx) => (
+                          <tr key={req.id} className="hover:bg-canvas-soft/50 transition-colors text-ink">
+                             <td className="p-3 text-center font-mono text-ink-mute">{idx + 1}</td>
+                             <td className="p-3 font-semibold text-ink">{req.user_name}</td>
+                             <td className="p-3">
+                                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-xs capitalize ${
+                                   req.type === 'peminjaman' 
+                                   ? 'bg-blue-50 text-blue-700 border border-blue-100' 
+                                   : 'bg-purple-50 text-purple-700 border border-purple-100'
+                                }`}>
+                                   {req.type === 'peminjaman' ? <BookOpen size={12} /> : <MapPin size={12} />}
+                                   {req.type}
+                                </span>
+                             </td>
+                             <td className="p-3 font-medium text-ink max-w-[250px] truncate">
+                                {req.type === 'peminjaman' ? req.archive_title : "Kunjungan Gedung Arsip"}
+                             </td>
+                             <td className="p-3 text-center font-mono text-ink-mute">
+                                {req.type === 'peminjaman' 
+                                 ? `${req.date} s/d ${req.time_or_return}` 
+                                 : `${req.date} (${req.time_or_return})`}
+                             </td>
+                             <td className="p-3 text-ink-mute max-w-[200px] truncate" title={req.purpose}>{req.purpose}</td>
+                             <td className="p-3 text-center">
+                                <span className={`border text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                                   req.status === 'Disetujui' 
+                                   ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
+                                   : req.status === 'Selesai'
+                                   ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                   : req.status === 'Menunggu ACC'
+                                   ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                   : 'bg-red-50 text-red-700 border-red-200'
+                                }`}>
+                                   {req.status}
+                                </span>
+                             </td>
+                             {role === 'pic_gedung' && (
+                                <td className="p-3">
+                                   <div className="flex items-center justify-center gap-2">
+                                      {req.status === 'Menunggu ACC' ? (
+                                         <>
+                                            <button 
+                                               onClick={() => handleApproveRequest(req.id)}
+                                               className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-2 py-1 rounded-sm text-[11px]"
+                                            >
+                                               Setujui
+                                            </button>
+                                            <button 
+                                               onClick={() => handleRejectRequest(req.id)}
+                                               className="border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium px-2 py-1 rounded-sm text-[11px]"
+                                            >
+                                               Tolak
+                                            </button>
+                                         </>
+                                      ) : req.status === 'Disetujui' && req.type === 'peminjaman' ? (
+                                         <button 
+                                            onClick={() => handleCompleteRequest(req.id)}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3.5 py-1 rounded-sm text-[11px]"
+                                         >
+                                            Kembali (Selesai)
+                                         </button>
+                                      ) : (
+                                         <span className="text-[11px] text-ink-mute-2 font-mono">-</span>
+                                      )}
+                                   </div>
+                                </td>
+                             )}
+                          </tr>
+                       ))
+                    ) : (
+                       <tr>
+                          <td colSpan={role === 'pic_gedung' ? 8 : 7} className="p-8 text-center text-ink-mute text-[14px]">
+                             Tidak ada riwayat pengajuan layanan saat ini.
                           </td>
                        </tr>
                     )}
@@ -1279,6 +1728,7 @@ export default function Dashboard() {
   if (activeMenu === "Dashboard" && role !== 'user') {
      const pendingCount = archives.filter(item => item.status === "Menunggu ACC").length;
      const pendingUsersCount = usersList.filter(u => !u.approved).length;
+     const pendingRequestsCount = requestsList.filter(r => r.status === "Menunggu ACC").length;
      
      return (
         <div className="space-y-8 max-w-[1280px] mx-auto">
@@ -1320,6 +1770,24 @@ export default function Dashboard() {
                        className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
                     >
                        Periksa Sekarang
+                    </button>
+                 </div>
+              )}
+
+              {role === 'pic_gedung' && pendingRequestsCount > 0 && (
+                 <div className="bg-purple-50 border border-purple-200 text-purple-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                       <Calendar className="text-purple-600" />
+                       <div>
+                          <h3 className="font-semibold text-sm">Permohonan Layanan Peminjaman & Kunjungan</h3>
+                          <p className="text-xs text-purple-700 mt-0.5">Ada {pendingRequestsCount} pengajuan peminjaman/kunjungan dari staf yang membutuhkan persetujuan.</p>
+                       </div>
+                    </div>
+                    <button 
+                       onClick={() => setActiveMenu("Layanan Arsip")}
+                       className="bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                    >
+                       Tinjau Layanan
                     </button>
                  </div>
               )}
