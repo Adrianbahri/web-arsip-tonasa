@@ -21,13 +21,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
      return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 
-  // Simplified Menu items with new ACC menu for PIC Gedung & Ganti Password for all roles
+  // Simplified Menu items - Ganti Password is removed from main menu list
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, roles: ["pic_gedung", "admin_dept"] },
     { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["pic_gedung"] },
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["pic_gedung"] },
-    { name: "Ganti Password", icon: Key, roles: ["pic_gedung", "admin_dept", "user"] },
   ];
 
   const allowedMenuItems = menuItems.filter(item => item.roles.includes(role));
@@ -96,9 +95,27 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                  {role === 'pic_gedung' ? 'Admin PIC Gedung' : role === 'admin_dept' ? 'Admin Departemen' : 'User Biasa'}
               </p>
            </div>
-           <button onClick={logout} className="text-ink-mute hover:text-primary transition-colors p-1" title="Keluar">
-              <LogOut size={16} />
-           </button>
+           {/* Profile Actions: Ganti Password (Key) & Keluar (LogOut) */}
+           <div className="flex items-center gap-1 flex-shrink-0">
+              <button 
+                 onClick={() => setActiveMenu("Ganti Password")}
+                 className={`p-1.5 transition-colors rounded-xs ${
+                    activeMenu === "Ganti Password" 
+                    ? 'text-primary bg-primary-soft/10 font-bold' 
+                    : 'text-ink-mute hover:text-primary'
+                 }`}
+                 title="Ganti Password"
+              >
+                 <Key size={15} />
+              </button>
+              <button 
+                 onClick={logout} 
+                 className="text-ink-mute hover:text-primary transition-colors p-1.5 rounded-xs" 
+                 title="Keluar"
+              >
+                 <LogOut size={15} />
+              </button>
+           </div>
         </div>
       </aside>
 
@@ -112,16 +129,40 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
              <h1 className="text-lg font-bold text-ink tracking-tight">Arsip<span className="text-primary ml-1">Tonasa</span></h1>
           </div>
           
-          {/* Quick Role Toggle on Mobile Header */}
-          <select 
-             value={role} 
-             onChange={(e) => setRole(e.target.value as any)}
-             className="bg-canvas border border-hairline text-[11px] rounded-xs px-1.5 py-1 outline-none font-medium text-ink focus:border-ink"
-          >
-             <option value="pic_gedung">PIC Gedung</option>
-             <option value="admin_dept">Admin Dept</option>
-             <option value="user">User Biasa</option>
-          </select>
+          <div className="flex items-center gap-3">
+             {/* Quick Role Toggle on Mobile Header */}
+             <select 
+                value={role} 
+                onChange={(e) => setRole(e.target.value as any)}
+                className="bg-canvas border border-hairline text-[11px] rounded-xs px-1.5 py-1 outline-none font-medium text-ink focus:border-ink"
+             >
+                <option value="pic_gedung">PIC Gedung</option>
+                <option value="admin_dept">Admin Dept</option>
+                <option value="user">User Biasa</option>
+             </select>
+             
+             {/* Ganti Password on Mobile Header */}
+             <button 
+                onClick={() => setActiveMenu("Ganti Password")}
+                className={`p-1.5 rounded-xs transition-colors ${
+                   activeMenu === "Ganti Password" 
+                   ? 'text-primary bg-primary-soft/10' 
+                   : 'text-ink-mute'
+                }`}
+                title="Ganti Password"
+             >
+                <Key size={15} />
+             </button>
+             
+             {/* Keluar on Mobile Header */}
+             <button 
+                onClick={logout}
+                className="p-1.5 text-ink-mute hover:text-primary transition-colors rounded-xs"
+                title="Keluar"
+             >
+                <LogOut size={15} />
+             </button>
+          </div>
         </header>
 
         <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
