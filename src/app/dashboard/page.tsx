@@ -927,7 +927,7 @@ export default function Dashboard() {
                        await handleReject(selectedDetailItem.no);
                        closeDetailModal();
                     }}
-                    className="flex-1 md:flex-none border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium px-4 py-2 rounded-xs text-[13px]"
+                    className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px]"
                  >
                     Tolak Pengajuan
                  </button>
@@ -953,7 +953,7 @@ export default function Dashboard() {
                           await handleRejectUser(selectedDetailItem.id);
                           closeDetailModal();
                        }}
-                       className="flex-1 md:flex-none border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5"
+                       className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5"
                     >
                        <UserX size={14} /> Tolak
                     </button>
@@ -976,7 +976,7 @@ export default function Dashboard() {
                           await handleRejectUser(selectedDetailItem.id);
                           closeDetailModal();
                        }}
-                       className="flex-1 md:flex-none border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute py-2 px-4 rounded-xs text-[13px] flex items-center justify-center gap-1.5"
+                       className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5"
                     >
                        <Trash2 size={14} /> Cabut Akses
                     </button>
@@ -1003,7 +1003,7 @@ export default function Dashboard() {
                           await handleRejectRequest(selectedDetailItem.id);
                           closeDetailModal();
                        }}
-                       className="flex-1 md:flex-none border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium px-4 py-2 rounded-xs text-[13px]"
+                       className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px]"
                     >
                        Tolak
                     </button>
@@ -1152,7 +1152,7 @@ export default function Dashboard() {
                               href={selectedDetailItem.linkBerkas} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="w-full inline-flex items-center justify-center gap-2 border border-hairline hover:bg-canvas-soft text-[14px] font-semibold py-2.5 rounded-xs transition-colors text-ink"
+                              className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-semibold py-2.5 rounded-xs transition-colors"
                            >
                               <ExternalLink size={16} /> Buka Berkas Digital (Drive)
                            </a>
