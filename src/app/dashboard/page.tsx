@@ -854,6 +854,210 @@ export default function Dashboard() {
      setDetailType(null);
   };
 
+  const renderDetailModal = () => {
+     if (!selectedDetailItem || !detailType) return null;
+     return (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-canvas border border-hairline rounded-sm shadow-2xl max-w-[550px] w-full relative overflow-hidden text-ink animate-in fade-in zoom-in duration-200">
+              {/* Modal Header */}
+              <div className="px-6 py-4 border-b border-hairline flex items-center justify-between bg-canvas-soft">
+                 <h3 className="font-semibold text-[15px] tracking-tight text-ink flex items-center gap-2">
+                    {detailType === 'archive' && <FileText size={18} className="text-primary" />}
+                    {detailType === 'user' && <Users size={18} className="text-primary" />}
+                    {detailType === 'request' && <Calendar size={18} className="text-primary" />}
+                    Detail {detailType === 'archive' ? 'Berkas Arsip' : detailType === 'user' ? 'Informasi User' : 'Pengajuan Layanan'}
+                 </h3>
+                 <button 
+                    onClick={closeDetailModal}
+                    className="p-1 hover:bg-hairline rounded-full text-ink-mute hover:text-ink transition-colors"
+                 >
+                    <X size={18} />
+                 </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                 {/* ARCHIVE DETAIL VIEW */}
+                 {detailType === 'archive' && (
+                    <div className="space-y-4">
+                       <div>
+                          <span className="text-[11px] font-mono bg-hairline-cool px-2 py-0.5 rounded-xs text-ink">{selectedDetailItem.kodeKlasifikasi}</span>
+                          <h4 className="text-[17px] font-bold text-ink mt-2">{selectedDetailItem.judulBerkas}</h4>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jenis Berkas</p>
+                             <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jenisBerkas}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Departemen</p>
+                             <p className="font-medium text-ink mt-0.5">{selectedDetailItem.departemen}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tahun Berkas</p>
+                             <p className="font-mono text-ink mt-0.5">{selectedDetailItem.tahun}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tanggal Terima</p>
+                             <p className="font-mono text-ink mt-0.5">{selectedDetailItem.tanggalTerima}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jangka Waktu</p>
+                             <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jangkaWaktu}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status Berkas</p>
+                             <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
+                                selectedDetailItem.status === 'Aktif' 
+                                ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
+                                : selectedDetailItem.status === 'Inaktif'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : 'bg-red-50 text-red-700 border border-red-200'
+                             }`}>
+                                {selectedDetailItem.status}
+                             </span>
+                          </div>
+                       </div>
+
+                       <div className="border-t border-hairline pt-4 space-y-3">
+                          <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Lokasi Fisik Penyimpanan</h5>
+                          <div className="grid grid-cols-3 gap-3 text-center bg-canvas-soft border border-hairline p-3 rounded-xs">
+                             <div>
+                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Gedung</p>
+                                <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.gedung || "-"}</p>
+                             </div>
+                             <div>
+                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Lorong</p>
+                                <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.lorong || "-"}</p>
+                             </div>
+                             <div>
+                                <p className="text-ink-mute text-[10px] uppercase font-semibold">Rak</p>
+                                <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
+                             </div>
+                          </div>
+                       </div>
+
+                       <div className="border-t border-hairline pt-4">
+                          <a 
+                             href={selectedDetailItem.linkBerkas} 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
+                             className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-deep text-on-primary text-[14px] font-semibold py-2.5 rounded-xs transition-colors"
+                          >
+                             <ExternalLink size={16} /> Buka Berkas Digital (Drive)
+                          </a>
+                       </div>
+                    </div>
+                 )}
+
+                 {/* USER DETAIL VIEW */}
+                 {detailType === 'user' && (
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-full border border-hairline overflow-hidden">
+                             <img 
+                                src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedDetailItem.name}`} 
+                                alt="Avatar" 
+                                className="w-full h-full object-cover"
+                             />
+                          </div>
+                          <div>
+                             <h4 className="text-[18px] font-bold text-ink">{selectedDetailItem.name}</h4>
+                             <p className="text-ink-mute text-[13px] font-mono mt-0.5">{selectedDetailItem.email}</p>
+                          </div>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jabatan Peran</p>
+                             <p className="font-semibold text-ink mt-0.5 capitalize">{selectedDetailItem.role === 'pic_gedung' ? 'PIC Gedung' : selectedDetailItem.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status ACC</p>
+                             <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
+                                selectedDetailItem.approved 
+                                ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
+                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                             }`}>
+                                {selectedDetailItem.approved ? 'Disetujui' : 'Menunggu ACC'}
+                             </span>
+                          </div>
+                          {selectedDetailItem.created_at && (
+                             <div className="col-span-2">
+                                <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tanggal Pendaftaran</p>
+                                <p className="font-mono text-ink mt-0.5">{new Date(selectedDetailItem.created_at).toLocaleString('id-ID')}</p>
+                             </div>
+                          )}
+                       </div>
+                    </div>
+                 )}
+
+                 {/* REQUEST / LAYANAN ARSIP DETAIL VIEW */}
+                 {detailType === 'request' && (
+                    <div className="space-y-4">
+                       <div>
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-xs uppercase ${
+                             selectedDetailItem.type === 'peminjaman' ? 'bg-blue-50 text-blue-800' : 'bg-purple-50 text-purple-800'
+                          }`}>
+                             {selectedDetailItem.type}
+                          </span>
+                          <h4 className="text-[17px] font-bold text-ink mt-2">
+                             {selectedDetailItem.type === 'peminjaman' ? selectedDetailItem.archive_title : "Kunjungan Gedung Kearsipan"}
+                          </h4>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Nama Pemohon</p>
+                             <p className="font-medium text-ink mt-0.5">{selectedDetailItem.user_name}</p>
+                          </div>
+                          <div>
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status</p>
+                             <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
+                                selectedDetailItem.status === 'Disetujui' 
+                                ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
+                                : selectedDetailItem.status === 'Selesai'
+                                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                : 'bg-amber-50 text-amber-700 border border-amber-200'
+                             }`}>
+                                {selectedDetailItem.status}
+                             </span>
+                          </div>
+                          <div className="col-span-2">
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">
+                                {selectedDetailItem.type === 'peminjaman' ? 'Rentang Tanggal Peminjaman' : 'Tanggal & Waktu Kunjungan'}
+                             </p>
+                             <p className="font-mono text-ink mt-0.5">
+                                {selectedDetailItem.type === 'peminjaman' 
+                                   ? `${selectedDetailItem.date} s/d ${selectedDetailItem.time_or_return}`
+                                   : `${selectedDetailItem.date} (${selectedDetailItem.time_or_return})`}
+                             </p>
+                          </div>
+                          <div className="col-span-2">
+                             <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tujuan / Keperluan</p>
+                             <p className="text-ink mt-1 bg-canvas-soft border border-hairline p-3 rounded-xs whitespace-pre-wrap">{selectedDetailItem.purpose}</p>
+                          </div>
+                       </div>
+                    </div>
+                 )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 border-t border-hairline flex justify-end bg-canvas-soft">
+                 <button 
+                    type="button"
+                    onClick={closeDetailModal}
+                    className="btn-outline"
+                 >
+                    Tutup Detail
+                 </button>
+              </div>
+           </div>
+        </div>
+     );
+  };
+
   // 1. ADD ARCHIVE FORM VIEW
   if (showAddForm) {
      return (
@@ -1456,6 +1660,7 @@ export default function Dashboard() {
                  </div>
               )}
            </div>
+           {renderDetailModal()}
         </div>
      );
   }
@@ -1671,8 +1876,9 @@ export default function Dashboard() {
                     Tidak ada riwayat pengajuan layanan saat ini.
                  </div>
               )}
-           </div>
-        </div>
+            </div>
+            {renderDetailModal()}
+         </div>
      );
   }
 
@@ -1937,7 +2143,8 @@ export default function Dashboard() {
                        )}
                     </div>
                  ))}
-              </div>
+               </div>
+               {renderDetailModal()}
            </div>
 
         </div>
@@ -2422,205 +2629,7 @@ export default function Dashboard() {
       </div>
 
       {/* MODAL DIALOG DETAIL DENGAN BACKDROP BLUR (BACKDROP-BLUR OVERLAY) */}
-      {selectedDetailItem && detailType && (
-         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-canvas border border-hairline rounded-sm shadow-2xl max-w-[550px] w-full relative overflow-hidden text-ink animate-in fade-in zoom-in duration-200">
-               {/* Modal Header */}
-               <div className="px-6 py-4 border-b border-hairline flex items-center justify-between bg-canvas-soft">
-                  <h3 className="font-semibold text-[15px] tracking-tight text-ink flex items-center gap-2">
-                     {detailType === 'archive' && <FileText size={18} className="text-primary" />}
-                     {detailType === 'user' && <Users size={18} className="text-primary" />}
-                     {detailType === 'request' && <Calendar size={18} className="text-primary" />}
-                     Detail {detailType === 'archive' ? 'Berkas Arsip' : detailType === 'user' ? 'Informasi User' : 'Pengajuan Layanan'}
-                  </h3>
-                  <button 
-                     onClick={closeDetailModal}
-                     className="p-1 hover:bg-hairline rounded-full text-ink-mute hover:text-ink transition-colors"
-                  >
-                     <X size={18} />
-                  </button>
-               </div>
-
-               {/* Modal Body */}
-               <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                  {/* ARCHIVE DETAIL VIEW */}
-                  {detailType === 'archive' && (
-                     <div className="space-y-4">
-                        <div>
-                           <span className="text-[11px] font-mono bg-hairline-cool px-2 py-0.5 rounded-xs text-ink">{selectedDetailItem.kodeKlasifikasi}</span>
-                           <h4 className="text-[17px] font-bold text-ink mt-2">{selectedDetailItem.judulBerkas}</h4>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jenis Berkas</p>
-                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jenisBerkas}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Departemen</p>
-                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.departemen}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tahun Berkas</p>
-                              <p className="font-mono text-ink mt-0.5">{selectedDetailItem.tahun}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tanggal Terima</p>
-                              <p className="font-mono text-ink mt-0.5">{selectedDetailItem.tanggalTerima}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jangka Waktu</p>
-                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jangkaWaktu}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status Berkas</p>
-                              <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
-                                 selectedDetailItem.status === 'Aktif' 
-                                 ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : selectedDetailItem.status === 'Inaktif'
-                                 ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                 : 'bg-red-50 text-red-700 border border-red-200'
-                              }`}>
-                                 {selectedDetailItem.status}
-                              </span>
-                           </div>
-                        </div>
-
-                        <div className="border-t border-hairline pt-4 space-y-3">
-                           <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Lokasi Fisik Penyimpanan</h5>
-                           <div className="grid grid-cols-3 gap-3 text-center bg-canvas-soft border border-hairline p-3 rounded-xs">
-                              <div>
-                                 <p className="text-ink-mute text-[10px] uppercase font-semibold">Gedung</p>
-                                 <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.gedung || "-"}</p>
-                              </div>
-                              <div>
-                                 <p className="text-ink-mute text-[10px] uppercase font-semibold">Lorong</p>
-                                 <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.lorong || "-"}</p>
-                              </div>
-                              <div>
-                                 <p className="text-ink-mute text-[10px] uppercase font-semibold">Rak</p>
-                                 <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
-                              </div>
-                           </div>
-                        </div>
-
-                        <div className="border-t border-hairline pt-4">
-                           <a 
-                              href={selectedDetailItem.linkBerkas} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-deep text-on-primary text-[14px] font-semibold py-2.5 rounded-xs transition-colors"
-                           >
-                              <ExternalLink size={16} /> Buka Berkas Digital (Drive)
-                           </a>
-                        </div>
-                     </div>
-                  )}
-
-                  {/* USER DETAIL VIEW */}
-                  {detailType === 'user' && (
-                     <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                           <div className="w-14 h-14 rounded-full border border-hairline overflow-hidden">
-                              <img 
-                                 src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedDetailItem.name}`} 
-                                 alt="Avatar" 
-                                 className="w-full h-full object-cover"
-                              />
-                           </div>
-                           <div>
-                              <h4 className="text-[18px] font-bold text-ink">{selectedDetailItem.name}</h4>
-                              <p className="text-ink-mute text-[13px] font-mono mt-0.5">{selectedDetailItem.email}</p>
-                           </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jabatan Peran</p>
-                              <p className="font-semibold text-ink mt-0.5 capitalize">{selectedDetailItem.role === 'pic_gedung' ? 'PIC Gedung' : selectedDetailItem.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status ACC</p>
-                              <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
-                                 selectedDetailItem.approved 
-                                 ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : 'bg-amber-50 text-amber-700 border-amber-200'
-                              }`}>
-                                 {selectedDetailItem.approved ? 'Disetujui' : 'Menunggu ACC'}
-                              </span>
-                           </div>
-                           {selectedDetailItem.created_at && (
-                              <div className="col-span-2">
-                                 <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tanggal Pendaftaran</p>
-                                 <p className="font-mono text-ink mt-0.5">{new Date(selectedDetailItem.created_at).toLocaleString('id-ID')}</p>
-                              </div>
-                           )}
-                        </div>
-                     </div>
-                  )}
-
-                  {/* REQUEST / LAYANAN ARSIP DETAIL VIEW */}
-                  {detailType === 'request' && (
-                     <div className="space-y-4">
-                        <div>
-                           <span className={`inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-xs uppercase ${
-                              selectedDetailItem.type === 'peminjaman' ? 'bg-blue-50 text-blue-800' : 'bg-purple-50 text-purple-800'
-                           }`}>
-                              {selectedDetailItem.type}
-                           </span>
-                           <h4 className="text-[17px] font-bold text-ink mt-2">
-                              {selectedDetailItem.type === 'peminjaman' ? selectedDetailItem.archive_title : "Kunjungan Gedung Kearsipan"}
-                           </h4>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Nama Pemohon</p>
-                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.user_name}</p>
-                           </div>
-                           <div>
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status</p>
-                              <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
-                                 selectedDetailItem.status === 'Disetujui' 
-                                 ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : selectedDetailItem.status === 'Selesai'
-                                 ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
-                              }`}>
-                                 {selectedDetailItem.status}
-                              </span>
-                           </div>
-                           <div className="col-span-2">
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">
-                                 {selectedDetailItem.type === 'peminjaman' ? 'Rentang Tanggal Peminjaman' : 'Tanggal & Waktu Kunjungan'}
-                              </p>
-                              <p className="font-mono text-ink mt-0.5">
-                                 {selectedDetailItem.type === 'peminjaman' 
-                                    ? `${selectedDetailItem.date} s/d ${selectedDetailItem.time_or_return}`
-                                    : `${selectedDetailItem.date} (${selectedDetailItem.time_or_return})`}
-                              </p>
-                           </div>
-                           <div className="col-span-2">
-                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tujuan / Keperluan</p>
-                              <p className="text-ink mt-1 bg-canvas-soft border border-hairline p-3 rounded-xs whitespace-pre-wrap">{selectedDetailItem.purpose}</p>
-                           </div>
-                        </div>
-                     </div>
-                  )}
-               </div>
-
-               {/* Modal Footer */}
-               <div className="px-6 py-4 border-t border-hairline flex justify-end bg-canvas-soft">
-                  <button 
-                     onClick={closeDetailModal}
-                     className="btn-outline"
-                  >
-                     Tutup Detail
-                  </button>
-               </div>
-            </div>
-         </div>
-      )}
+      {renderDetailModal()}
 
     </div>
   );
