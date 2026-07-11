@@ -138,6 +138,44 @@ create policy "Only PIC Gedung can update archives" on public.archives
       and profiles.role = 'pic_gedung'
     )
   );
+
+-- ========================================================
+-- 3. TABEL LAYANAN (Peminjaman & Kunjungan)
+-- ========================================================
+create table public.requests (
+  id uuid default gen_random_uuid() primary key,
+  user_name text not null,
+  type text not null check (type in ('peminjaman', 'kunjungan')),
+  archive_title text, -- Kosong jika jenis layanan adalah kunjungan
+  date text not null, -- Tanggal Pinjam / Tanggal Kunjungan
+  time_or_return text not null, -- Tanggal Kembali / Jam Kunjungan
+  purpose text not null,
+  status text not null check (status in ('Menunggu ACC', 'Disetujui', 'Ditolak', 'Selesai')),
+  created_by uuid references auth.users default auth.uid(),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Mengaktifkan Row Level Security (RLS) pada tabel requests
+alter table public.requests enable row level security;
+
+-- Policy RLS untuk tabel requests:
+-- 1. Semua user terautentikasi dapat melihat daftar request
+create policy "Authenticated users can select requests" on public.requests
+  for select to authenticated using (true);
+
+-- 2. Semua user terautentikasi dapat membuat request
+create policy "Authenticated users can insert requests" on public.requests
+  for insert to authenticated with check (auth.uid() is not null);
+
+-- 3. Hanya PIC Gedung yang dapat memperbarui request (ACC status)
+create policy "Only PIC Gedung can update requests" on public.requests
+  for update to authenticated using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() 
+      and profiles.role = 'pic_gedung'
+    )
+  );
 ```
 
 ---
