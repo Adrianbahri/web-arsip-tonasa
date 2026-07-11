@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import { useRole } from "@/components/RoleContext";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { 
   FileText, 
   Clock, 
   Archive, 
   ChevronRight, 
-  MoreVertical, 
   Plus, 
   Search, 
   Filter, 
@@ -35,14 +35,6 @@ export default function Dashboard() {
      rak: ""
   });
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-     const savedSession = localStorage.getItem("arsip_session");
-     if (!savedSession && !user) {
-        router.push("/login");
-     }
-  }, [user, router]);
-
   // Form State
   const [formData, setFormData] = useState({
      kodeKlasifikasi: "",
@@ -59,7 +51,7 @@ export default function Dashboard() {
      status: "Menunggu ACC"
   });
 
-  // Mock database records
+  // Mock / state database records
   const [archives, setArchives] = useState([
      {
         no: "01",
@@ -198,13 +190,49 @@ export default function Dashboard() {
      }
   ]);
 
-  if (!user) {
-     return (
-        <div className="min-h-[50vh] flex items-center justify-center bg-canvas">
-           <span className="text-[14px] text-ink-mute">Mengecek sesi login...</span>
-        </div>
-     );
-  }
+  // Fetch from Supabase
+  const fetchArchives = async () => {
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { data, error } = await supabase
+              .from('archives')
+              .select('*')
+              .order('no', { ascending: true });
+           
+           if (!error && data && data.length > 0) {
+              const formatted = data.map(item => ({
+                 no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
+                 kodeKlasifikasi: item.kode_klasifikasi,
+                 jenisBerkas: item.jenis_berkas,
+                 judulBerkas: item.judul_berkas,
+                 departemen: item.departemen,
+                 tahun: item.tahun,
+                 tanggalTerima: item.tanggal_terima,
+                 jangkaWaktu: item.jangka_waktu,
+                 gedung: item.gedung || "",
+                 lorong: item.lorong || "",
+                 rak: item.rak || "",
+                 status: item.status,
+                 linkBerkas: item.link_berkas
+              }));
+              setArchives(formatted);
+           }
+        }
+     } catch (e) {
+        console.warn("Supabase fetch failed, using mock data fallback:", e);
+     }
+  };
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+     const savedSession = localStorage.getItem("arsip_session");
+     if (!savedSession && !user) {
+        router.push("/login");
+     } else {
+        fetchArchives();
+     }
+  }, [user, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
      const { name, value } = e.target;
@@ -216,31 +244,68 @@ export default function Dashboard() {
      setApprovalLocation(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
      
-     const newRecord = {
-        no: (archives.length + 1).toString().padStart(2, '0'),
-        kodeKlasifikasi: formData.kodeKlasifikasi,
-        jenisBerkas: formData.jenisBerkas,
-        judulBerkas: formData.judulBerkas,
-        departemen: role === 'admin_dept' ? 'KEUANGAN' : formData.departemen,
+     const statusVal = role === 'pic_gedung' ? "Aktif" : "Menunggu ACC";
+     const deptVal = role === 'admin_dept' ? 'KEUANGAN' : formData.departemen;
+
+     const payload = {
+        kode_klasifikasi: formData.kodeKlasifikasi,
+        jenis_berkas: formData.jenisBerkas,
+        judul_berkas: formData.judulBerkas,
+        departemen: deptVal,
         tahun: formData.tahun,
-        tanggalTerima: formData.tanggalTerima,
-        jangkaWaktu: formData.jangkaWaktu,
-        gedung: role === 'pic_gedung' ? formData.gedung : "",
-        lorong: role === 'pic_gedung' ? formData.lorong : "",
-        rak: role === 'pic_gedung' ? formData.rak : "",
-        status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC",
-        linkBerkas: formData.linkBerkas
+        tanggal_terima: formData.tanggalTerima,
+        jangka_waktu: formData.jangkaWaktu,
+        gedung: role === 'pic_gedung' ? formData.gedung : null,
+        lorong: role === 'pic_gedung' ? formData.lorong : null,
+        rak: role === 'pic_gedung' ? formData.rak : null,
+        status: statusVal,
+        link_berkas: formData.linkBerkas
      };
 
-     setArchives(prev => [...prev, newRecord]);
-     setSuccessMessage(
-        role === 'pic_gedung' 
-        ? "Arsip berhasil disimpan sebagai Aktif!" 
-        : "Pengajuan arsip dikirim! Menunggu ACC dari PIC Gedung."
-     );
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('archives')
+              .insert([payload]);
+           
+           if (!error) {
+              supabaseSuccess = true;
+           } else {
+              console.error("Supabase insert error:", error);
+           }
+        }
+     } catch (err) {
+        console.warn("Supabase insertion skipped, falling back to mock insert:", err);
+     }
+
+     // FALLBACK LOCAL STATE MUTATION
+     if (supabaseSuccess) {
+        setSuccessMessage(role === 'pic_gedung' ? "Arsip berhasil disimpan di Database!" : "Pengajuan dikirim ke Database!");
+        fetchArchives();
+     } else {
+        const newRecord = {
+           no: (archives.length + 1).toString().padStart(2, '0'),
+           kodeKlasifikasi: formData.kodeKlasifikasi,
+           jenisBerkas: formData.jenisBerkas,
+           judulBerkas: formData.judulBerkas,
+           departemen: deptVal,
+           tahun: formData.tahun,
+           tanggalTerima: formData.tanggalTerima,
+           jangkaWaktu: formData.jangkaWaktu,
+           gedung: role === 'pic_gedung' ? formData.gedung : "",
+           lorong: role === 'pic_gedung' ? formData.lorong : "",
+           rak: role === 'pic_gedung' ? formData.rak : "",
+           status: statusVal,
+           linkBerkas: formData.linkBerkas
+        };
+        setArchives(prev => [...prev, newRecord]);
+        setSuccessMessage(role === 'pic_gedung' ? "Arsip disimpan (Simulasi)!" : "Pengajuan terkirim (Simulasi)!");
+     }
      
      setTimeout(() => {
         setSuccessMessage("");
@@ -259,42 +324,105 @@ export default function Dashboard() {
            linkBerkas: "",
            status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC"
         });
-     }, 2000);
+     }, 1500);
   };
 
   const handleApprove = (no: string) => {
      setSelectedApprovalId(no);
   };
 
-  const submitApproval = (e: React.FormEvent) => {
+  const submitApproval = async (e: React.FormEvent) => {
      e.preventDefault();
-     setArchives(prev => prev.map(item => {
-        if (item.no === selectedApprovalId) {
-           return {
-              ...item,
-              gedung: approvalLocation.gedung,
-              lorong: approvalLocation.lorong,
-              rak: approvalLocation.rak,
-              status: "Aktif"
-           };
+     let supabaseSuccess = false;
+
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           // Jika 'no' adalah serial/integer di DB, parse ke number
+           const isNoNumeric = !isNaN(Number(selectedApprovalId));
+           const queryField = isNoNumeric ? 'no' : 'id';
+           const queryVal = isNoNumeric ? Number(selectedApprovalId) : selectedApprovalId;
+
+           const { error } = await supabase
+              .from('archives')
+              .update({
+                 gedung: approvalLocation.gedung,
+                 lorong: approvalLocation.lorong,
+                 rak: approvalLocation.rak,
+                 status: "Aktif"
+              })
+              .eq(queryField, queryVal);
+
+           if (!error) {
+              supabaseSuccess = true;
+           } else {
+              console.error("Supabase update error:", error);
+           }
         }
-        return item;
-     }));
-     setSuccessMessage("Berkas berhasil disetujui & lokasi penyimpanan fisik direkam!");
+     } catch (err) {
+        console.warn("Supabase update skipped, falling back to mock update:", err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Status berkas diperbarui di database!");
+        fetchArchives();
+     } else {
+        setArchives(prev => prev.map(item => {
+           if (item.no === selectedApprovalId) {
+              return {
+                 ...item,
+                 gedung: approvalLocation.gedung,
+                 lorong: approvalLocation.lorong,
+                 rak: approvalLocation.rak,
+                 status: "Aktif"
+              };
+           }
+           return item;
+        }));
+        setSuccessMessage("Status berkas diperbarui (Simulasi)!");
+     }
+
      setSelectedApprovalId(null);
      setApprovalLocation({ gedung: "A", lorong: "", rak: "" });
-     setTimeout(() => setSuccessMessage(""), 2000);
+     setTimeout(() => setSuccessMessage(""), 1500);
   };
 
-  const handleReject = (no: string) => {
-     setArchives(prev => prev.map(item => {
-        if (item.no === no) {
-           return { ...item, status: "Ditolak" };
+  const handleReject = async (no: string) => {
+     let supabaseSuccess = false;
+
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const isNoNumeric = !isNaN(Number(no));
+           const queryField = isNoNumeric ? 'no' : 'id';
+           const queryVal = isNoNumeric ? Number(no) : no;
+
+           const { error } = await supabase
+              .from('archives')
+              .update({ status: "Ditolak" })
+              .eq(queryField, queryVal);
+
+           if (!error) {
+              supabaseSuccess = true;
+           }
         }
-        return item;
-     }));
-     setSuccessMessage("Pengajuan arsip ditolak.");
-     setTimeout(() => setSuccessMessage(""), 2000);
+     } catch (err) {
+        console.warn(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pengajuan ditolak di database.");
+        fetchArchives();
+     } else {
+        setArchives(prev => prev.map(item => {
+           if (item.no === no) {
+              return { ...item, status: "Ditolak" };
+           }
+           return item;
+        }));
+        setSuccessMessage("Pengajuan ditolak (Simulasi).");
+     }
+     setTimeout(() => setSuccessMessage(""), 1500);
   };
 
   const filteredArchives = archives.filter(item => {
@@ -306,7 +434,25 @@ export default function Dashboard() {
      return matchesStatus && matchesSearch;
   });
 
-  // EXPORT EXCEL (CSV) FUNCTIONALITY (New feature)
+  const getRoleName = (r: string) => {
+     if (r === 'pic_gedung') return 'Admin PIC Gedung';
+     if (r === 'admin_dept') return 'Admin Departemen';
+     return 'Staf Biasa';
+  };
+
+  // Helper stats calculation
+  const getStats = () => {
+     const active = archives.filter(item => item.status === 'Aktif').length;
+     const inactive = archives.filter(item => item.status === 'Inaktif').length;
+     return {
+        pic_gedung: { total: archives.length, active, inactive },
+        admin_dept: { total: archives.filter(i => i.departemen === 'KEUANGAN').length, active: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Aktif').length, inactive: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Inaktif').length },
+        user: { total: archives.length, active, inactive }
+     };
+  };
+  const stats = getStats();
+
+  // EXPORT EXCEL (CSV)
   const handleExportExcel = () => {
      const headers = [
         "No",
@@ -601,7 +747,6 @@ export default function Dashboard() {
                  </p>
               </div>
               
-              {/* Export Pending List to Excel for PIC */}
               <button 
                  onClick={handleExportExcel}
                  className="btn-outline flex items-center justify-center gap-2 py-2 px-3 text-[13px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto"
@@ -885,7 +1030,7 @@ export default function Dashboard() {
      );
   }
 
-  // 4. VIEW: DAFTAR ARSIP GENERAL PAGE (Available for all roles)
+  // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
     <div className="space-y-6 max-w-full mx-auto pb-10">
       
@@ -900,7 +1045,6 @@ export default function Dashboard() {
            </p>
         </div>
         
-        {/* Actions header */}
         <div className="flex flex-wrap items-center gap-3">
            <div className="relative w-full md:w-64">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
@@ -913,7 +1057,6 @@ export default function Dashboard() {
               />
            </div>
 
-           {/* Status Filter Dropdown */}
            <div className="relative w-full md:w-auto flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-2 bg-canvas hover:border-hairline-strong transition-colors">
               <Filter size={14} className="text-ink-mute" />
               <select 
@@ -922,7 +1065,7 @@ export default function Dashboard() {
                  className="bg-transparent border-none text-[13px] text-ink font-medium outline-none pr-6 cursor-pointer"
               >
                  <option value="Semua">Semua Status</option>
-                 <option value="Aktif">Berkas Aktif</option>
+                 <option value="Aktif">Berkas Hack/Aktif</option>
                  <option value="Inaktif">Berkas Inaktif</option>
                  <option value="Permanen">Berkas Permanen</option>
                  <option value="Dinilai Kembali">Dinilai Kembali</option>
@@ -933,7 +1076,6 @@ export default function Dashboard() {
               </select>
            </div>
 
-           {/* Export Excel Button (Only for Admins) */}
            {role !== 'user' && (
               <button 
                  onClick={handleExportExcel}
@@ -943,7 +1085,6 @@ export default function Dashboard() {
               </button>
            )}
            
-           {/* Add button only visible to Admins */}
            {role !== 'user' && (
              <button 
                 onClick={() => setShowAddForm(true)}

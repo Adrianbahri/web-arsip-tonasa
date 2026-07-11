@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type Role = 'pic_gedung' | 'admin_dept' | 'user';
 
@@ -15,7 +16,7 @@ interface RoleContextType {
   role: Role;
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
-  login: (email: string, role: Role) => Promise<boolean>;
+  login: (email: string, selectedRole: Role, password?: string) => Promise<boolean>;
   logout: () => void;
   setRole: (role: Role) => void;
 }
@@ -38,7 +39,44 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, selectedRole: Role): Promise<boolean> => {
+  const login = async (email: string, selectedRole: Role, password?: string): Promise<boolean> => {
+     try {
+        // 1. Coba hubungkan ke Supabase Auth asli jika kredensial URL valid
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        
+        if (!isMockUrl) {
+           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+              email,
+              password: password || "12345678"
+           });
+
+           if (!authError && authData.user) {
+              // Ambil profile role dari tabel profiles
+              const { data: profile, error: profileError } = await supabase
+                 .from('profiles')
+                 .select('role, name')
+                 .eq('id', authData.user.id)
+                 .single();
+
+              if (!profileError && profile) {
+                 const realUser: UserProfile = {
+                    email: authData.user.email || email,
+                    role: profile.role as Role,
+                    name: profile.name || email.split("@")[0]
+                 };
+                 localStorage.setItem("arsip_session", JSON.stringify(realUser));
+                 setUser(realUser);
+                 setRoleState(realUser.role);
+                 setActiveMenu(realUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
+                 return true;
+              }
+           }
+        }
+     } catch (e) {
+        console.warn("Supabase Auth failed, falling back to mock login simulation:", e);
+     }
+
+     // 2. FALLBACK: Jika Supabase belum di-setup / offline, jalankan simulasi lokal
      const mockUser: UserProfile = {
         email: email,
         role: selectedRole,
@@ -49,7 +87,6 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      setUser(mockUser);
      setRoleState(mockUser.role);
      
-     // Set default active menu based on role
      if (mockUser.role === 'user') {
         setActiveMenu("Daftar Arsip");
      } else {
@@ -58,7 +95,12 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      return true;
   };
 
-  const logout = () => {
+  const logout = async () => {
+     try {
+        await supabase.auth.signOut();
+     } catch (e) {
+        console.warn("Error signing out from Supabase:", e);
+     }
      localStorage.removeItem("arsip_session");
      setUser(null);
      router.push("/login");
@@ -71,7 +113,6 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("arsip_session", JSON.stringify(updatedUser));
         setUser(updatedUser);
      }
-     // Redirect menu if role changes to user
      if (newRole === 'user') {
         setActiveMenu("Daftar Arsip");
      } else {

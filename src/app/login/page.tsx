@@ -19,7 +19,7 @@ export default function Login() {
      setError("");
 
      try {
-        const success = await login(email, selectedRole);
+        const success = await login(email, selectedRole, password);
         if (success) {
            router.push("/dashboard");
         } else {
