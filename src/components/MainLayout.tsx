@@ -8,7 +8,8 @@ import {
   Users, 
   LogOut, 
   ShieldAlert,
-  ClipboardCheck
+  ClipboardCheck,
+  Key
 } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -20,12 +21,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
      return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 
-  // Simplified Menu items with new ACC menu for PIC Gedung
+  // Simplified Menu items with new ACC menu for PIC Gedung & Ganti Password for all roles
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, roles: ["pic_gedung", "admin_dept"] },
     { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["pic_gedung"] },
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["pic_gedung"] },
+    { name: "Ganti Password", icon: Key, roles: ["pic_gedung", "admin_dept", "user"] },
   ];
 
   const allowedMenuItems = menuItems.filter(item => item.roles.includes(role));
