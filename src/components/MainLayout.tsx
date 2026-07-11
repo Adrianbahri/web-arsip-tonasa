@@ -15,7 +15,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { role, setRole, user, logout, activeMenu, setActiveMenu } = useRole();
   const pathname = usePathname();
 
-  if (pathname === "/login" || pathname === "/") {
+  // Exclude login page, register page, and landing page (/) from sidebar & dashboard layout wrapper
+  if (pathname === "/login" || pathname === "/" || pathname === "/register") {
      return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 

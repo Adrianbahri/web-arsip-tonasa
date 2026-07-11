@@ -16,7 +16,8 @@ interface RoleContextType {
   role: Role;
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
-  login: (email: string, selectedRole: Role, password?: string) => Promise<boolean>;
+  login: (email: string, selectedRole: Role, password?: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name: string, selectedRole: Role) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setRole: (role: Role) => void;
 }
@@ -39,10 +40,9 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, selectedRole: Role, password?: string): Promise<boolean> => {
+  const login = async (email: string, selectedRole: Role, password?: string): Promise<{ success: boolean; error?: string }> => {
      try {
-        // 1. Coba hubungkan ke Supabase Auth asli jika kredensial URL valid
-        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
         
         if (!isMockUrl) {
            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -50,7 +50,11 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
               password: password || "12345678"
            });
 
-           if (!authError && authData.user) {
+           if (authError) {
+              return { success: false, error: authError.message };
+           }
+
+           if (authData.user) {
               // Ambil profile role dari tabel profiles
               const { data: profile, error: profileError } = await supabase
                  .from('profiles')
@@ -58,7 +62,14 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
                  .eq('id', authData.user.id)
                  .single();
 
-              if (!profileError && profile) {
+              if (profileError) {
+                 return { 
+                    success: false, 
+                    error: "Login berhasil di Auth, tetapi gagal memuat data peran dari tabel 'profiles'. Pastikan query tabel SQL di panduan SUPABASE_SETUP.md sudah dijalankan." 
+                 };
+              }
+
+              if (profile) {
                  const realUser: UserProfile = {
                     email: authData.user.email || email,
                     role: profile.role as Role,
@@ -68,15 +79,34 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
                  setUser(realUser);
                  setRoleState(realUser.role);
                  setActiveMenu(realUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
-                 return true;
+                 return { success: true };
               }
            }
         }
-     } catch (e) {
-        console.warn("Supabase Auth failed, falling back to mock login simulation:", e);
+     } catch (e: any) {
+        console.error("Supabase Auth connection error:", e);
+        
+        // JIKA FETCH ERROR (Gagal Terhubung / Offline), AKTIFKAN FALLBACK SIMULASI LOKAL AGAR WEB TIDAK CRASH
+        const errString = e.toString() || "";
+        if (errString.includes("Failed to fetch") || errString.includes("TypeError")) {
+           const mockUser: UserProfile = {
+              email: email,
+              role: selectedRole,
+              name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1)
+           };
+           localStorage.setItem("arsip_session", JSON.stringify(mockUser));
+           setUser(mockUser);
+           setRoleState(mockUser.role);
+           setActiveMenu(mockUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
+           return { 
+              success: true, 
+              error: "Mode Simulasi: Gagal menghubungi server Supabase (Failed to fetch). Sistem otomatis beralih menggunakan simulasi offline." 
+           };
+        }
+        return { success: false, error: e.message || "Gagal menghubungi server database Supabase." };
      }
 
-     // 2. FALLBACK: Jika Supabase belum di-setup / offline, jalankan simulasi lokal
+     // FALLBACK SIMULASI MURNI JIKA URL MOCK
      const mockUser: UserProfile = {
         email: email,
         role: selectedRole,
@@ -92,7 +122,40 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      } else {
         setActiveMenu("Dashboard");
      }
-     return true;
+     return { success: true };
+  };
+
+  const signUp = async (email: string, password: string, name: string, selectedRole: Role): Promise<{ success: boolean; error?: string }> => {
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+        
+        if (isMockUrl) {
+           return { 
+              success: false, 
+              error: "Supabase belum terkonfigurasi. Mohon isi variabel env terlebih dahulu." 
+           };
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+           email,
+           password,
+           options: {
+              data: {
+                 name,
+                 role: selectedRole
+              }
+           }
+        });
+
+        if (error) {
+           return { success: false, error: error.message };
+        }
+
+        return { success: true };
+     } catch (e: any) {
+        console.error("Supabase Register connection error:", e);
+        return { success: false, error: e.message || "Gagal menghubungi server database Supabase." };
+     }
   };
 
   const logout = async () => {
@@ -121,7 +184,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <RoleContext.Provider value={{ user, role, activeMenu, setActiveMenu, login, logout, setRole }}>
+    <RoleContext.Provider value={{ user, role, activeMenu, setActiveMenu, login, signUp, logout, setRole }}>
       {children}
     </RoleContext.Provider>
   );

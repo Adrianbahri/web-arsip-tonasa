@@ -3,38 +3,40 @@ import { useState } from "react";
 import { useRole } from "@/components/RoleContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Mail, ShieldAlert } from "lucide-react";
+import { Lock, Mail, User, ShieldAlert, Check } from "lucide-react";
 
-export default function Login() {
-  const { login } = useRole();
+export default function Register() {
+  const { signUp } = useRole();
   const router = useRouter();
+  
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<'pic_gedung' | 'admin_dept' | 'user'>('pic_gedung');
+  const [selectedRole, setSelectedRole] = useState<'pic_gedung' | 'admin_dept' | 'user'>('user');
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [infoMessage, setInfoMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
      e.preventDefault();
      setIsLoading(true);
      setError("");
-     setInfoMessage("");
+     setSuccess(false);
 
      try {
-        const res = await login(email, selectedRole, password);
+        const res = await signUp(email, password, name, selectedRole);
         if (res.success) {
-           if (res.error) {
-              // Jika login sukses tetapi ada pesan peringatan (e.g. Supabase offline & fallback aktif)
-              setInfoMessage(res.error);
-              setTimeout(() => {
-                 router.push("/dashboard");
-              }, 4000);
-           } else {
-              router.push("/dashboard");
-           }
+           setSuccess(true);
+           setName("");
+           setEmail("");
+           setPassword("");
+           // Redirect to login page after 3 seconds
+           setTimeout(() => {
+              router.push("/login");
+           }, 3000);
         } else {
-           setError(res.error || "Email atau password salah.");
+           setError(res.error || "Gagal melakukan registrasi.");
         }
      } catch (err: any) {
         setError("Terjadi kesalahan sistem: " + (err.message || ""));
@@ -45,6 +47,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-canvas px-4 font-sans selection:bg-primary-soft selection:text-white">
+      {/* Flat card on mobile, bordered on PC */}
       <div className="w-full max-w-[420px] bg-canvas md:border md:border-hairline rounded-xs py-8 px-4 md:p-8 space-y-6">
          
          {/* Logo / Header */}
@@ -54,7 +57,7 @@ export default function Login() {
                Arsip<span className="text-primary font-bold ml-1">Tonasa</span>
             </h1>
             <p className="text-ink-mute text-[14px]">
-               Sistem Informasi Manajemen Arsip
+               Daftar Akun Baru Kearsipan
             </p>
          </div>
 
@@ -64,15 +67,37 @@ export default function Login() {
             </div>
          )}
 
-         {infoMessage && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-950 text-[12px] rounded-xs p-3 leading-relaxed">
-               {infoMessage}
+         {success && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] rounded-xs p-3 flex items-center gap-3">
+               <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                  <Check size={12} strokeWidth={3} />
+               </div>
+               <div>
+                  <p className="font-semibold">Registrasi Berhasil!</p>
+                  <p className="text-[11px] text-emerald-700">Akun Anda sedang didaftarkan. Mengarahkan Anda ke Halaman Login...</p>
+               </div>
             </div>
          )}
 
          {/* Form */}
-         <form onSubmit={handleLogin} className="space-y-4">
+         <form onSubmit={handleRegister} className="space-y-4">
             
+            {/* Nama Lengkap */}
+            <div className="space-y-1.5">
+               <label className="block text-[13px] font-medium text-ink">Nama Lengkap</label>
+               <div className="relative">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
+                  <input 
+                     type="text" 
+                     required
+                     value={name}
+                     onChange={(e) => setName(e.target.value)}
+                     placeholder="Nama Lengkap"
+                     className="w-full bg-canvas border border-hairline text-[14px] rounded-xs pl-9 pr-3 py-2.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
+                  />
+               </div>
+            </div>
+
             {/* Email Field */}
             <div className="space-y-1.5">
                <label className="block text-[13px] font-medium text-ink">Email Perusahaan</label>
@@ -97,47 +122,48 @@ export default function Login() {
                   <input 
                      type="password" 
                      required
+                     minLength={6}
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     placeholder="••••••••"
+                     placeholder="Minimal 6 karakter"
                      className="w-full bg-canvas border border-hairline text-[14px] rounded-xs pl-9 pr-3 py-2.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                   />
                </div>
             </div>
 
-            {/* Role Simulation Dropdown */}
+            {/* Role Dropdown */}
             <div className="space-y-1.5 bg-canvas-soft border border-hairline p-3 rounded-xs">
                <div className="flex items-center gap-1.5 text-ink-mute mb-2">
                   <ShieldAlert size={14} />
-                  <label className="text-[12px] font-medium">Masuk Sebagai (Simulasi Role)</label>
+                  <label className="text-[12px] font-medium">Pilih Jabatan (Role)</label>
                </div>
                <select 
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value as any)}
                   className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-2.5 py-1.5 outline-none font-medium text-ink focus:border-ink"
                >
-                  <option value="pic_gedung">PIC Gedung Arsip</option>
-                  <option value="admin_dept">Admin Departemen (HRD)</option>
                   <option value="user">User Biasa (Staff)</option>
+                  <option value="admin_dept">Admin Departemen (HRD/Keuangan)</option>
+                  <option value="pic_gedung">PIC Gedung Arsip</option>
                </select>
             </div>
 
-            {/* Submit Button */}
+            {/* Register Button */}
             <button 
                type="submit" 
-               disabled={isLoading}
+               disabled={isLoading || success}
                className="w-full bg-primary hover:bg-primary-deep text-on-primary py-2.5 rounded-xs text-[14px] font-semibold transition-colors mt-4 disabled:opacity-50"
             >
-               {isLoading ? "Menghubungkan..." : "Masuk"}
+               {isLoading ? "Mendaftarkan..." : "Daftar Akun"}
             </button>
          </form>
 
-         {/* Link to Register */}
+         {/* Link to Login */}
          <div className="text-center pt-2">
             <p className="text-[12px] text-ink-mute">
-               Belum memiliki akun?{" "}
-               <Link href="/register" className="text-primary hover:underline font-semibold">
-                  Daftar Sekarang
+               Sudah memiliki akun?{" "}
+               <Link href="/login" className="text-primary hover:underline font-semibold">
+                  Masuk Disini
                </Link>
             </p>
          </div>
