@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand Primary: Red */
+  --color-primary: #e31837;
+  --color-primary-deep: #b91029;
+  --color-primary-soft: #ff4d6a;
+  
+  /* Ink (Text) */
+  --color-ink: #171717;
+  --color-ink-secondary: #212121;
+  --color-ink-mute: #707070;
+  --color-ink-faint: #b2b2b2;
+  
+  /* Canvas (Background) */
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #fafafa;
+  --color-canvas-night: #1c1c1c;
+  
+  /* Hairline (Borders) */
+  --color-hairline: #dfdfdf;
+  --color-hairline-strong: #c7c7c7;
+  --color-hairline-cool: #ededed;
+  
+  /* On-Surfaces */
+  --color-on-primary: #ffffff; /* White text on red CTA */
+  --color-on-dark: #ffffff;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, Monaco, Consolas, monospace;
+
+  /* Border Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px; /* Signature button radius */
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Tracking for display is handled in utility classes, but body uses standard */
+  letter-spacing: 0;
+}
+
+/* Custom utilities matching DESIGN.md */
+@layer utilities {
+  .text-display-xxl {
+    font-size: 64px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -1.92px;
+  }
+  .text-display-xl {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -1.44px;
+  }
+  .text-display-lg {
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.72px;
+  }
+  .text-display-md {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.42px;
+  }
+  .btn-primary {
+    @apply bg-primary text-on-primary text-[14px] font-medium rounded-sm px-4 py-2 transition-colors hover:bg-primary-deep;
+  }
+  .btn-outline {
+    @apply bg-canvas text-ink text-[14px] font-medium rounded-sm px-4 py-2 border border-hairline-strong hover:bg-canvas-soft transition-colors;
+  }
+  .card-standard {
+    @apply bg-canvas text-ink rounded-lg p-8 border border-hairline;
+  }
 }
