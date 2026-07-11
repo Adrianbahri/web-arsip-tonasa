@@ -790,6 +790,17 @@ export default function Dashboard() {
   };
   const stats = getStats();
 
+  // Reactive Stats per Department for the Chart
+  const getDeptStats = () => {
+     const depts = ["KEUANGAN", "PERLENGKAPAN", "HRD", "LEGAL"];
+     return depts.map(dept => {
+        const count = archives.filter(item => item.departemen.toUpperCase() === dept).length;
+        return { name: dept, count };
+     });
+  };
+  const deptStats = getDeptStats();
+  const maxDeptCount = Math.max(...deptStats.map(d => d.count), 1);
+
   // EXPORT EXCEL (CSV)
   const handleExportExcel = () => {
      const headers = [
@@ -2118,61 +2129,45 @@ export default function Dashboard() {
               </div>
            </div>
 
-           <div className="bg-canvas border border-hairline rounded-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-hairline flex justify-between items-center bg-canvas-soft">
-                 <h3 className="text-[14px] font-medium text-ink">Arsip Terbaru</h3>
-                 <button 
-                    onClick={() => setActiveMenu("Daftar Arsip")}
-                    className="text-[13px] font-medium text-ink hover:text-primary transition-colors flex items-center gap-1"
-                 >
-                    Lihat Semua <ChevronRight size={14} />
-                 </button>
+           {/* STATS CHART CARD (REPLACES RECENT ARCHIVES LIST) */}
+           <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-hairline">
+                 <div>
+                    <h3 className="text-[15px] font-bold text-ink tracking-tight">Statistik Arsip per Departemen</h3>
+                    <p className="text-[12px] text-ink-mute">Perbandingan jumlah dokumen kearsipan yang tersimpan aktif di dalam sistem.</p>
+                 </div>
+                 <div className="flex items-center gap-1.5 text-[11px] font-semibold text-ink-mute bg-canvas-soft border border-hairline px-2.5 py-1 rounded-xs">
+                    <span className="w-2 h-2 bg-primary rounded-full"></span>
+                    Total Berkas
+                 </div>
               </div>
-              
-              <div className="divide-y divide-hairline">
-                 {archives.slice(0, 3).map((archive) => (
-                    <div 
-                       key={archive.no} 
-                       onClick={() => {
-                          setSelectedDetailItem(archive);
-                          setDetailType("archive");
-                       }}
-                       className="p-4 md:px-6 md:py-4 hover:bg-canvas-soft transition-colors flex items-center gap-4 group justify-between cursor-pointer"
-                    >
-                       <div className="flex items-center gap-4 min-w-0 flex-1">
-                          <div className="w-10 h-10 rounded-xs bg-canvas border border-hairline text-ink flex items-center justify-center flex-shrink-0">
-                             <span className="font-mono text-[10px] font-medium tracking-wide">PDF</span>
+
+              {/* Grid Bar Chart with custom rich styling */}
+              <div className="space-y-5">
+                 {deptStats.map((dept) => {
+                    const percentage = (dept.count / maxDeptCount) * 100;
+                    return (
+                       <div key={dept.name} className="space-y-1.5 group">
+                          <div className="flex justify-between items-center text-[12px]">
+                             <span className="font-semibold text-ink group-hover:text-primary transition-colors tracking-tight">{dept.name}</span>
+                             <span className="font-mono font-bold text-ink bg-canvas-soft border border-hairline px-2 py-0.5 rounded-xs text-[11px]">{dept.count} Berkas</span>
                           </div>
-                          <div className="flex-1 min-w-0">
-                             <h4 className="text-[14px] md:text-[15px] font-medium text-ink truncate group-hover:text-primary transition-colors cursor-pointer">{archive.judulBerkas}.pdf</h4>
-                             <div className="flex items-center gap-2 mt-1 text-[12px] text-ink-mute">
-                                <span className="font-mono bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span>
-                                <span>•</span>
-                                <span>No: {archive.kodeKlasifikasi}</span>
+                          <div className="w-full h-8 bg-canvas-soft border border-hairline rounded-xs overflow-hidden relative">
+                             {/* Animated Gradient Bar Fill */}
+                             <div 
+                                style={{ width: `${percentage}%` }} 
+                                className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-500 ease-out flex items-center justify-end px-3 relative min-w-[20px]"
+                             >
+                                {percentage > 12 && (
+                                   <span className="text-[10px] font-extrabold text-white relative z-10 font-mono">
+                                      {Math.round(percentage)}%
+                                   </span>
+                                )}
                              </div>
                           </div>
                        </div>
-                       <div className="flex items-center gap-4">
-                          <a 
-                             href={archive.linkBerkas} 
-                             target="_blank" 
-                             rel="noopener noreferrer" 
-                             className="text-primary hover:text-primary-deep" 
-                             onClick={(e) => e.stopPropagation()}
-                             title="Buka berkas digital"
-                          >
-                             <ExternalLink size={14} />
-                          </a>
-                          <span className={`border text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                             archive.status === 'Aktif' 
-                             ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                             : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}>
-                             {archive.status}
-                          </span>
-                       </div>
-                    </div>
-                 ))}
+                    );
+                 })}
               </div>
            </div>
         </div>
@@ -2549,7 +2544,7 @@ export default function Dashboard() {
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
                                  selectedDetailItem.approved 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                 : 'bg-amber-50 text-amber-700 border-amber-200'
                               }`}>
                                  {selectedDetailItem.approved ? 'Disetujui' : 'Menunggu ACC'}
                               </span>
