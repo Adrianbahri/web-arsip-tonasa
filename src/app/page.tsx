@@ -68,9 +68,9 @@ export default function LandingPage() {
 
       {/* HERO SECTION */}
       <section 
-         className="relative bg-cover bg-center h-[350px] md:h-[450px] flex items-center justify-center text-center px-4"
+         className="relative bg-cover bg-center w-full aspect-video max-h-[600px] flex items-center justify-center text-center px-4"
          style={{ 
-            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&h=450&q=80')" 
+            backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('/hero-image.jpg')" 
          }}
       >
          <div className="max-w-[800px] space-y-4">
