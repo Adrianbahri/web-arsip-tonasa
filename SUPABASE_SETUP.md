@@ -77,7 +77,7 @@ create table public.archives (
   isi_bundel text, -- Disimpan sebagai JSON array string
   status text not null check (status in ('Aktif', 'Inaktif', 'Permanen', 'Dinilai Kembali', 'Ditinjau Kembali', 'Upaya Pemusnahan', 'Dimusnahkan', 'Menunggu ACC', 'Ditolak')),
   link_berkas text not null,
-  created_by uuid references auth.users default auth.uid(),
+  created_by uuid references auth.users on delete set null default auth.uid(),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
