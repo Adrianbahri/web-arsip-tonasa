@@ -65,22 +65,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           })}
         </nav>
         
-        {/* Role Simulator inside Sidebar (Desktop) */}
-        <div className="p-3 mx-3 mb-2 border border-hairline bg-canvas-soft rounded-xs space-y-2">
-           <div className="flex items-center gap-1.5 text-ink-mute">
-              <ShieldAlert size={14} />
-              <span className="text-[11px] font-medium">Role Simulator</span>
-           </div>
-           <select 
-              value={role} 
-              onChange={(e) => setRole(e.target.value as any)}
-              className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1 outline-none font-medium text-ink focus:border-ink"
-           >
-              <option value="pic_gedung">PIC Gedung</option>
-              <option value="admin_dept">Admin Dept</option>
-              <option value="user">User Biasa</option>
-           </select>
-        </div>
+
 
         {/* Profile / User Info (Bawah Sidebar) */}
         <div className="p-4 border-t border-hairline flex items-center gap-3">

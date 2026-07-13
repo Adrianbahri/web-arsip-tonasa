@@ -28,6 +28,56 @@ import {
   X
 } from "lucide-react";
 
+const formatDate = (dateStr: string) => {
+   if (!dateStr) return "-";
+   const parts = dateStr.split("-");
+   if (parts.length === 3 && parts[0].length === 4) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+   }
+   return dateStr;
+};
+
+const StatusBadge = ({ status, alasanPenolakan, isSmall = false }: { status: string; alasanPenolakan?: string; isSmall?: boolean }) => {
+   let colorClasses = "";
+   switch (status) {
+      case 'Aktif':
+      case 'Disetujui':
+         colorClasses = 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]';
+         break;
+      case 'Inaktif':
+         colorClasses = 'bg-amber-50 text-amber-700 border-amber-200';
+         break;
+      case 'Permanen':
+         colorClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+         break;
+      case 'Selesai':
+         colorClasses = 'bg-blue-50 text-blue-700 border-blue-100';
+         break;
+      case 'Menunggu ACC':
+         colorClasses = 'bg-amber-100 text-amber-800 border-amber-300';
+         break;
+      case 'Ditolak':
+      default:
+         colorClasses = 'bg-red-50 text-red-700 border-red-200';
+         break;
+   }
+
+   const textSize = isSmall ? 'text-[10px]' : 'text-[11px]';
+
+   return (
+      <div className={`flex flex-col ${isSmall ? 'items-end' : 'items-center'} gap-1`}>
+         <span className={`border ${textSize} px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${colorClasses}`}>
+            {status}
+         </span>
+         {status === 'Ditolak' && alasanPenolakan && (
+            <span className={`text-[9px] text-red-600 font-sans ${isSmall ? 'max-w-[100px]' : 'max-w-[120px]'} truncate`} title={alasanPenolakan}>
+               Alasan: {alasanPenolakan}
+            </span>
+         )}
+      </div>
+   );
+};
+
 export default function Dashboard() {
   const { role, user, activeMenu, setActiveMenu } = useRole();
   const router = useRouter();
@@ -44,23 +94,24 @@ export default function Dashboard() {
      rak: ""
   });
 
+  // Delete Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [archiveToDelete, setArchiveToDelete] = useState<string | null>(null);
+
+  // Reject Modal State
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [archiveToReject, setArchiveToReject] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
   // Modal Detail States
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
   const [detailType, setDetailType] = useState<"archive" | "user" | "request" | null>(null);
 
   // Users List State for Manajemen User (PIC Gedung ONLY)
-  const [usersList, setUsersList] = useState<any[]>([
-     { id: "1", name: "Adrian Bahri", email: "adrian@sementonasa.co.id", role: "admin_dept", approved: true, created_at: "2026-07-10T10:00:00Z" },
-     { id: "2", name: "Syukur", email: "syukur@sementonasa.co.id", role: "pic_gedung", approved: true, created_at: "2026-07-09T09:00:00Z" },
-     { id: "3", name: "Budi Santoso", email: "budi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:00:00Z" },
-     { id: "4", name: "Dewi Lestari", email: "dewi@sementonasa.co.id", role: "user", approved: false, created_at: "2026-07-11T03:15:00Z" }
-  ]);
+  const [usersList, setUsersList] = useState<any[]>([]);
 
   // Layanan Peminjaman & Kunjungan State
-  const [requestsList, setRequestsList] = useState<any[]>([
-     { id: "req-1", user_name: "Adrian Bahri", type: "peminjaman", archive_title: "BUKTI-BUKTI / DOKUMEN TRANSAKSI - EXISTING (332)", date: "2026-07-12", time_or_return: "2026-07-19", purpose: "Pemeriksaan Audit Internal Keuangan", status: "Menunggu ACC", created_at: "2026-07-11T03:00:00Z" },
-     { id: "req-2", user_name: "Budi Santoso", type: "kunjungan", archive_title: null, date: "2026-07-14", time_or_return: "10:00 WITA", purpose: "Penelitian Struktur Gedung Arsip A", status: "Disetujui", created_at: "2026-07-11T04:10:00Z" }
-  ]);
+  const [requestsList, setRequestsList] = useState<any[]>([]);
 
   const [serviceFormData, setServiceFormData] = useState({
      type: "peminjaman",
@@ -92,144 +143,11 @@ export default function Dashboard() {
      status: "Menunggu ACC"
   });
 
+  // Edit Mode State
+  const [editArchiveItem, setEditArchiveItem] = useState<any | null>(null);
+
   // Mock / state database records
-  const [archives, setArchives] = useState([
-     {
-        no: "01",
-        kodeKlasifikasi: "PL.01.01.04",
-        jenisBerkas: "MATERIAL DAN PERALATAN PABRIK",
-        judulBerkas: "PENGADAAN DALAM NEGRI ( OP )",
-        departemen: "PERLENGKAPAN",
-        tahun: "2018",
-        tanggalTerima: "01/03/2018",
-        jangkaWaktu: "5 tahun",
-        gedung: "A",
-        lorong: "20",
-        rak: "RAK F BARIS 2",
-        status: "Aktif",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_perlengkapan/view"
-     },
-     {
-        no: "02",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (332)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Aktif",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan332/view"
-     },
-     {
-        no: "03",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (333)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Aktif",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan333/view"
-     },
-     {
-        no: "04",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (334)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Inaktif",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan334/view"
-     },
-     {
-        no: "05",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (335)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Inaktif",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan335/view"
-     },
-     {
-        no: "06",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (336)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Permanen",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan336/view"
-     },
-     {
-        no: "07",
-        kodeKlasifikasi: "PR (PAYMENT REGISTER)",
-        jenisBerkas: "BUKTI-BUKTI / DOKUMEN TRANSAKSI",
-        judulBerkas: "EXISTING (337)",
-        departemen: "KEUANGAN",
-        tahun: "2018",
-        tanggalTerima: "23/04/2018",
-        jangkaWaktu: "2th lpr disyahkan RKAP",
-        gedung: "A",
-        lorong: "22",
-        rak: "RAK G BARIS 1",
-        status: "Dinilai Kembali",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_keuangan337/view"
-     },
-     {
-        no: "08",
-        kodeKlasifikasi: "PL.02.04.11",
-        jenisBerkas: "SOP OPERASIONAL SHIFT",
-        judulBerkas: "SOP KARYAWAN SHIFT PABRIK UNIT 4",
-        departemen: "HRD",
-        tahun: "2026",
-        tanggalTerima: "10/07/2026",
-        jangkaWaktu: "3 tahun",
-        gedung: "",
-        lorong: "",
-        rak: "",
-        status: "Menunggu ACC",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_hrd08/view"
-     },
-     {
-        no: "09",
-        kodeKlasifikasi: "LGL.01.12.01",
-        jenisBerkas: "PENGESAHAN DOKUMEN LAHAN",
-        judulBerkas: "PENGESAHAN LAHAN BARU TONASA B",
-        departemen: "LEGAL",
-        tahun: "2026",
-        tanggalTerima: "11/07/2026",
-        jangkaWaktu: "10 tahun",
-        gedung: "",
-        lorong: "",
-        rak: "",
-        status: "Menunggu ACC",
-        linkBerkas: "https://drive.google.com/file/d/1_demo_legal09/view"
-     }
-  ]);
+  const [archives, setArchives] = useState<any[]>([]);
 
   // Fetch from Supabase
   const fetchArchives = async () => {
@@ -241,8 +159,9 @@ export default function Dashboard() {
               .select('*')
               .order('no', { ascending: true });
            
-           if (!error && data && data.length > 0) {
+           if (!error && data) {
               const formatted = data.map(item => ({
+                 id: item.id,
                  no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
                  kodeKlasifikasi: item.kode_klasifikasi,
                  jenisBerkas: item.jenis_berkas,
@@ -255,7 +174,8 @@ export default function Dashboard() {
                  lorong: item.lorong || "",
                  rak: item.rak || "",
                  status: item.status,
-                 linkBerkas: item.link_berkas
+                 linkBerkas: item.link_berkas,
+                 alasanPenolakan: item.alasan_penolakan || ""
               }));
               setArchives(formatted);
            }
@@ -338,70 +258,142 @@ export default function Dashboard() {
      setApprovalLocation(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     
-     const statusVal = role === 'pic_gedung' ? "Aktif" : "Menunggu ACC";
-     const deptVal = role === 'admin_dept' ? 'KEUANGAN' : formData.departemen;
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      const statusVal = role === 'pic_gedung' ? 'Aktif' : 'Menunggu ACC';
+      const deptVal = role === 'admin_dept' ? 'KEUANGAN' : formData.departemen;
 
-     const payload = {
-        kode_klasifikasi: formData.kodeKlasifikasi,
-        jenis_berkas: formData.jenisBerkas,
-        judul_berkas: formData.judulBerkas,
-        departemen: deptVal,
-        tahun: formData.tahun,
-        tanggal_terima: formData.tanggalTerima,
-        jangkaWaktu: formData.jangkaWaktu,
-        gedung: role === 'pic_gedung' ? formData.gedung : null,
-        lorong: role === 'pic_gedung' ? formData.lorong : null,
-        rak: role === 'pic_gedung' ? formData.rak : null,
-        status: statusVal,
-        link_berkas: formData.linkBerkas
-     };
+      if (editArchiveItem) {
+         // UPDATE MODE
+         const payload = {
+            kode_klasifikasi: formData.kodeKlasifikasi,
+            jenis_berkas: formData.jenisBerkas,
+            judul_berkas: formData.judulBerkas,
+            departemen: formData.departemen,
+            tahun: formData.tahun,
+            tanggal_terima: formData.tanggalTerima,
+            jangka_waktu: formData.jangkaWaktu,
+            gedung: formData.gedung,
+            lorong: formData.lorong,
+            rak: formData.rak,
+            status: formData.status,
+            link_berkas: formData.linkBerkas
+         };
 
-     let supabaseSuccess = false;
-     try {
-        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
-        if (!isMockUrl) {
-           const { error } = await supabase
-              .from('archives')
-              .insert([payload]);
-           
-           if (!error) {
-              supabaseSuccess = true;
-           } else {
-              console.error("Supabase insert error:", error);
-           }
-        }
-     } catch (err) {
-        console.warn("Supabase insertion skipped, falling back to mock insert:", err);
-     }
+         let supabaseSuccess = false;
+         try {
+            const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+            if (!isMockUrl) {
+               const no = editArchiveItem.no;
+               const isNoNumeric = !isNaN(Number(no));
+               const queryField = isNoNumeric ? 'no' : 'id';
+               const queryVal = isNoNumeric ? Number(no) : no;
 
-     if (supabaseSuccess) {
-        setSuccessMessage(role === 'pic_gedung' ? "Arsip berhasil disimpan di Database!" : "Pengajuan dikirim ke Database!");
-        fetchArchives();
-     } else {
-        const newRecord = {
-           no: (archives.length + 1).toString().padStart(2, '0'),
-           kodeKlasifikasi: formData.kodeKlasifikasi,
-           jenisBerkas: formData.jenisBerkas,
-           judulBerkas: formData.judulBerkas,
-           departemen: deptVal,
-           tahun: formData.tahun,
-           tanggalTerima: formData.tanggalTerima,
-           jangkaWaktu: formData.jangkaWaktu,
-           gedung: role === 'pic_gedung' ? formData.gedung : "",
-           lorong: role === 'pic_gedung' ? formData.lorong : "",
-           rak: role === 'pic_gedung' ? formData.rak : "",
-           status: statusVal,
-           linkBerkas: formData.linkBerkas
-        };
-        setArchives(prev => [...prev, newRecord]);
-        setSuccessMessage(role === 'pic_gedung' ? "Arsip disimpan (Simulasi)!" : "Pengajuan terkirim (Simulasi)!");
-     }
-     
-     setTimeout(() => {
-        setSuccessMessage("");
+               const { error } = await supabase
+                  .from('archives')
+                  .update(payload)
+                  .eq(queryField, queryVal);
+
+               if (!error) {
+                  supabaseSuccess = true;
+               } else {
+                  console.error('Supabase update error:', error);
+               }
+            }
+         } catch (err) {
+            console.warn('Supabase update failed:', err);
+         }
+
+         if (supabaseSuccess) {
+            setSuccessMessage('Arsip berhasil diperbarui di Database!');
+            fetchArchives();
+         } else {
+            setArchives(prev => prev.map(item => {
+               if (item.no === editArchiveItem.no) {
+                  return {
+                     ...item,
+                     kodeKlasifikasi: formData.kodeKlasifikasi,
+                     jenisBerkas: formData.jenisBerkas,
+                     judulBerkas: formData.judulBerkas,
+                     departemen: formData.departemen,
+                     tahun: formData.tahun,
+                     tanggalTerima: formData.tanggalTerima,
+                     jangkaWaktu: formData.jangkaWaktu,
+                     gedung: formData.gedung,
+                     lorong: formData.lorong,
+                     rak: formData.rak,
+                     status: formData.status,
+                     linkBerkas: formData.linkBerkas
+                  };
+               }
+               return item;
+            }));
+            setSuccessMessage('Arsip diperbarui (Simulasi)!');
+         }
+      } else {
+         // INSERT MODE
+         const payload = {
+            kode_klasifikasi: formData.kodeKlasifikasi,
+            jenis_berkas: formData.jenisBerkas,
+            judul_berkas: formData.judulBerkas,
+            departemen: deptVal,
+            tahun: formData.tahun,
+            tanggal_terima: formData.tanggalTerima,
+            jangka_waktu: formData.jangkaWaktu,
+            gedung: role === 'pic_gedung' ? formData.gedung : null,
+            lorong: role === 'pic_gedung' ? formData.lorong : null,
+            rak: role === 'pic_gedung' ? formData.rak : null,
+            status: statusVal,
+            link_berkas: formData.linkBerkas
+         };
+
+         let supabaseSuccess = false;
+         try {
+            const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+            if (!isMockUrl) {
+               const { error } = await supabase
+                  .from('archives')
+                  .insert([payload]);
+               
+               if (!error) {
+                  supabaseSuccess = true;
+               } else {
+                  console.error('Supabase insert error:', error);
+               }
+            }
+         } catch (err) {
+            console.warn('Supabase insertion failed:', err);
+         }
+
+         if (supabaseSuccess) {
+            setSuccessMessage(role === 'pic_gedung' ? 'Arsip berhasil disimpan di Database!' : 'Pengajuan dikirim ke Database!');
+            fetchArchives();
+         } else {
+            const newRecord = {
+               no: (archives.length + 1).toString().padStart(2, '0'),
+               kodeKlasifikasi: formData.kodeKlasifikasi,
+               jenisBerkas: formData.jenisBerkas,
+               judulBerkas: formData.judulBerkas,
+               departemen: deptVal,
+               tahun: formData.tahun,
+               tanggalTerima: formData.tanggalTerima,
+               jangkaWaktu: formData.jangkaWaktu,
+               gedung: role === 'pic_gedung' ? formData.gedung : '',
+               lorong: role === 'pic_gedung' ? formData.lorong : '',
+               rak: role === 'pic_gedung' ? formData.rak : '',
+               status: statusVal,
+               linkBerkas: formData.linkBerkas
+            };
+            setArchives(prev => [...prev, newRecord]);
+            setSuccessMessage(role === 'pic_gedung' ? 'Arsip disimpan (Simulasi)!' : 'Pengajuan terkirim (Simulasi)!');
+         }
+      }
+      
+      setEditArchiveItem(null);
+
+      setTimeout(() => {
+         setSuccessMessage("");
         setShowAddForm(false);
         setFormData({
            kodeKlasifikasi: "",
@@ -475,9 +467,108 @@ export default function Dashboard() {
      setSelectedApprovalId(null);
      setApprovalLocation({ gedung: "A", lorong: "", rak: "" });
      setTimeout(() => setSuccessMessage(""), 1500);
-  };
+   };
 
-  const handleReject = async (no: string) => {
+   const handleEditClick = (archive: any) => {
+      setEditArchiveItem(archive);
+      setFormData({
+         kodeKlasifikasi: archive.kodeKlasifikasi || '',
+         jenisBerkas: archive.jenisBerkas || '',
+         judulBerkas: archive.judulBerkas || '',
+         departemen: archive.departemen || 'KEUANGAN',
+         tahun: archive.tahun || new Date().getFullYear().toString(),
+         tanggalTerima: archive.tanggalTerima || '',
+         jangkaWaktu: archive.jangkaWaktu || '',
+         gedung: archive.gedung || '',
+         lorong: archive.lorong || '',
+         rak: archive.rak || '',
+         linkBerkas: archive.linkBerkas || '',
+         status: archive.status || 'Menunggu ACC'
+      });
+      setShowAddForm(true);
+      closeDetailModal();
+   };
+
+   const confirmDeleteArchive = (no: string) => {
+      setArchiveToDelete(no);
+      setDeleteModalOpen(true);
+   };
+
+   const handleDeleteArchive = async () => {
+      if (!archiveToDelete) return;
+      const no = archiveToDelete;
+      setDeleteModalOpen(false);
+      setArchiveToDelete(null);
+
+      let supabaseSuccess = false;
+      try {
+         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+         if (!isMockUrl) {
+            const isNoNumeric = !isNaN(Number(no));
+            const queryField = isNoNumeric ? 'no' : 'id';
+            const queryVal = isNoNumeric ? Number(no) : no;
+
+            const { error } = await supabase
+               .from('archives')
+               .delete()
+               .eq(queryField, queryVal);
+
+            if (!error) {
+               supabaseSuccess = true;
+            }
+         }
+      } catch (err) {
+         console.warn('Supabase delete failed:', err);
+      }
+
+      if (supabaseSuccess) {
+         setSuccessMessage('Berkas berhasil dihapus dari database.');
+         fetchArchives();
+      } else {
+         setArchives(prev => prev.filter(item => item.no !== no));
+         setSuccessMessage('Berkas berhasil dihapus (Simulasi).');
+      }
+      closeDetailModal();
+      setTimeout(() => setSuccessMessage(''), 1500);
+   };
+
+   const handlePinjamClick = (archive: any) => {
+      closeDetailModal();
+      setActiveMenu('Layanan Arsip');
+      setServiceFormData(prev => ({
+         ...prev,
+         type: 'peminjaman',
+         archive_title: `${archive.judulBerkas} (${archive.no})`
+      }));
+      setShowServiceForm(true);
+   };
+
+
+   const confirmRejectArchive = (no: string) => {
+      setArchiveToReject(no);
+      setRejectReason("");
+      setRejectModalOpen(true);
+   };
+
+   const submitRejectArchive = async () => {
+      if (!archiveToReject) return;
+      if (!rejectReason.trim()) {
+         alert("Alasan penolakan tidak boleh kosong!");
+         return;
+      }
+      
+      const no = archiveToReject;
+      const reason = rejectReason;
+      
+      setRejectModalOpen(false);
+      setArchiveToReject(null);
+      setRejectReason("");
+
+      await handleReject(no, reason);
+      closeDetailModal();
+   };
+
+  const handleReject = async (no: string, alasan: string) => {
      let supabaseSuccess = false;
 
      try {
@@ -489,7 +580,7 @@ export default function Dashboard() {
 
            const { error } = await supabase
               .from('archives')
-              .update({ status: "Ditolak" })
+              .update({ status: "Ditolak", alasan_penolakan: alasan })
               .eq(queryField, queryVal);
 
            if (!error) {
@@ -506,7 +597,7 @@ export default function Dashboard() {
      } else {
         setArchives(prev => prev.map(item => {
            if (item.no === no) {
-              return { ...item, status: "Ditolak" };
+              return { ...item, status: "Ditolak", alasanPenolakan: alasan };
            }
            return item;
         }));
@@ -923,10 +1014,9 @@ export default function Dashboard() {
                  </button>
                  <button 
                     onClick={async (e) => {
-                       e.preventDefault();
-                       await handleReject(selectedDetailItem.no);
-                       closeDetailModal();
-                    }}
+                        e.preventDefault();
+                        confirmRejectArchive(selectedDetailItem.no);
+                     }}
                     className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px]"
                  >
                     Tolak Pengajuan
@@ -1024,7 +1114,40 @@ export default function Dashboard() {
            }
         }
 
-        return null;
+        
+         if (detailType === 'archive' && selectedDetailItem.status !== 'Menunggu ACC') {
+            if (role === 'user') {
+               if (selectedDetailItem.status !== 'Ditolak') {
+                  return (
+                     <button
+                        onClick={() => handlePinjamClick(selectedDetailItem)}
+                        className="btn-primary w-full md:w-auto text-center flex items-center justify-center gap-1.5"
+                     >
+                        <BookOpen size={15} /> Ajukan Peminjaman
+                     </button>
+                  );
+               }
+            } else {
+               return (
+                  <div className="flex gap-2 w-full md:w-auto">
+                     <button 
+                        onClick={() => handleEditClick(selectedDetailItem)}
+                        className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-1.5 text-[13px] border border-hairline-strong py-2 px-4 hover:bg-canvas-soft transition-colors text-ink font-semibold"
+                     >
+                        <Edit3 size={14} /> Edit Berkas
+                     </button>
+                     <button 
+                        onClick={() => confirmDeleteArchive(selectedDetailItem.no)}
+                        className="flex-1 md:flex-none border border-transparent bg-red-50 hover:bg-red-100 text-primary font-semibold px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5 transition-colors"
+                     >
+                        <Trash2 size={14} /> Hapus Berkas
+                     </button>
+                  </div>
+               );
+            }
+         }
+
+         return null;
      };
 
      return (
@@ -1223,25 +1346,19 @@ export default function Dashboard() {
                            </div>
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status</p>
-                              <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
-                                 selectedDetailItem.status === 'Disetujui' 
-                                 ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : selectedDetailItem.status === 'Selesai'
-                                 ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
-                              }`}>
-                                 {selectedDetailItem.status}
-                              </span>
-                           </div>
+                               <div className="mt-1.5 flex justify-start">
+                                  <StatusBadge status={selectedDetailItem.status} />
+                                </div>
+                            </div>
                            <div className="col-span-2">
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">
                                  {selectedDetailItem.type === 'peminjaman' ? 'Rentang Tanggal Peminjaman' : 'Tanggal & Waktu Kunjungan'}
-                              </p>
-                              <p className="font-mono text-ink mt-0.5">
-                                 {selectedDetailItem.type === 'peminjaman' 
-                                    ? `${selectedDetailItem.date} s/d ${selectedDetailItem.time_or_return}`
-                                    : `${selectedDetailItem.date} (${selectedDetailItem.time_or_return})`}
-                              </p>
+                               </p>
+                               <p className="font-mono text-ink mt-0.5">
+                                  {selectedDetailItem.type === 'peminjaman' 
+                                     ? `${formatDate(selectedDetailItem.date)} s/d ${formatDate(selectedDetailItem.time_or_return)}`
+                                     : `${formatDate(selectedDetailItem.date)} (${selectedDetailItem.time_or_return})`}
+                               </p>
                            </div>
                            <div className="col-span-2">
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tujuan / Keperluan</p>
@@ -1268,25 +1385,142 @@ export default function Dashboard() {
      );
   };
 
+  {/* DELETE CONFIRMATION MODAL */}
+  const renderDeleteModal = () => {
+    if (!deleteModalOpen) return null;
+    return (
+       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+          <div 
+             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             onClick={(e) => e.stopPropagation()}
+          >
+             <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                   </svg>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Arsip?</h3>
+                <p className="text-gray-500 mb-6">
+                   Apakah Anda yakin ingin menghapus berkas arsip ini? Tindakan ini tidak dapat dibatalkan.
+                </p>
+                
+                <div className="flex gap-3 w-full">
+                   <button
+                      onClick={() => setDeleteModalOpen(false)}
+                      className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                   >
+                      Batal
+                   </button>
+                   <button
+                      onClick={handleDeleteArchive}
+                      className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/30 transition-all"
+                   >
+                      Ya, Hapus
+                   </button>
+                </div>
+             </div>
+          </div>
+       </div>
+    );
+  };
+
+  {/* REJECT CONFIRMATION MODAL */}
+  const renderRejectModal = () => {
+    if (!rejectModalOpen) return null;
+    return (
+       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+          <div 
+             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             onClick={(e) => e.stopPropagation()}
+          >
+             <div className="p-6">
+                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                   </svg>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Tolak Pengajuan?</h3>
+                <p className="text-gray-500 mb-4 text-center text-sm">
+                   Harap berikan alasan yang jelas mengapa berkas arsip ini ditolak.
+                </p>
+                
+                <div className="mb-6">
+                   <label htmlFor="rejectReason" className="sr-only">Alasan Penolakan</label>
+                   <textarea 
+                      id="rejectReason"
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="Masukkan alasan penolakan..."
+                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none resize-none bg-gray-50"
+                      rows={3}
+                      autoFocus
+                   />
+                </div>
+                
+                <div className="flex gap-3 w-full">
+                   <button
+                      onClick={() => setRejectModalOpen(false)}
+                      className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                   >
+                      Batal
+                   </button>
+                   <button
+                      onClick={submitRejectArchive}
+                      className="flex-1 px-4 py-2.5 bg-rose-600 text-white font-medium rounded-xl hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/30 transition-all"
+                   >
+                      Ya, Tolak
+                   </button>
+                </div>
+             </div>
+          </div>
+       </div>
+    );
+  };
+
+
   // 1. ADD ARCHIVE FORM VIEW
   if (showAddForm) {
      return (
         <div className="space-y-6 max-w-[800px] mx-auto pb-10">
            <div className="pb-4 border-b border-hairline flex items-center gap-4">
               <button 
-                 onClick={() => setShowAddForm(false)} 
+                 onClick={() => {
+                    setShowAddForm(false);
+                    setEditArchiveItem(null);
+                    setFormData({
+                       kodeKlasifikasi: "",
+                       jenisBerkas: "",
+                       judulBerkas: "",
+                       departemen: "KEUANGAN",
+                       tahun: new Date().getFullYear().toString(),
+                       tanggalTerima: "",
+                       jangkaWaktu: "",
+                       gedung: "",
+                       lorong: "",
+                       rak: "",
+                       linkBerkas: "",
+                       status: "Menunggu ACC"
+                    });
+                 }} 
                  className="p-1.5 hover:bg-canvas-soft rounded-xs border border-hairline text-ink transition-colors"
               >
                  <ArrowLeft size={18} />
               </button>
               <div>
                  <h2 className="text-[18px] md:text-display-md font-medium tracking-tight text-ink">
-                    {role === 'pic_gedung' ? 'Tambah Berkas Arsip' : 'Ajukan Berkas Arsip Baru'}
+                    {editArchiveItem 
+                     ? 'Edit Berkas Arsip' 
+                     : (role === 'pic_gedung' ? 'Tambah Berkas Arsip' : 'Ajukan Berkas Arsip Baru')}
                  </h2>
                  <p className="text-ink-mute text-[12px] md:text-[14px]">
-                    {role === 'pic_gedung' 
-                     ? 'Masukkan metadata berkas untuk langsung diarsipkan secara aktif.' 
-                     : 'Berkas akan diajukan ke PIC Gedung Arsip untuk disetujui (ACC) terlebih dahulu.'}
+                    {editArchiveItem 
+                     ? `Mengedit data berkas: ${editArchiveItem.judulBerkas}` 
+                     : (role === 'pic_gedung' 
+                        ? 'Masukkan metadata berkas untuk langsung diarsipkan secara aktif.' 
+                        : 'Berkas akan diajukan ke PIC Gedung Arsip untuk disetujui (ACC) terlebih dahulu.')}
                  </p>
               </div>
            </div>
@@ -1482,7 +1716,24 @@ export default function Dashboard() {
               <div className="pt-4 border-t border-hairline flex justify-end gap-3">
                  <button 
                     type="button" 
-                    onClick={() => setShowAddForm(false)} 
+                    onClick={() => {
+                       setShowAddForm(false);
+                       setEditArchiveItem(null);
+                       setFormData({
+                          kodeKlasifikasi: "",
+                          jenisBerkas: "",
+                          judulBerkas: "",
+                          departemen: "KEUANGAN",
+                          tahun: new Date().getFullYear().toString(),
+                          tanggalTerima: "",
+                          jangkaWaktu: "",
+                          gedung: "",
+                          lorong: "",
+                          rak: "",
+                          linkBerkas: "",
+                          status: "Menunggu ACC"
+                       });
+                    }} 
                     className="btn-outline"
                  >
                     Batal
@@ -1491,7 +1742,9 @@ export default function Dashboard() {
                     type="submit" 
                     className="btn-primary"
                  >
-                    {role === 'pic_gedung' ? 'Simpan Berkas' : 'Ajukan Berkas'}
+                    {editArchiveItem 
+                     ? 'Simpan Perubahan' 
+                     : (role === 'pic_gedung' ? 'Simpan Berkas' : 'Ajukan Berkas')}
                  </button>
               </div>
            </form>
@@ -1766,7 +2019,7 @@ export default function Dashboard() {
                              <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                              <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
                              <td className="p-3 text-center font-mono">{archive.tahun}</td>
-                             <td className="p-3 text-center font-mono">{archive.tanggalTerima}</td>
+                             <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                              <td className="p-3 text-center">
                                 <a 
                                    href={archive.linkBerkas} 
@@ -1778,9 +2031,7 @@ export default function Dashboard() {
                                 </a>
                              </td>
                              <td className="p-3 text-center">
-                                <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] px-2 py-0.5 rounded-full font-medium">
-                                   {archive.status}
-                                </span>
+                                <StatusBadge status={archive.status} />
                              </td>
                              <td className="p-3">
                                 <div className="flex items-center justify-center gap-2">
@@ -1791,8 +2042,8 @@ export default function Dashboard() {
                                       ACC
                                    </button>
                                    <button 
-                                      onClick={() => handleReject(archive.no)}
-                                      className="border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium px-3 py-1 rounded-sm text-[11px]"
+                                      onClick={() => confirmRejectArchive(archive.no)}
+                                      className="bg-rose-600 hover:bg-rose-700 text-white font-medium px-3 py-1 rounded-sm text-[11px]"
                                    >
                                       Tolak
                                    </button>
@@ -1856,8 +2107,17 @@ export default function Dashboard() {
                              ACC
                           </button>
                           <button 
-                             onClick={(e) => { e.stopPropagation(); handleReject(archive.no); }}
-                             className="flex-1 border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-2 rounded-sm text-[12px] text-center"
+                             onClick={(e) => {
+                                 e.stopPropagation();
+                                 const reason = window.prompt('Masukkan alasan penolakan berkas:');
+                                 if (reason === null) return;
+                                 if (!reason.trim()) {
+                                    alert('Alasan penolakan tidak boleh kosong!');
+                                    return;
+                                 }
+                                 handleReject(archive.no, reason);
+                              }}
+                             className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 rounded-sm text-[12px] text-center"
                           >
                              Tolak
                           </button>
@@ -1871,6 +2131,8 @@ export default function Dashboard() {
               )}
            </div>
            {renderDetailModal()}
+           {renderDeleteModal()}
+           {renderRejectModal()}
         </div>
      );
   }
@@ -1952,24 +2214,23 @@ export default function Dashboard() {
                              <td className="p-3 font-medium text-ink max-w-[250px] truncate">
                                 {req.type === 'peminjaman' ? req.archive_title : "Kunjungan Gedung Arsip"}
                              </td>
-                             <td className="p-3 text-center font-mono text-ink-mute">
-                                {req.type === 'peminjaman' 
-                                 ? `${req.date} s/d ${req.time_or_return}` 
-                                 : `${req.date} (${req.time_or_return})`}
+                             <td className="p-3 text-center font-mono text-ink-mute whitespace-nowrap">
+                                {req.type === 'peminjaman' ? (
+                                   <div className="inline-flex items-center gap-1.5">
+                                      <span className="text-ink font-semibold">{formatDate(req.date)}</span>
+                                      <span className="text-[10px] text-ink-mute font-sans px-1 bg-hairline-cool rounded-xs font-normal">s/d</span>
+                                      <span className="text-ink font-semibold">{formatDate(req.time_or_return)}</span>
+                                   </div>
+                                ) : (
+                                   <div className="inline-flex items-center gap-1">
+                                      <span className="text-ink font-semibold">{formatDate(req.date)}</span>
+                                      <span className="text-[11px] text-ink-mute font-sans">({req.time_or_return})</span>
+                                   </div>
+                                )}
                              </td>
                              <td className="p-3 text-ink-mute max-w-[200px] truncate" title={req.purpose}>{req.purpose}</td>
                              <td className="p-3 text-center">
-                                <span className={`border text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                                   req.status === 'Disetujui' 
-                                   ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                   : req.status === 'Selesai'
-                                   ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                   : req.status === 'Menunggu ACC'
-                                   ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                   : 'bg-red-50 text-red-700 border-red-200'
-                                }`}>
-                                   {req.status}
-                                </span>
+                                <StatusBadge status={req.status} />
                              </td>
                              {role === 'pic_gedung' && (
                                 <td className="p-3">
@@ -1984,7 +2245,7 @@ export default function Dashboard() {
                                             </button>
                                             <button 
                                                onClick={() => handleRejectRequest(req.id)}
-                                               className="border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium px-2 py-1 rounded-sm text-[11px]"
+                                               className="bg-rose-600 hover:bg-rose-700 text-white font-medium px-2 py-1 rounded-sm text-[11px]"
                                             >
                                                Tolak
                                             </button>
@@ -2037,17 +2298,15 @@ export default function Dashboard() {
                                 {req.type}
                              </span>
                           </div>
-                          <span className={`border text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                             req.status === 'Disetujui' ? 'bg-[#def7ec] text-[#03543f]' : req.status === 'Selesai' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'
-                          }`}>
-                             {req.status}
-                          </span>
+                          <StatusBadge status={req.status} isSmall={true} />
                        </div>
                        <div className="text-[12px] text-ink border-t border-hairline pt-2.5">
                           <p className="font-semibold text-ink-mute text-[9px] uppercase">Detail Pengajuan:</p>
                           <p className="font-medium mt-0.5 truncate">{req.type === 'peminjaman' ? req.archive_title : "Kunjungan Gedung Arsip"}</p>
                           <p className="text-ink-mute font-mono text-[11px] mt-1">
-                             {req.type === 'peminjaman' ? `Sewa: ${req.date} s/d ${req.time_or_return}` : `Jadwal: ${req.date} (${req.time_or_return})`}
+                             {req.type === 'peminjaman' 
+                                 ? `Sewa: ${formatDate(req.date)} s/d ${formatDate(req.time_or_return)}` 
+                                 : `Jadwal: ${formatDate(req.date)} (${req.time_or_return})`}
                           </p>
                        </div>
                        {role === 'pic_gedung' && (
@@ -2062,7 +2321,7 @@ export default function Dashboard() {
                                    </button>
                                    <button 
                                       onClick={(e) => { e.stopPropagation(); handleRejectRequest(req.id); }}
-                                      className="flex-1 border border-hairline hover:bg-red-50 text-ink-mute hover:text-primary font-medium py-1.5 rounded-sm text-[11px]"
+                                      className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium py-1.5 rounded-sm text-[11px]"
                                    >
                                       Tolak
                                    </button>
@@ -2088,6 +2347,8 @@ export default function Dashboard() {
               )}
             </div>
             {renderDetailModal()}
+            {renderDeleteModal()}
+            {renderRejectModal()}
          </div>
      );
   }
@@ -2168,7 +2429,7 @@ export default function Dashboard() {
                                       </button>
                                       <button 
                                          onClick={() => handleRejectUser(item.id)}
-                                         className="border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium px-3 py-1 rounded-sm text-[11px] flex items-center gap-1"
+                                         className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1 rounded-sm text-[11px] flex items-center gap-1"
                                       >
                                          <UserX size={12} /> Tolak
                                       </button>
@@ -2220,7 +2481,7 @@ export default function Dashboard() {
                              </button>
                              <button 
                                 onClick={(e) => { e.stopPropagation(); handleRejectUser(item.id); }}
-                                className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute font-medium py-2 rounded-sm text-[11px] flex items-center justify-center gap-1"
+                                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 rounded-sm text-[11px] flex items-center justify-center gap-1"
                              >
                                 <UserX size={12} /> Tolak
                              </button>
@@ -2289,11 +2550,14 @@ export default function Dashboard() {
                                             <Key size={14} className="text-amber-600 hover:text-amber-800" />
                                          </button>
                                          <button 
-                                            onClick={() => handleRejectUser(item.id)}
-                                            className="p-1 text-ink-mute hover:text-primary transition-colors"
+                                            onClick={(e) => {
+                                               e.stopPropagation();
+                                               confirmDeleteArchive(item.id);
+                                            }}
+                                            className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
                                             title="Cabut Akses Pengguna"
                                          >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
                                          </button>
                                       </>
                                    ) : (
@@ -2344,7 +2608,7 @@ export default function Dashboard() {
                              </button>
                              <button 
                                 onClick={(e) => { e.stopPropagation(); handleRejectUser(item.id); }}
-                                className="flex-1 border border-hairline hover:bg-red-50 hover:text-primary text-ink-mute py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
                                 title="Cabut Akses"
                              >
                                 <Trash2 size={12} /> Cabut Akses
@@ -2355,6 +2619,8 @@ export default function Dashboard() {
                  ))}
                </div>
                {renderDetailModal()}
+               {renderDeleteModal()}
+               {renderRejectModal()}
            </div>
 
         </div>
@@ -2675,7 +2941,7 @@ export default function Dashboard() {
                   <th className="p-3">Rak</th>
                   <th className="p-3 text-center">Berkas Digital</th>
                   <th className="p-3 text-center">Status</th>
-                  {role !== 'user' && <th className="p-3 text-center">Aksi</th>}
+                  <th className="p-3 text-center">Aksi</th>
                </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
@@ -2696,7 +2962,7 @@ export default function Dashboard() {
                         <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                         <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
                         <td className="p-3 text-center font-mono">{archive.tahun}</td>
-                        <td className="p-3 text-center font-mono">{archive.tanggalTerima}</td>
+                        <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                         <td className="p-3 text-ink-mute">{archive.jangkaWaktu}</td>
                         <td className="p-3 text-center font-mono font-medium">{archive.gedung || "-"}</td>
                         <td className="p-3 text-center font-mono">{archive.lorong || "-"}</td>
@@ -2712,37 +2978,55 @@ export default function Dashboard() {
                            </a>
                         </td>
                         <td className="p-3 text-center">
-                           <span className={`border text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                              archive.status === 'Aktif' 
-                              ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                              : archive.status === 'Inaktif'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : archive.status === 'Permanen'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : archive.status === 'Menunggu ACC'
-                              ? 'bg-amber-100 text-amber-800 border-amber-300'
-                              : 'bg-red-50 text-red-700 border-red-200'
-                           }`}>
-                              {archive.status}
-                           </span>
+                           <StatusBadge status={archive.status} alasanPenolakan={archive.alasanPenolakan} />
                         </td>
-                        {role !== 'user' && (
-                           <td className="p-3">
-                              <div className="flex items-center justify-center gap-2">
-                                 <button className="p-1 hover:text-primary rounded-xs transition-colors" title="Edit">
-                                    <Edit3 size={14} className="text-ink-mute hover:text-ink" />
-                                 </button>
-                                 <button className="p-1 hover:text-primary rounded-xs transition-colors" title="Hapus">
-                                    <Trash2 size={14} className="text-primary" />
-                                 </button>
-                              </div>
-                           </td>
-                        )}
+                        <td className="p-3">
+                           <div className="flex items-center justify-center gap-2">
+                              {role === 'user' ? (
+                                 (archive.status !== 'Menunggu ACC' && archive.status !== 'Ditolak') ? (
+                                    <button 
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          handlePinjamClick(archive);
+                                       }}
+                                       className="bg-primary hover:bg-primary-deep text-on-primary text-[11px] font-semibold px-2.5 py-1 rounded-sm transition-colors"
+                                    >
+                                       Pinjam
+                                    </button>
+                                 ) : (
+                                    <span className="text-[11px] text-ink-mute font-mono">-</span>
+                                 )
+                              ) : (
+                                 <>
+                                    <button 
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditClick(archive);
+                                       }}
+                                       className="p-1 text-ink-mute hover:text-ink hover:bg-canvas-soft rounded-sm transition-colors"
+                                       title="Edit"
+                                    >
+                                       <Edit3 size={14} />
+                                    </button>
+                                    <button 
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          confirmDeleteArchive(archive.no);
+                                       }}
+                                       className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
+                                       title="Hapus"
+                                    >
+                                       <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
+                                    </button>
+                                 </>
+                              )}
+                           </div>
+                        </td>
                      </tr>
                   ))
                ) : (
                   <tr>
-                     <td colSpan={role === 'user' ? 13 : 14} className="p-8 text-center text-ink-mute text-[14px]">
+                     <td colSpan={14} className="p-8 text-center text-ink-mute text-[14px]">
                         Tidak ada arsip berkas yang cocok dengan filter atau kata kunci pencarian.
                      </td>
                   </tr>
@@ -2768,15 +3052,7 @@ export default function Dashboard() {
                         <span className="font-mono text-[10px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.kodeKlasifikasi}</span>
                         <h4 className="font-bold text-[14px] text-ink mt-1">{archive.judulBerkas}.pdf</h4>
                      </div>
-                     <span className={`border text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                        archive.status === 'Aktif' 
-                        ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                        : archive.status === 'Inaktif'
-                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-red-50 text-red-700 border-red-200'
-                     }`}>
-                        {archive.status}
-                     </span>
+                     <StatusBadge status={archive.status} alasanPenolakan={archive.alasanPenolakan} isSmall={true} />
                   </div>
                   <div className="text-[12px] text-ink border-t border-hairline pt-2.5 grid grid-cols-2 gap-2">
                      <div>
@@ -2784,8 +3060,8 @@ export default function Dashboard() {
                         <p className="font-medium text-[11px] mt-0.5">{archive.departemen}</p>
                      </div>
                      <div>
-                        <p className="text-ink-mute text-[9px] uppercase">Tahun</p>
-                        <p className="font-mono text-[11px] mt-0.5">{archive.tahun}</p>
+                        <p className="text-ink-mute text-[9px] uppercase">Tanggal Terima</p>
+                        <p className="font-mono text-[11px] mt-0.5">{formatDate(archive.tanggalTerima)}</p>
                      </div>
                      <div className="col-span-2">
                         <p className="text-ink-mute text-[9px] uppercase">Letak Fisik Penyimpanan</p>
@@ -2802,17 +3078,35 @@ export default function Dashboard() {
                      >
                         <ExternalLink size={12} /> Buka Berkas
                      </a>
-                     {role !== 'user' && (
+                     {role === 'user' ? (
+                        (archive.status !== 'Menunggu ACC' && archive.status !== 'Ditolak') && (
+                           <button 
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 handlePinjamClick(archive);
+                              }}
+                              className="bg-primary hover:bg-primary-deep text-on-primary font-semibold px-2 py-1 rounded-sm text-[10px] transition-colors"
+                           >
+                              Pinjam Berkas
+                           </button>
+                        )
+                     ) : (
                         <div className="flex gap-2">
                            <button 
-                              onClick={(e) => { e.stopPropagation(); }} 
-                              className="flex items-center gap-1 border border-hairline hover:bg-canvas-soft px-2 py-1 rounded-xs text-[10px] text-ink font-medium"
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleEditClick(archive);
+                              }}
+                              className="flex items-center gap-1 border border-hairline hover:bg-canvas-soft px-2 py-1 rounded-sm text-[10px] text-ink font-medium transition-colors"
                            >
                               <Edit3 size={10} /> Edit
                            </button>
                            <button 
-                              onClick={(e) => { e.stopPropagation(); }} 
-                              className="flex items-center gap-1 border border-transparent bg-red-50 hover:bg-red-100 text-primary px-2 py-1 rounded-xs text-[10px] font-medium"
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 confirmDeleteArchive(archive.no);
+                              }}
+                              className="flex items-center gap-1 border border-transparent bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
                            >
                               <Trash2 size={10} /> Hapus
                            </button>
@@ -2840,6 +3134,8 @@ export default function Dashboard() {
 
       {/* MODAL DIALOG DETAIL DENGAN BACKDROP BLUR (BACKDROP-BLUR OVERLAY) */}
       {renderDetailModal()}
+      {renderDeleteModal()}
+      {renderRejectModal()}
 
     </div>
   );

@@ -19,14 +19,13 @@ Jalankan perintah SQL berikut di **Supabase SQL Editor** untuk membuat tabel pro
 
 ```sql
 -- ========================================================
--- 1. TABEL PROFIL USER (Menyimpan Role RBAC & ACC Status)
+-- 1. TABEL PROFIL USER (Menyimpan Role RBAC)
 -- ========================================================
 create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   name text not null,
   email text not null,
   role text not null check (role in ('pic_gedung', 'admin_dept', 'user')),
-  approved boolean default false not null, -- ACC Status (default: false)
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -37,48 +36,16 @@ alter table public.profiles enable row level security;
 create policy "User can read own profile" on public.profiles
   for select using (auth.uid() = id);
 
--- Policy agar PIC Gedung dapat melihat semua profiles & melakukan update (ACC)
-create policy "PIC Gedung can read all profiles" on public.profiles
-  for select to authenticated using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() 
-      and profiles.role = 'pic_gedung'
-    )
-  );
-
-create policy "PIC Gedung can update profiles" on public.profiles
-  for update to authenticated using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() 
-      and profiles.role = 'pic_gedung'
-    )
-  );
-
 -- Trigger otomatis untuk membuat baris profil baru saat user mendaftar di auth.users
 create or replace function public.handle_new_user()
 returns trigger as $$
-declare
-  new_role text;
-  is_approved boolean;
 begin
-  new_role := coalesce(new.raw_user_meta_data->>'role', 'user');
-  
-  -- PIC Gedung otomatis disetujui (approved = true), role lainnya menunggu ACC (approved = false)
-  if new_role = 'pic_gedung' then
-    is_approved := true;
-  else
-    is_approved := false;
-  end if;
-
-  insert into public.profiles (id, name, email, role, approved)
+  insert into public.profiles (id, name, email, role)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
-    new_role,
-    is_approved
+    coalesce(new.raw_user_meta_data->>'role', 'user') -- Default role jika tidak ditentukan
   );
   return new;
 end;
@@ -138,152 +105,6 @@ create policy "Only PIC Gedung can update archives" on public.archives
       and profiles.role = 'pic_gedung'
     )
   );
-
--- ========================================================
--- 3. TABEL LAYANAN (Peminjaman & Kunjungan)
--- ========================================================
-create table public.requests (
-  id uuid default gen_random_uuid() primary key,
-  user_name text not null,
-  type text not null check (type in ('peminjaman', 'kunjungan')),
-  archive_title text, -- Kosong jika jenis layanan adalah kunjungan
-  date text not null, -- Tanggal Pinjam / Tanggal Kunjungan
-  time_or_return text not null, -- Tanggal Kembali / Jam Kunjungan
-  purpose text not null,
-  status text not null check (status in ('Menunggu ACC', 'Disetujui', 'Ditolak', 'Selesai')),
-  created_by uuid references auth.users default auth.uid(),
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Mengaktifkan Row Level Security (RLS) pada tabel requests
-alter table public.requests enable row level security;
-
--- Policy RLS untuk tabel requests:
--- 1. Semua user terautentikasi dapat melihat daftar request
-create policy "Authenticated users can select requests" on public.requests
-  for select to authenticated using (true);
-
--- 2. Semua user terautentikasi dapat membuat request
-create policy "Authenticated users can insert requests" on public.requests
-  for insert to authenticated with check (auth.uid() is not null);
-
--- 3. Hanya PIC Gedung yang dapat memperbarui request (ACC status)
-create policy "Only PIC Gedung can update requests" on public.requests
-  for update to authenticated using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() 
-      and profiles.role = 'pic_gedung'
-    )
-  );
 ```
 
 ---
-
-## 3. Integrasi Kode Frontend
-
-### A. Sambungkan Auth (`src/components/RoleContext.tsx`)
-Ganti fungsi `login` dan `logout` simulasi dengan Supabase Auth Client:
-
-```typescript
-import { supabase } from "@/lib/supabase";
-
-// Di dalam RoleProvider:
-const login = async (email: string, selectedRole: Role): Promise<boolean> => {
-   // Dalam produksi asli, Supabase Auth akan memverifikasi password:
-   // const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-   
-   // Contoh implementasi bypass password untuk demo tapi mencatat ke Supabase Auth:
-   const { data, error } = await supabase.auth.signInWithOtp({ email });
-   
-   if (error) return false;
-   return true;
-};
-
-const logout = async () => {
-   await supabase.auth.signOut();
-   setUser(null);
-   router.push("/login");
-};
-```
-
-### B. Hubungkan CRUD Tabel (`src/app/dashboard/page.tsx`)
-
-#### 1. Membaca Data (*READ*):
-Ganti `initialArchives` statis dengan fungsi fetch ke database:
-
-```typescript
-const fetchArchives = async () => {
-  const { data, error } = await supabase
-    .from('archives')
-    .select('*')
-    .order('no', { ascending: true });
-    
-  if (data) {
-     setArchives(data);
-  }
-};
-
-useEffect(() => {
-  fetchArchives();
-}, []);
-```
-
-#### 2. Menambahkan Pengajuan (*CREATE*):
-Ganti fungsi `handleSubmit` pada form untuk menyimpan langsung ke database Supabase:
-
-```typescript
-const handleSubmit = async (e: React.FormEvent) => {
-   e.preventDefault();
-   
-   const newRecord = {
-      kode_klasifikasi: formData.kodeKlasifikasi,
-      jenis_berkas: formData.jenisBerkas,
-      judul_berkas: formData.judulBerkas,
-      departemen: role === 'admin_dept' ? 'KEUANGAN' : formData.departemen,
-      tahun: formData.tahun,
-      tanggal_terima: formData.tanggalTerima,
-      jangka_waktu: formData.jangkaWaktu,
-      gedung: role === 'pic_gedung' ? formData.gedung : null,
-      lorong: role === 'pic_gedung' ? formData.lorong : null,
-      rak: role === 'pic_gedung' ? formData.rak : null,
-      status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC",
-      link_berkas: formData.linkBerkas
-   };
-
-   const { error } = await supabase
-      .from('archives')
-      .insert([newRecord]);
-
-   if (!error) {
-      setSuccessMessage("Berkas berhasil disimpan!");
-      fetchArchives(); // Refresh tabel
-      setShowAddForm(false);
-   }
-};
-```
-
-#### 3. Memberikan ACC & Lokasi Fisik (*UPDATE*):
-Ganti fungsi `submitApproval` untuk melakukan update status ke Supabase:
-
-```typescript
-const submitApproval = async (e: React.FormEvent) => {
-   e.preventDefault();
-   
-   const { error } = await supabase
-      .from('archives')
-      .update({
-         gedung: approvalLocation.gedung,
-         lorong: approvalLocation.lorong,
-         rak: approvalLocation.rak,
-         status: "Aktif"
-      })
-      .eq('id', selectedApprovalId); // Menggunakan UUID
-
-   if (!error) {
-      setSuccessMessage("Berkas berhasil di-ACC!");
-      fetchArchives(); // Refresh tabel
-      setSelectedApprovalId(null);
-   }
-};
-```

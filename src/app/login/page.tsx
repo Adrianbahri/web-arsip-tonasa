@@ -10,7 +10,6 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<'pic_gedung' | 'admin_dept' | 'user'>('pic_gedung');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
@@ -22,7 +21,7 @@ export default function Login() {
      setInfoMessage("");
 
      try {
-        const res = await login(email, selectedRole, password);
+        const res = await login(email, 'user', password);
         if (res.success) {
            if (res.error) {
               setInfoMessage(res.error);
@@ -113,22 +112,7 @@ export default function Login() {
                </a>
             </div>
 
-            {/* Role Simulation Dropdown */}
-            <div className="space-y-1.5 bg-canvas-soft border border-hairline p-3 rounded-xs">
-               <div className="flex items-center gap-1.5 text-ink-mute mb-2">
-                  <ShieldAlert size={14} />
-                  <label className="text-[12px] font-medium">Masuk Sebagai (Simulasi Role)</label>
-               </div>
-               <select 
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as any)}
-                  className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-2.5 py-1.5 outline-none font-medium text-ink focus:border-ink"
-               >
-                  <option value="pic_gedung">PIC Gedung Arsip</option>
-                  <option value="admin_dept">Admin Departemen (HRD)</option>
-                  <option value="user">User Biasa (Staff)</option>
-               </select>
-            </div>
+
 
             {/* Submit Button */}
             <button 
