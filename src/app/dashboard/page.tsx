@@ -984,14 +984,37 @@ export default function Dashboard() {
      setTimeout(() => setSuccessMessage(""), 4000);
   };
 
-  const filteredArchives = archives.filter(item => {
-     const matchesStatus = statusFilter === "Semua" || item.status === statusFilter;
-     const matchesSearch = 
-        item.judulBerkas.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        item.kodeKlasifikasi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.departemen.toLowerCase().includes(searchQuery.toLowerCase());
-     return matchesStatus && matchesSearch;
-  });
+  const filteredArchives = archives
+     .map(item => {
+        const q = searchQuery.toLowerCase();
+        if (!q) return { ...item, _searchScore: 1 };
+        
+        let score = 0;
+        
+        if (item.isiBundel && item.isiBundel.some((b: string) => b.toLowerCase().includes(q))) {
+            score = Math.max(score, 4);
+        }
+        if (item.judulBerkas && item.judulBerkas.toLowerCase().includes(q)) {
+            score = Math.max(score, 3);
+        }
+        if (item.kodeKlasifikasi && item.kodeKlasifikasi.toLowerCase().includes(q)) {
+            score = Math.max(score, 3);
+        }
+        if (item.jenisBerkas && item.jenisBerkas.toLowerCase().includes(q)) {
+            score = Math.max(score, 2);
+        }
+        if (item.departemen && item.departemen.toLowerCase().includes(q)) {
+            score = Math.max(score, 1);
+        }
+        
+        return { ...item, _searchScore: score };
+     })
+     .filter(item => {
+        const matchesStatus = statusFilter === "Semua" || item.status === statusFilter;
+        const matchesSearch = searchQuery === "" || item._searchScore > 0;
+        return matchesStatus && matchesSearch;
+     })
+     .sort((a, b) => b._searchScore - a._searchScore);
 
   const getRoleName = (r: string) => {
      if (r === 'pic_gedung') return 'Admin PIC Gedung';
