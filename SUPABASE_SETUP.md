@@ -72,6 +72,8 @@ create table public.archives (
   gedung text, -- Kosong jika belum di-ACC
   lorong text, -- Kosong jika belum di-ACC
   rak text,    -- Kosong jika belum di-ACC
+  keterangan text,
+  isi_bundel text, -- Disimpan sebagai JSON array string
   status text not null check (status in ('Aktif', 'Inaktif', 'Permanen', 'Dinilai Kembali', 'Ditinjau Kembali', 'Upaya Pemusnahan', 'Dimusnahkan', 'Menunggu ACC', 'Ditolak')),
   link_berkas text not null,
   created_by uuid references auth.users default auth.uid(),

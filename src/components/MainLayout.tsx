@@ -117,17 +117,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
           
           <div className="flex items-center gap-3">
-             {/* Quick Role Toggle on Mobile Header */}
-             <select 
-                value={role} 
-                onChange={(e) => setRole(e.target.value as any)}
-                className="bg-canvas border border-hairline text-[11px] rounded-xs px-1.5 py-1 outline-none font-medium text-ink focus:border-ink"
-             >
-                <option value="pic_gedung">PIC Gedung</option>
-                <option value="admin_dept">Admin Dept</option>
-                <option value="user">User Biasa</option>
-             </select>
-             
+             {/* Quick Role Toggle on Mobile Header Removed */}
              {/* Ganti Password on Mobile Header */}
              <button 
                 onClick={() => setActiveMenu("Ganti Password")}

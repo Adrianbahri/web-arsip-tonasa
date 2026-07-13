@@ -140,8 +140,31 @@ export default function Dashboard() {
      lorong: "",
      rak: "",
      linkBerkas: "",
-     status: "Menunggu ACC"
+     status: "Menunggu ACC",
+     keterangan: "",
+     isiBundel: [] as string[]
   });
+  
+  const [newItemText, setNewItemText] = useState("");
+
+  const handleAddIsiBundel = () => {
+     if (newItemText.trim()) {
+        const itemsToAdd = newItemText.split(',').map(i => i.trim()).filter(i => i);
+        setFormData(prev => ({
+           ...prev,
+           isiBundel: [...prev.isiBundel, ...itemsToAdd]
+        }));
+        setNewItemText("");
+     }
+  };
+
+  const handleRemoveIsiBundel = (index: number) => {
+     setFormData(prev => ({
+        ...prev,
+        isiBundel: prev.isiBundel.filter((_, i) => i !== index)
+     }));
+  };
+
 
   // Edit Mode State
   const [editArchiveItem, setEditArchiveItem] = useState<any | null>(null);
@@ -173,6 +196,8 @@ export default function Dashboard() {
                  gedung: item.gedung || "",
                  lorong: item.lorong || "",
                  rak: item.rak || "",
+                 keterangan: item.keterangan || "",
+                 isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
                  status: item.status,
                  linkBerkas: item.link_berkas,
                  alasanPenolakan: item.alasan_penolakan || ""
@@ -262,7 +287,7 @@ export default function Dashboard() {
       e.preventDefault();
       
       const statusVal = role === 'pic_gedung' ? 'Aktif' : 'Menunggu ACC';
-      const deptVal = role === 'admin_dept' ? 'KEUANGAN' : formData.departemen;
+      const deptVal = formData.departemen;
 
       if (editArchiveItem) {
          // UPDATE MODE
@@ -278,6 +303,8 @@ export default function Dashboard() {
             lorong: formData.lorong,
             rak: formData.rak,
             status: formData.status,
+            keterangan: formData.keterangan,
+            isi_bundel: JSON.stringify(formData.isiBundel),
             link_berkas: formData.linkBerkas
          };
 
@@ -324,6 +351,8 @@ export default function Dashboard() {
                      lorong: formData.lorong,
                      rak: formData.rak,
                      status: formData.status,
+                     keterangan: formData.keterangan,
+                     isiBundel: formData.isiBundel,
                      linkBerkas: formData.linkBerkas
                   };
                }
@@ -345,6 +374,8 @@ export default function Dashboard() {
             lorong: role === 'pic_gedung' ? formData.lorong : null,
             rak: role === 'pic_gedung' ? formData.rak : null,
             status: statusVal,
+            keterangan: formData.keterangan,
+            isi_bundel: JSON.stringify(formData.isiBundel),
             link_berkas: formData.linkBerkas
          };
 
@@ -383,6 +414,8 @@ export default function Dashboard() {
                lorong: role === 'pic_gedung' ? formData.lorong : '',
                rak: role === 'pic_gedung' ? formData.rak : '',
                status: statusVal,
+               keterangan: formData.keterangan,
+               isiBundel: formData.isiBundel,
                linkBerkas: formData.linkBerkas
             };
             setArchives(prev => [...prev, newRecord]);
@@ -399,7 +432,7 @@ export default function Dashboard() {
            kodeKlasifikasi: "",
            jenisBerkas: "",
            judulBerkas: "",
-           departemen: "KEUANGAN",
+           departemen: "",
            tahun: new Date().getFullYear().toString(),
            tanggalTerima: "",
            jangkaWaktu: "",
@@ -407,7 +440,9 @@ export default function Dashboard() {
            lorong: "",
            rak: "",
            linkBerkas: "",
-           status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC"
+           status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC",
+           keterangan: "",
+           isiBundel: []
         });
      }, 1500);
   };
@@ -475,7 +510,7 @@ export default function Dashboard() {
          kodeKlasifikasi: archive.kodeKlasifikasi || '',
          jenisBerkas: archive.jenisBerkas || '',
          judulBerkas: archive.judulBerkas || '',
-         departemen: archive.departemen || 'KEUANGAN',
+         departemen: archive.departemen || '',
          tahun: archive.tahun || new Date().getFullYear().toString(),
          tanggalTerima: archive.tanggalTerima || '',
          jangkaWaktu: archive.jangkaWaktu || '',
@@ -483,7 +518,9 @@ export default function Dashboard() {
          lorong: archive.lorong || '',
          rak: archive.rak || '',
          linkBerkas: archive.linkBerkas || '',
-         status: archive.status || 'Menunggu ACC'
+         status: archive.status || 'Menunggu ACC',
+         keterangan: archive.keterangan || '',
+         isiBundel: archive.isiBundel || []
       });
       setShowAddForm(true);
       closeDetailModal();
@@ -1200,6 +1237,22 @@ export default function Dashboard() {
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jangka Waktu</p>
                               <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jangkaWaktu}</p>
                            </div>
+                           <div className="col-span-2">
+                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Keterangan</p>
+                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.keterangan || "-"}</p>
+                           </div>
+                           <div className="col-span-2">
+                              <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold mb-1">Isi (Lampiran)</p>
+                              {selectedDetailItem.isiBundel && selectedDetailItem.isiBundel.length > 0 ? (
+                                 <ul className="list-disc pl-4 space-y-1">
+                                    {selectedDetailItem.isiBundel.map((item: string, idx: number) => (
+                                       <li key={idx} className="font-medium text-ink">{item}</li>
+                                    ))}
+                                 </ul>
+                              ) : (
+                                 <p className="font-medium text-ink">-</p>
+                              )}
+                           </div>
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status Berkas</p>
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
@@ -1494,7 +1547,7 @@ export default function Dashboard() {
                        kodeKlasifikasi: "",
                        jenisBerkas: "",
                        judulBerkas: "",
-                       departemen: "KEUANGAN",
+                       departemen: "",
                        tahun: new Date().getFullYear().toString(),
                        tanggalTerima: "",
                        jangkaWaktu: "",
@@ -1502,7 +1555,9 @@ export default function Dashboard() {
                        lorong: "",
                        rak: "",
                        linkBerkas: "",
-                       status: "Menunggu ACC"
+                       status: "Menunggu ACC",
+                       keterangan: "",
+                       isiBundel: []
                     });
                  }} 
                  className="p-1.5 hover:bg-canvas-soft rounded-xs border border-hairline text-ink transition-colors"
@@ -1577,26 +1632,48 @@ export default function Dashboard() {
 
                  <div className="space-y-2">
                     <label className="block text-[13px] font-medium text-ink">Departemen</label>
-                    {role === 'pic_gedung' ? (
-                       <select 
-                          name="departemen"
-                          value={formData.departemen}
-                          onChange={handleInputChange}
-                          className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
-                       >
-                          <option value="KEUANGAN">KEUANGAN</option>
-                          <option value="PERLENGKAPAN">PERLENGKAPAN</option>
-                          <option value="LEGAL">LEGAL</option>
-                          <option value="UMUM">UMUM</option>
-                       </select>
-                    ) : (
+                    <input 
+                       type="text" 
+                       name="departemen"
+                       value={formData.departemen}
+                       onChange={handleInputChange}
+                       required
+                       placeholder="Contoh: KEUANGAN, LEGAL, UMUM"
+                       className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
+                    />
+                 </div>
+
+
+                 <div className="space-y-2 md:col-span-2">
+                    <label className="block text-[13px] font-medium text-ink mb-2">Isi (Lampiran)</label>
+                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
                        <input 
                           type="text" 
-                          name="departemen"
-                          value="KEUANGAN (Departemen Anda)" 
-                          disabled
-                          className="w-full bg-canvas-soft border border-hairline text-[14px] rounded-xs px-3 py-2 text-ink-mute cursor-not-allowed"
+                          value={newItemText}
+                          onChange={(e) => setNewItemText(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddIsiBundel(); } }}
+                          placeholder="Contoh: Dokumen 10000, Dokumen 20192020"
+                          className="flex-1 bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                        />
+                       <button 
+                          type="button" 
+                          onClick={handleAddIsiBundel}
+                          className="w-full sm:w-auto justify-center bg-canvas border border-hairline px-4 py-2 text-[13px] font-medium rounded-xs hover:bg-canvas-soft transition-colors flex items-center gap-1 text-ink"
+                       >
+                          <Plus size={16} /> Tambah
+                       </button>
+                    </div>
+                    {formData.isiBundel && formData.isiBundel.length > 0 && (
+                       <ul className="space-y-2">
+                          {formData.isiBundel.map((item, idx) => (
+                             <li key={idx} className="flex justify-between items-center bg-canvas-soft border border-hairline px-3 py-2 rounded-xs text-[13px] text-ink">
+                                <span>{item}</span>
+                                <button type="button" onClick={() => handleRemoveIsiBundel(idx)} className="text-red-500 hover:text-red-700">
+                                   <X size={16} />
+                                </button>
+                             </li>
+                          ))}
+                       </ul>
                     )}
                  </div>
 
@@ -1620,7 +1697,6 @@ export default function Dashboard() {
                        name="tanggalTerima"
                        value={formData.tanggalTerima}
                        onChange={handleInputChange}
-                       required
                        placeholder="e.g. 23/04/2018"
                        className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                     />
@@ -1633,7 +1709,6 @@ export default function Dashboard() {
                        name="jangkaWaktu"
                        value={formData.jangkaWaktu}
                        onChange={handleInputChange}
-                       required
                        placeholder="e.g. 5 tahun"
                        className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                     />
@@ -1706,11 +1781,22 @@ export default function Dashboard() {
                        name="linkBerkas"
                        value={formData.linkBerkas}
                        onChange={handleInputChange}
-                       required
                        placeholder="https://drive.google.com/file/d/..."
                        className="w-full bg-canvas border border-hairline text-[14px] rounded-xs pl-9 pr-4 py-2.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                     />
                  </div>
+              </div>
+
+              <div className="space-y-2">
+                 <label className="block text-[13px] font-medium text-ink">Keterangan (Singkat)</label>
+                 <textarea 
+                    name="keterangan"
+                    value={formData.keterangan}
+                    onChange={(e) => setFormData(prev => ({ ...prev, keterangan: e.target.value }))}
+                    rows={3}
+                    placeholder="Catatan tambahan terkait berkas..."
+                    className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
+                 />
               </div>
 
               <div className="pt-4 border-t border-hairline flex justify-end gap-3">
@@ -1723,7 +1809,7 @@ export default function Dashboard() {
                           kodeKlasifikasi: "",
                           jenisBerkas: "",
                           judulBerkas: "",
-                          departemen: "KEUANGAN",
+                          departemen: "",
                           tahun: new Date().getFullYear().toString(),
                           tanggalTerima: "",
                           jangkaWaktu: "",
@@ -1731,7 +1817,9 @@ export default function Dashboard() {
                           lorong: "",
                           rak: "",
                           linkBerkas: "",
-                          status: "Menunggu ACC"
+                          status: "Menunggu ACC",
+                          keterangan: "",
+                          isiBundel: []
                        });
                     }} 
                     className="btn-outline"
@@ -1994,6 +2082,8 @@ export default function Dashboard() {
                        <th className="p-3">Jenis Berkas</th>
                        <th className="p-3">Judul Berkas</th>
                        <th className="p-3">Departemen</th>
+                       <th className="p-3">Keterangan</th>
+                       <th className="p-3 text-center">Isi Bundel</th>
                        <th className="p-3 text-center">Tahun</th>
                        <th className="p-3 text-center">Tanggal Ajukan</th>
                        <th className="p-3 text-center">Link Berkas</th>
@@ -2018,6 +2108,8 @@ export default function Dashboard() {
                              <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
                              <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                              <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
+                             <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
+                             <td className="p-3 text-center"><span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-full text-[10px]">{archive.isiBundel?.length || 0} Item</span></td>
                              <td className="p-3 text-center font-mono">{archive.tahun}</td>
                              <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                              <td className="p-3 text-center">
@@ -2053,7 +2145,7 @@ export default function Dashboard() {
                        ))
                     ) : (
                        <tr>
-                          <td colSpan={10} className="p-8 text-center text-ink-mute text-[14px]">
+                          <td colSpan={12} className="p-8 text-center text-ink-mute text-[14px]">
                              Tidak ada pengajuan berkas masuk saat ini.
                           </td>
                        </tr>
@@ -2933,6 +3025,8 @@ export default function Dashboard() {
                   <th className="p-3">Jenis Berkas</th>
                   <th className="p-3">Judul Berkas</th>
                   <th className="p-3">Departemen</th>
+                  <th className="p-3">Keterangan</th>
+                  <th className="p-3 text-center">Isi Bundel</th>
                   <th className="p-3 text-center">Tahun</th>
                   <th className="p-3 text-center">Tanggal Terima</th>
                   <th className="p-3">Jangka Waktu Aktif</th>
@@ -2961,6 +3055,8 @@ export default function Dashboard() {
                         <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
                         <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                         <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
+                        <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
+                        <td className="p-3 text-center"><span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-full text-[10px]">{archive.isiBundel?.length || 0} Item</span></td>
                         <td className="p-3 text-center font-mono">{archive.tahun}</td>
                         <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                         <td className="p-3 text-ink-mute">{archive.jangkaWaktu}</td>
@@ -3026,7 +3122,7 @@ export default function Dashboard() {
                   ))
                ) : (
                   <tr>
-                     <td colSpan={14} className="p-8 text-center text-ink-mute text-[14px]">
+                     <td colSpan={16} className="p-8 text-center text-ink-mute text-[14px]">
                         Tidak ada arsip berkas yang cocok dengan filter atau kata kunci pencarian.
                      </td>
                   </tr>
