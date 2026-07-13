@@ -109,6 +109,10 @@ export default function Dashboard() {
 
   // Users List State for Manajemen User (PIC Gedung ONLY)
   const [usersList, setUsersList] = useState<any[]>([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'user', password: '' });
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [addUserError, setAddUserError] = useState("");
 
   // Layanan Peminjaman & Kunjungan State
   const [requestsList, setRequestsList] = useState<any[]>([]);
@@ -149,7 +153,44 @@ export default function Dashboard() {
 
   const handleAddIsiBundel = () => {
      if (newItemText.trim()) {
-        const itemsToAdd = newItemText.split(',').map(i => i.trim()).filter(i => i);
+        const itemsToAdd: string[] = [];
+        
+        const rawItems = newItemText.split(',').map(i => i.trim()).filter(i => i);
+        
+        for (const item of rawItems) {
+            const match = item.match(/^(.*?)\s+s\/d\s+(.*?)$/i);
+            
+            if (match) {
+                const startStr = match[1];
+                const endStr = match[2];
+                
+                const startMatch = startStr.match(/^(.*?)(\d+)$/);
+                const endMatch = endStr.match(/^(.*?)(\d+)$/);
+                
+                if (startMatch && endMatch && startMatch[1] === endMatch[1]) {
+                    const prefix = startMatch[1];
+                    const startNum = parseInt(startMatch[2], 10);
+                    const endNum = parseInt(endMatch[2], 10);
+                    
+                    if (startNum <= endNum) {
+                        for (let i = startNum; i <= endNum; i++) {
+                            const numStr = i.toString().padStart(startMatch[2].length, '0');
+                            itemsToAdd.push(`${prefix}${numStr}`);
+                        }
+                    } else {
+                         for (let i = startNum; i >= endNum; i--) {
+                            const numStr = i.toString().padStart(startMatch[2].length, '0');
+                            itemsToAdd.push(`${prefix}${numStr}`);
+                         }
+                    }
+                } else {
+                    itemsToAdd.push(item);
+                }
+            } else {
+                itemsToAdd.push(item);
+            }
+        }
+
         setFormData(prev => ({
            ...prev,
            isiBundel: [...prev.isiBundel, ...itemsToAdd]
@@ -670,6 +711,58 @@ export default function Dashboard() {
         setSuccessMessage("Pendaftaran disetujui (Simulasi)!");
      }
      setTimeout(() => setSuccessMessage(""), 1500);
+  };
+  const handleAddUserSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+     setIsAddingUser(true);
+     setAddUserError("");
+
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+        
+        if (isMockUrl) {
+           const mockUser = {
+              id: "mock-" + Date.now(),
+              name: newUserForm.name,
+              email: newUserForm.email,
+              role: newUserForm.role,
+              approved: true,
+              created_at: new Date().toISOString()
+           };
+           setUsersList(prev => [mockUser, ...prev]);
+           setShowAddUserModal(false);
+           setNewUserForm({ name: '', email: '', role: 'user', password: '' });
+           setSuccessMessage("Pengguna berhasil ditambahkan (Simulasi)!");
+           setTimeout(() => setSuccessMessage(""), 2000);
+           return;
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+           email: newUserForm.email,
+           password: newUserForm.password,
+           options: {
+              data: {
+                 name: newUserForm.name,
+                 role: newUserForm.role,
+                 approved: true
+              }
+           }
+        });
+
+        if (error) {
+           setAddUserError(error.message);
+        } else {
+           setShowAddUserModal(false);
+           setNewUserForm({ name: '', email: '', role: 'user', password: '' });
+           setSuccessMessage("Pengguna berhasil ditambahkan!");
+           setTimeout(() => setSuccessMessage(""), 2000);
+           fetchUsers();
+        }
+     } catch (err: any) {
+        setAddUserError(err.message || "Gagal menambah pengguna");
+     } finally {
+        setIsAddingUser(false);
+     }
   };
 
   // Reject / Delete user registration request (PIC Gedung ONLY)
@@ -1477,6 +1570,95 @@ export default function Dashboard() {
           </div>
        </div>
     );
+  };
+
+  const renderAddUserModal = () => {
+     if (!showAddUserModal) return null;
+     return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+           <div className="bg-canvas border border-hairline rounded-sm shadow-xl w-full max-w-[400px] overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+              <div className="p-4 border-b border-hairline flex justify-between items-center bg-canvas-soft">
+                 <h3 className="font-semibold text-ink text-[15px] flex items-center gap-2">
+                    <Users size={16} className="text-primary" /> Tambah Pengguna Baru
+                 </h3>
+                 <button onClick={() => setShowAddUserModal(false)} className="text-ink-mute hover:text-ink transition-colors p-1">
+                    <X size={16} />
+                 </button>
+              </div>
+              <div className="p-5 overflow-y-auto custom-scrollbar">
+                 {addUserError && (
+                    <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xs text-[13px]">
+                       {addUserError}
+                    </div>
+                 )}
+                 <form id="add-user-form" onSubmit={handleAddUserSubmit} className="space-y-4">
+                    <div>
+                       <label className="block text-[13px] font-medium text-ink mb-1.5">Nama Lengkap</label>
+                       <input 
+                          type="text" 
+                          required 
+                          value={newUserForm.name}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, name: e.target.value })}
+                          className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 outline-none focus:border-ink"
+                          placeholder="Nama Lengkap"
+                       />
+                    </div>
+                    <div>
+                       <label className="block text-[13px] font-medium text-ink mb-1.5">Email</label>
+                       <input 
+                          type="email" 
+                          required 
+                          value={newUserForm.email}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                          className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 outline-none focus:border-ink"
+                          placeholder="contoh@sementonasa.co.id"
+                       />
+                    </div>
+                    <div>
+                       <label className="block text-[13px] font-medium text-ink mb-1.5">Role</label>
+                       <select 
+                          value={newUserForm.role}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                          className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 outline-none focus:border-ink"
+                       >
+                          <option value="user">User Biasa</option>
+                          <option value="admin_dept">Admin Departemen</option>
+                          <option value="pic_gedung">PIC Gedung</option>
+                       </select>
+                    </div>
+                    <div>
+                       <label className="block text-[13px] font-medium text-ink mb-1.5">Password</label>
+                       <input 
+                          type="password" 
+                          required
+                          minLength={6}
+                          value={newUserForm.password}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                          className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 outline-none focus:border-ink"
+                          placeholder="Minimal 6 karakter"
+                       />
+                    </div>
+                 </form>
+              </div>
+              <div className="p-4 border-t border-hairline bg-canvas-soft flex justify-end gap-3">
+                 <button 
+                    onClick={() => setShowAddUserModal(false)}
+                    className="px-4 py-2 text-[13px] font-semibold text-ink-mute hover:text-ink transition-colors"
+                 >
+                    Batal
+                 </button>
+                 <button 
+                    type="submit"
+                    form="add-user-form"
+                    disabled={isAddingUser}
+                    className="bg-primary hover:bg-primary-deep text-on-primary px-5 py-2 rounded-sm text-[13px] font-semibold transition-colors flex items-center gap-2 disabled:opacity-50"
+                 >
+                    {isAddingUser ? "Menyimpan..." : "Simpan Pengguna"}
+                 </button>
+              </div>
+           </div>
+        </div>
+     );
   };
 
   {/* REJECT CONFIRMATION MODAL */}
@@ -2452,13 +2634,21 @@ export default function Dashboard() {
 
      return (
         <div className="space-y-8 max-w-full mx-auto pb-10">
-           <div>
-              <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
-                 Manajemen & Persetujuan Pengguna
-              </h2>
-              <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
-                 Berikan persetujuan akses (ACC) bagi staf departemen yang mendaftar baru serta kelola akun pengguna aktif.
-              </p>
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                 <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+                    Manajemen & Persetujuan Pengguna
+                 </h2>
+                 <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                    Berikan persetujuan akses (ACC) bagi staf departemen yang mendaftar baru serta kelola akun pengguna aktif.
+                 </p>
+              </div>
+              <button 
+                 onClick={() => setShowAddUserModal(true)}
+                 className="bg-primary hover:bg-primary-deep text-on-primary px-4 py-2 rounded-sm text-[13px] font-semibold flex items-center gap-2 whitespace-nowrap shadow-sm"
+              >
+                 <Users size={16} /> Tambah Pengguna
+              </button>
            </div>
 
            {successMessage && (
@@ -2713,6 +2903,7 @@ export default function Dashboard() {
                {renderDetailModal()}
                {renderDeleteModal()}
                {renderRejectModal()}
+               {renderAddUserModal()}
            </div>
 
         </div>
@@ -3232,7 +3423,7 @@ export default function Dashboard() {
       {renderDetailModal()}
       {renderDeleteModal()}
       {renderRejectModal()}
-
+      {renderAddUserModal()}
     </div>
   );
 }
