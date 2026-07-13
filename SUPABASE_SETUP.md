@@ -146,21 +146,21 @@ create policy "Only PIC Gedung can update requests" on public.requests
 
 
 -- Policy agar PIC Gedung dapat melihat semua profil
-create policy "PIC Gedung can read all profiles" on public.profiles
-  for select using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() 
-      and p.role = 'pic_gedung'
-    )
-  );
 
--- Policy agar PIC Gedung dapat mengupdate profil (misal: approve)
-create policy "PIC Gedung can update profiles" on public.profiles
-  for update using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() 
-      and p.role = 'pic_gedung'
-    )
+-- Policy agar SEMUA user yang login dapat membaca profil (Mencegah Infinite Recursion)
+create policy "All authenticated users can read profiles" on public.profiles
+  for select to authenticated using (true);
+
+-- Fungsi bypass RLS untuk mengecek apakah user adalah PIC Gedung
+create or replace function public.is_pic_gedung()
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'pic_gedung'
   );
+$$
+language sql security definer;
+
+-- Policy agar PIC Gedung dapat mengupdate profil
+create policy "PIC Gedung can update profiles" on public.profiles
+  for update to authenticated using (public.is_pic_gedung());
