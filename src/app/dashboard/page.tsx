@@ -2275,7 +2275,7 @@ export default function Dashboard() {
                  </thead>
                  <tbody className="divide-y divide-hairline">
                     {pendingSubmissions.length > 0 ? (
-                       pendingSubmissions.map((archive) => (
+                       pendingSubmissions.map((archive, index) => (
                           <tr 
                              key={archive.no} 
                              onClick={(e) => {
@@ -2285,7 +2285,7 @@ export default function Dashboard() {
                              }}
                              className="hover:bg-canvas-soft/50 transition-colors text-ink cursor-pointer"
                           >
-                             <td className="p-3 text-center font-mono text-ink-mute">{archive.no}</td>
+                             <td className="p-3 text-center font-mono text-ink-mute">{index + 1}</td>
                              <td className="p-3 font-medium">{archive.kodeKlasifikasi}</td>
                              <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
                              <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
@@ -2339,7 +2339,7 @@ export default function Dashboard() {
            {/* Mobile Card List View (Mobile First Design) */}
            <div className="block md:hidden space-y-4">
               {pendingSubmissions.length > 0 ? (
-                 pendingSubmissions.map((archive) => (
+                 pendingSubmissions.map((archive, index) => (
                     <div 
                        key={archive.no}
                        onClick={() => {
@@ -3231,7 +3231,7 @@ export default function Dashboard() {
             </thead>
             <tbody className="divide-y divide-hairline">
                {filteredArchives.length > 0 ? (
-                  filteredArchives.map((archive) => (
+                  filteredArchives.map((archive, index) => (
                      <tr 
                         key={archive.no} 
                         onClick={(e) => {
@@ -3241,7 +3241,7 @@ export default function Dashboard() {
                         }}
                         className="hover:bg-canvas-soft/50 transition-colors text-ink cursor-pointer"
                      >
-                        <td className="p-3 text-center font-mono text-ink-mute">{archive.no}</td>
+                        <td className="p-3 text-center font-mono text-ink-mute">{index + 1}</td>
                         <td className="p-3 font-medium">{archive.kodeKlasifikasi}</td>
                         <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
                         <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
@@ -3325,7 +3325,7 @@ export default function Dashboard() {
       {/* Mobile Card List View (Mobile First Design) */}
       <div className="block md:hidden space-y-3">
          {filteredArchives.length > 0 ? (
-            filteredArchives.map((archive) => (
+            filteredArchives.map((archive, index) => (
                <div 
                   key={archive.no}
                   onClick={() => {
