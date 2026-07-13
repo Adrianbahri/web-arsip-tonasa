@@ -26,6 +26,7 @@ create table public.profiles (
   name text not null,
   email text not null,
   role text not null check (role in ('pic_gedung', 'admin_dept', 'user')),
+  approved boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -36,16 +37,16 @@ alter table public.profiles enable row level security;
 create policy "User can read own profile" on public.profiles
   for select using (auth.uid() = id);
 
--- Trigger otomatis untuk membuat baris profil baru saat user mendaftar di auth.users
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, role)
+  insert into public.profiles (id, name, email, role, approved)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
-    coalesce(new.raw_user_meta_data->>'role', 'user') -- Default role jika tidak ditentukan
+    coalesce(new.raw_user_meta_data->>'role', 'user'), -- Default role jika tidak ditentukan
+    coalesce((new.raw_user_meta_data->>'approved')::boolean, false)
   );
   return new;
 end;
@@ -110,3 +111,36 @@ create policy "Only PIC Gedung can update archives" on public.archives
 ```
 
 ---
+
+-- ========================================================
+-- 3. TABEL REQUESTS (Layanan Peminjaman & Kunjungan)
+-- ========================================================
+create table public.requests (
+  id uuid default gen_random_uuid() primary key,
+  user_name text not null,
+  type text not null,
+  archive_title text,
+  date text not null,
+  time_or_return text not null,
+  purpose text not null,
+  status text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.requests enable row level security;
+
+create policy "Authenticated users can select requests" on public.requests
+  for select to authenticated using (true);
+
+create policy "Authenticated users can insert requests" on public.requests
+  for insert to authenticated using (true);
+
+create policy "Only PIC Gedung can update requests" on public.requests
+  for update to authenticated using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() 
+      and profiles.role = 'pic_gedung'
+    )
+  );
+
