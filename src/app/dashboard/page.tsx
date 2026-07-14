@@ -3331,34 +3331,34 @@ export default function Dashboard() {
          <table className="w-full text-left text-[12px] border-collapse min-w-[1250px]">
             <thead>
                <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
-                  <th className="p-3 w-12 text-center">No</th>
+                  <th className="p-3 w-12 text-center whitespace-nowrap">No</th>
                   <th className="p-3 whitespace-nowrap">Kode Klas.</th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('jenisBerkas')}>
-                     Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                     <div className="flex items-center gap-1">Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('judulBerkas')}>
-                     Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                     <div className="flex items-center gap-1">Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3">Departemen</th>
-                  <th className="p-3">Keterangan</th>
+                  <th className="p-3 whitespace-nowrap">Departemen</th>
+                  <th className="p-3 whitespace-nowrap">Keterangan</th>
                   <th className="p-3 text-center whitespace-nowrap">Isi Bundel</th>
-                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('tahun')}>
-                     Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('tahun')}>
+                     <div className="flex items-center justify-center gap-1">Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 text-center whitespace-nowrap">Tgl Terima</th>
                   <th className="p-3 whitespace-nowrap">Masa Aktif</th>
-                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('gedung')}>
-                     Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('gedung')}>
+                     <div className="flex items-center justify-center gap-1">Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('lorong')}>
-                     Lorong {sortConfig?.key === 'lorong' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('lorong')}>
+                     <div className="flex items-center justify-center gap-1">Lorong {sortConfig?.key === 'lorong' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('rak')}>
-                     Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                     <div className="flex items-center justify-center gap-1">Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 text-center whitespace-nowrap">File Digital</th>
-                  <th className="p-3 text-center">Status</th>
-                  <th className="p-3 text-center">Aksi</th>
+                  <th className="p-3 text-center whitespace-nowrap">Status</th>
+                  <th className="p-3 text-center whitespace-nowrap">Aksi</th>
                </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
