@@ -3332,31 +3332,31 @@ export default function Dashboard() {
             <thead>
                <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
                   <th className="p-3 w-12 text-center">No</th>
-                  <th className="p-3">Kode Klasifikasi</th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('jenisBerkas')}>
-                     Jenis Berkas {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  <th className="p-3 whitespace-nowrap">Kode Klas.</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('jenisBerkas')}>
+                     Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('judulBerkas')}>
-                     Judul Berkas {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('judulBerkas')}>
+                     Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
                   <th className="p-3">Departemen</th>
                   <th className="p-3">Keterangan</th>
-                  <th className="p-3 text-center">Isi Bundel</th>
+                  <th className="p-3 text-center whitespace-nowrap">Isi Bundel</th>
                   <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('tahun')}>
                      Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
-                  <th className="p-3 text-center">Tanggal Terima</th>
-                  <th className="p-3">Jangka Waktu Aktif</th>
+                  <th className="p-3 text-center whitespace-nowrap">Tgl Terima</th>
+                  <th className="p-3 whitespace-nowrap">Masa Aktif</th>
                   <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('gedung')}>
                      Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
                   <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('lorong')}>
                      Lorong {sortConfig?.key === 'lorong' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('rak')}>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('rak')}>
                      Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
                   </th>
-                  <th className="p-3 text-center">Berkas Digital</th>
+                  <th className="p-3 text-center whitespace-nowrap">File Digital</th>
                   <th className="p-3 text-center">Status</th>
                   <th className="p-3 text-center">Aksi</th>
                </tr>
@@ -3389,7 +3389,7 @@ export default function Dashboard() {
                         <td className="p-3 text-ink-mute">{archive.jangkaWaktu}</td>
                         <td className="p-3 text-center font-mono font-medium">{archive.gedung || "-"}</td>
                         <td className="p-3 text-center font-mono">{archive.lorong || "-"}</td>
-                        <td className="p-3 text-[11px] font-medium">{archive.rak || "-"}</td>
+                        <td className="p-3 text-[11px] font-medium whitespace-nowrap">{archive.rak || "-"}</td>
                         <td className="p-3 text-center">
                            {archive.linkBerkas && archive.linkBerkas !== '-' ? (
                               <a 
