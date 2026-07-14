@@ -1521,14 +1521,20 @@ export default function Dashboard() {
                         )}
 
                         <div className="border-t border-hairline pt-4">
-                           <a 
-                              href={selectedDetailItem.linkBerkas} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-semibold py-2.5 rounded-xs transition-colors"
-                           >
-                              <ExternalLink size={16} /> Buka Berkas Digital (Drive)
-                           </a>
+                           {selectedDetailItem.linkBerkas && selectedDetailItem.linkBerkas !== '-' ? (
+                              <a 
+                                 href={selectedDetailItem.linkBerkas} 
+                                 target="_blank" 
+                                 rel="noopener noreferrer" 
+                                 className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-semibold py-2.5 rounded-xs transition-colors"
+                              >
+                                 <ExternalLink size={16} /> Buka Berkas Digital (Drive)
+                              </a>
+                           ) : (
+                              <span className="w-full inline-flex items-center justify-center gap-2 bg-canvas-soft text-ink-mute text-[14px] font-semibold py-2.5 rounded-xs cursor-not-allowed">
+                                 <ExternalLink size={16} /> Berkas Digital Tidak Tersedia
+                              </span>
+                           )}
                         </div>
                      </div>
                   )}
@@ -2403,14 +2409,20 @@ export default function Dashboard() {
                              <td className="p-3 text-center font-mono">{archive.tahun}</td>
                              <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                              <td className="p-3 text-center">
-                                <a 
-                                   href={archive.linkBerkas} 
-                                   target="_blank" 
-                                   rel="noopener noreferrer" 
-                                   className="inline-flex items-center gap-1.5 text-primary hover:underline hover:text-primary-deep font-semibold"
-                                >
-                                   <ExternalLink size={14} /> Buka Berkas
-                                </a>
+                                 {archive.linkBerkas && archive.linkBerkas !== '-' ? (
+                                    <a 
+                                       href={archive.linkBerkas} 
+                                       target="_blank" 
+                                       rel="noopener noreferrer" 
+                                       className="inline-flex items-center gap-1.5 text-primary hover:underline hover:text-primary-deep font-semibold"
+                                    >
+                                       <ExternalLink size={14} /> Buka Berkas
+                                    </a>
+                                 ) : (
+                                    <span className="inline-flex items-center gap-1.5 text-ink-mute/50 cursor-not-allowed font-semibold">
+                                       <ExternalLink size={14} /> Buka Berkas
+                                    </span>
+                                 )}
                              </td>
                              <td className="p-3 text-center">
                                 <StatusBadge status={archive.status} />
@@ -3379,14 +3391,20 @@ export default function Dashboard() {
                         <td className="p-3 text-center font-mono">{archive.lorong || "-"}</td>
                         <td className="p-3 text-[11px] font-medium">{archive.rak || "-"}</td>
                         <td className="p-3 text-center">
-                           <a 
-                              href={archive.linkBerkas} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="inline-flex items-center gap-1 text-primary hover:underline hover:text-primary-deep font-semibold"
-                           >
-                              <ExternalLink size={13} /> Buka
-                           </a>
+                           {archive.linkBerkas && archive.linkBerkas !== '-' ? (
+                              <a 
+                                 href={archive.linkBerkas} 
+                                 target="_blank" 
+                                 rel="noopener noreferrer" 
+                                 className="inline-flex items-center gap-1 text-primary hover:underline hover:text-primary-deep font-semibold"
+                              >
+                                 <ExternalLink size={13} /> Buka
+                              </a>
+                           ) : (
+                              <span className="inline-flex items-center gap-1 text-ink-mute/50 cursor-not-allowed font-semibold">
+                                 <ExternalLink size={13} /> Buka
+                              </span>
+                           )}
                         </td>
                         <td className="p-3 text-center">
                            <StatusBadge status={archive.status} alasanPenolakan={archive.alasanPenolakan} />
@@ -3480,15 +3498,24 @@ export default function Dashboard() {
                      </div>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-hairline">
-                     <a 
-                        href={archive.linkBerkas} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-primary hover:underline font-semibold text-[11px] flex items-center gap-1"
-                     >
-                        <ExternalLink size={12} /> Buka Berkas
-                     </a>
+                     {archive.linkBerkas && archive.linkBerkas !== '-' ? (
+                        <a 
+                           href={archive.linkBerkas} 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           onClick={(e) => e.stopPropagation()}
+                           className="text-primary hover:underline font-semibold text-[11px] flex items-center gap-1"
+                        >
+                           <ExternalLink size={12} /> Buka Berkas
+                        </a>
+                     ) : (
+                        <span 
+                           onClick={(e) => e.stopPropagation()}
+                           className="text-ink-mute/50 cursor-not-allowed font-semibold text-[11px] flex items-center gap-1"
+                        >
+                           <ExternalLink size={12} /> Buka Berkas
+                        </span>
+                     )}
                      {role === 'user' ? (
                         (archive.status !== 'Menunggu ACC' && archive.status !== 'Ditolak') && (
                            <button 
