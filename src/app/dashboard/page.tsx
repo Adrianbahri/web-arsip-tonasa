@@ -86,6 +86,15 @@ export default function Dashboard() {
   const [successMessage, setSuccessMessage] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
+
+  const handleSort = (key: string) => {
+     let direction: 'ascending' | 'descending' = 'ascending';
+     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+        direction = 'descending';
+     }
+     setSortConfig({ key, direction });
+  };
 
   const [selectedApprovalId, setSelectedApprovalId] = useState<string | null>(null);
   const [approvalLocation, setApprovalLocation] = useState({
@@ -1062,7 +1071,31 @@ export default function Dashboard() {
         const matchesSearch = searchQuery === "" || item._searchScore > 0;
         return matchesStatus && matchesSearch;
      })
-     .sort((a, b) => b._searchScore - a._searchScore);
+     .sort((a, b) => {
+         if (sortConfig !== null) {
+            const { key, direction } = sortConfig;
+            let aVal = a[key] || '';
+            let bVal = b[key] || '';
+            
+            // Handle numeric values for sort like tahun, rak
+            if (key === 'tahun' || key === 'rak' || key === 'no') {
+               const aNum = Number(aVal);
+               const bNum = Number(bVal);
+               if (!isNaN(aNum) && !isNaN(bNum)) {
+                  return direction === 'ascending' ? aNum - bNum : bNum - aNum;
+               }
+            }
+
+            // String sort
+            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+            if (aVal < bVal) return direction === 'ascending' ? -1 : 1;
+            if (aVal > bVal) return direction === 'ascending' ? 1 : -1;
+            return 0;
+         }
+         return b._searchScore - a._searchScore;
+     });
 
   const getRoleName = (r: string) => {
      if (r === 'pic_gedung') return 'Admin PIC Gedung';
@@ -3288,17 +3321,29 @@ export default function Dashboard() {
                <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
                   <th className="p-3 w-12 text-center">No</th>
                   <th className="p-3">Kode Klasifikasi</th>
-                  <th className="p-3">Jenis Berkas</th>
-                  <th className="p-3">Judul Berkas</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('jenisBerkas')}>
+                     Jenis Berkas {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('judulBerkas')}>
+                     Judul Berkas {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
                   <th className="p-3">Departemen</th>
                   <th className="p-3">Keterangan</th>
                   <th className="p-3 text-center">Isi Bundel</th>
-                  <th className="p-3 text-center">Tahun</th>
+                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('tahun')}>
+                     Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
                   <th className="p-3 text-center">Tanggal Terima</th>
                   <th className="p-3">Jangka Waktu Aktif</th>
-                  <th className="p-3 text-center">Gedung</th>
-                  <th className="p-3 text-center">Lorong</th>
-                  <th className="p-3">Rak</th>
+                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('gedung')}>
+                     Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
+                  <th className="p-3 text-center cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('lorong')}>
+                     Lorong {sortConfig?.key === 'lorong' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong" onClick={() => handleSort('rak')}>
+                     Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}
+                  </th>
                   <th className="p-3 text-center">Berkas Digital</th>
                   <th className="p-3 text-center">Status</th>
                   <th className="p-3 text-center">Aksi</th>
