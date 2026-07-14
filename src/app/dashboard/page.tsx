@@ -2362,7 +2362,11 @@ export default function Dashboard() {
                              <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                              <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
                              <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
-                             <td className="p-3 text-center"><span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-full text-[10px]">{archive.isiBundel?.length || 0}</span></td>
+                             <td className="p-3 text-center">
+                                <span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-md text-[10px] max-w-[200px] truncate inline-block" title={archive.isiBundel?.join(', ')}>
+                                   {archive.isiBundel?.join(', ') || '-'}
+                                </span>
+                             </td>
                              <td className="p-3 text-center font-mono">{archive.tahun}</td>
                              <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                              <td className="p-3 text-center">
@@ -3318,7 +3322,11 @@ export default function Dashboard() {
                         <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                         <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
                         <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
-                        <td className="p-3 text-center"><span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-full text-[10px]">{archive.isiBundel?.length || 0}</span></td>
+                        <td className="p-3 text-center">
+                           <span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-md text-[10px] max-w-[200px] truncate inline-block" title={archive.isiBundel?.join(', ')}>
+                              {archive.isiBundel?.join(', ') || '-'}
+                           </span>
+                        </td>
                         <td className="p-3 text-center font-mono">{archive.tahun}</td>
                         <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
                         <td className="p-3 text-ink-mute">{archive.jangkaWaktu}</td>
