@@ -158,7 +158,8 @@ export default function Dashboard() {
         const rawItems = newItemText.split(',').map(i => i.trim()).filter(i => i);
         
         for (const item of rawItems) {
-            const match = item.match(/^(.*?)\s+s\/d\s+(.*?)$/i);
+            // Deteksi penggunaan "s/d" atau "-"
+            const match = item.match(/^(.*?)\s+(?:s\/d|-)\s+(.*?)$/i);
             
             if (match) {
                 const startStr = match[1];
@@ -171,17 +172,24 @@ export default function Dashboard() {
                     const prefix = startMatch[1];
                     const startNum = parseInt(startMatch[2], 10);
                     const endNum = parseInt(endMatch[2], 10);
+                    const count = Math.abs(endNum - startNum) + 1;
                     
-                    if (startNum <= endNum) {
-                        for (let i = startNum; i <= endNum; i++) {
-                            const numStr = i.toString().padStart(startMatch[2].length, '0');
-                            itemsToAdd.push(`${prefix}${numStr}`);
+                    if (count <= 20) {
+                        // Expand jika jumlah item <= 20
+                        if (startNum <= endNum) {
+                            for (let i = startNum; i <= endNum; i++) {
+                                const numStr = i.toString().padStart(startMatch[2].length, '0');
+                                itemsToAdd.push(`${prefix}${numStr}`);
+                            }
+                        } else {
+                             for (let i = startNum; i >= endNum; i--) {
+                                const numStr = i.toString().padStart(startMatch[2].length, '0');
+                                itemsToAdd.push(`${prefix}${numStr}`);
+                             }
                         }
                     } else {
-                         for (let i = startNum; i >= endNum; i--) {
-                            const numStr = i.toString().padStart(startMatch[2].length, '0');
-                            itemsToAdd.push(`${prefix}${numStr}`);
-                         }
+                        // Jangan expand jika lebih dari 20 item, gunakan format '-'
+                        itemsToAdd.push(`${startStr} - ${endStr}`);
                     }
                 } else {
                     itemsToAdd.push(item);
@@ -991,7 +999,47 @@ export default function Dashboard() {
         
         let score = 0;
         
-        if (item.isiBundel && item.isiBundel.some((b: string) => b.toLowerCase().includes(q))) {
+        if (item.isiBundel && item.isiBundel.some((b: string) => {
+            const bLower = b.toLowerCase();
+            if (bLower.includes(q)) return true;
+            
+            // Cek apakah item adalah format range (menggunakan - atau s/d)
+            const rangeMatch = b.match(/^(.*?)\s*(?:-|s\/d)\s*(.*?)$/i);
+            if (rangeMatch) {
+               const startStr = rangeMatch[1];
+               const endStr = rangeMatch[2];
+               
+               const startMatch = startStr.match(/^(.*?)(\d+)$/);
+               const endMatch = endStr.match(/^(.*?)(\d+)$/);
+               const queryMatch = q.match(/^(.*?)(\d+)$/);
+               const queryOnlyNum = q.match(/^(\d+)$/);
+               
+               if (startMatch && endMatch && (queryMatch || queryOnlyNum)) {
+                  const prefix = startMatch[1].toLowerCase();
+                  const startNum = parseInt(startMatch[2], 10);
+                  const endNum = parseInt(endMatch[2], 10);
+                  
+                  let queryPrefix = "";
+                  let queryNum = 0;
+                  
+                  if (queryMatch) {
+                     queryPrefix = queryMatch[1].toLowerCase();
+                     queryNum = parseInt(queryMatch[2], 10);
+                  } else if (queryOnlyNum) {
+                     queryNum = parseInt(queryOnlyNum[1], 10);
+                  }
+                  
+                  // Jika query memiliki prefix, pastikan prefix-nya cocok dengan range
+                  // Jika query HANYA angka (queryOnlyNum), abaikan pengecekan prefix
+                  if (!queryPrefix || queryPrefix === prefix) {
+                     if (queryNum >= Math.min(startNum, endNum) && queryNum <= Math.max(startNum, endNum)) {
+                        return true;
+                     }
+                  }
+               }
+            }
+            return false;
+        })) {
             score = Math.max(score, 4);
         }
         if (item.judulBerkas && item.judulBerkas.toLowerCase().includes(q)) {
