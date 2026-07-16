@@ -88,6 +88,13 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 100;
+
+  useEffect(() => {
+     setCurrentPage(1);
+  }, [searchQuery, statusFilter, sortConfig]);
+
   const handleSort = (key: string) => {
      let direction: 'ascending' | 'descending' = 'ascending';
      if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -1153,6 +1160,9 @@ export default function Dashboard() {
          }
          return b._searchScore - a._searchScore;
      });
+
+  const paginatedArchives = filteredArchives.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(filteredArchives.length / itemsPerPage) || 1;
 
   const getRoleName = (r: string) => {
      if (r === 'pic_gedung') return 'Admin PIC Gedung';
@@ -3450,8 +3460,8 @@ export default function Dashboard() {
                </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
-               {filteredArchives.length > 0 ? (
-                  filteredArchives.map((archive, index) => (
+               {paginatedArchives.length > 0 ? (
+                  paginatedArchives.map((archive, index) => (
                      <tr 
                         key={archive.no} 
                         onClick={(e) => {
@@ -3461,7 +3471,7 @@ export default function Dashboard() {
                         }}
                         className="hover:bg-canvas-soft/50 transition-colors text-ink cursor-pointer"
                      >
-                        <td className="p-3 text-center font-mono text-ink-mute">{index + 1}</td>
+                        <td className="p-3 text-center font-mono text-ink-mute">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td className="p-3 font-medium">{archive.kodeKlasifikasi}</td>
                         <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
                         <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
@@ -3554,8 +3564,8 @@ export default function Dashboard() {
 
       {/* Mobile Card List View (Mobile First Design) */}
       <div className="block md:hidden space-y-3">
-         {filteredArchives.length > 0 ? (
-            filteredArchives.map((archive, index) => (
+         {paginatedArchives.length > 0 ? (
+            paginatedArchives.map((archive, index) => (
                <div 
                   key={archive.no}
                   onClick={() => {
@@ -3649,12 +3659,27 @@ export default function Dashboard() {
       </div>
 
       {/* FOOTER */}
-      <div className="flex justify-between items-center text-ink-mute text-[13px] pt-2">
-         <span>Showing 1-{filteredArchives.length} of {filteredArchives.length}</span>
+      <div className="flex justify-between items-center text-ink-mute text-[13px] pt-4 border-t border-hairline mt-4">
+         <span>
+            Menampilkan {paginatedArchives.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+            {Math.min(currentPage * itemsPerPage, filteredArchives.length)} dari {filteredArchives.length}
+         </span>
          <div className="flex gap-1.5">
-            <button className="px-2.5 py-1 bg-canvas-soft border border-hairline rounded-sm text-ink-mute cursor-not-allowed">Previous</button>
-            <button className="px-3 py-1 bg-primary text-on-primary rounded-sm font-medium">1</button>
-            <button className="px-2.5 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft">Next</button>
+            <button 
+               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+               disabled={currentPage === 1}
+               className="px-2.5 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+               Sebelumnya
+            </button>
+            <button className="px-3 py-1 bg-primary text-on-primary rounded-sm font-medium">{currentPage}</button>
+            <button 
+               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+               disabled={currentPage === totalPages}
+               className="px-2.5 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+               Selanjutnya
+            </button>
          </div>
       </div>
 
