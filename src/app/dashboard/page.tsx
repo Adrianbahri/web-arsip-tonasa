@@ -1185,8 +1185,8 @@ export default function Dashboard() {
             let aVal = a[key] || '';
             let bVal = b[key] || '';
             
-            // Handle numeric values for sort like tahun, rak
-            if (key === 'tahun' || key === 'rak' || key === 'no') {
+            // Handle numeric values for sort like tahun, rak, lorong
+            if (key === 'tahun' || key === 'rak' || key === 'no' || key === 'lorong') {
                const aNum = Number(aVal);
                const bNum = Number(bVal);
                if (!isNaN(aNum) && !isNaN(bNum)) {
