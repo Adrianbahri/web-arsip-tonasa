@@ -2705,7 +2705,7 @@ export default function Dashboard() {
 
      return (
         <div className="flex flex-col h-full max-w-full mx-auto">
-           <div className="flex-none flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+           <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
                     Layanan Peminjaman & Kunjungan Arsip
@@ -3505,18 +3505,18 @@ export default function Dashboard() {
     <div className="flex flex-col h-full max-w-full mx-auto">
       
       {/* HEADER SECTION */}
-      <div className="flex-none flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
-        <div>
-           <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+      <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="shrink-0">
+           <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
               Daftar Berkas Arsip
            </h2>
-           <p className="text-ink-mute text-[12px] md:text-[14px] mt-0.5">
+           <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
               Cari dan kelola seluruh arsip korporasi yang terdaftar di database.
            </p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-           <div className="relative w-full md:w-64">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+           <div className="relative w-full md:w-48 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
                  type="text" 
@@ -3527,7 +3527,7 @@ export default function Dashboard() {
               />
            </div>
 
-           <div className="relative w-full md:w-auto flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors">
+           <div className="relative w-full md:w-auto shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors">
               <Filter size={14} className="text-ink-mute" />
               <select 
                  value={statusFilter}
@@ -3549,7 +3549,7 @@ export default function Dashboard() {
            {role !== 'user' && (
               <button 
                  onClick={handleExportExcel}
-                 className="btn-outline flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto"
+                 className="btn-outline shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto whitespace-nowrap"
               >
                  <Download size={14} /> Export Excel
               </button>
@@ -3558,7 +3558,7 @@ export default function Dashboard() {
            {role !== 'user' && (
              <button 
                 onClick={() => setShowAddForm(true)}
-                className="bg-[#e4e4e7] hover:bg-[#d4d4d8] text-[12px] text-ink font-medium px-3 py-1.5 rounded-sm transition-colors border border-hairline-strong w-full md:w-auto text-center"
+                className="bg-[#e4e4e7] shrink-0 hover:bg-[#d4d4d8] text-[12px] text-ink font-medium px-3 py-1.5 rounded-sm transition-colors border border-hairline-strong w-full md:w-auto text-center whitespace-nowrap"
              >
                 Tambah Berkas
              </button>
