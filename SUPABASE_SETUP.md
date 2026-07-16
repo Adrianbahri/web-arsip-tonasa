@@ -123,6 +123,8 @@ create table public.requests (
   date text not null,
   time_or_return text not null,
   purpose text not null,
+  link_surat text,
+  reject_reason text,
   status text not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
