@@ -126,12 +126,18 @@ export default function Dashboard() {
   // Layanan Peminjaman & Kunjungan State
   const [requestsList, setRequestsList] = useState<any[]>([]);
 
+  // Layanan Peminjaman & Kunjungan: Reject Modal State
+  const [rejectServiceModalOpen, setRejectServiceModalOpen] = useState(false);
+  const [serviceToReject, setServiceToReject] = useState<string | null>(null);
+  const [serviceRejectReason, setServiceRejectReason] = useState("");
+
   const [serviceFormData, setServiceFormData] = useState({
      type: "peminjaman",
      archive_title: "",
      date: "",
      time_or_return: "",
-     purpose: ""
+     purpose: "",
+     link_surat: ""
   });
 
   // Self password change states
@@ -828,6 +834,7 @@ export default function Dashboard() {
         date: serviceFormData.date,
         time_or_return: serviceFormData.time_or_return,
         purpose: serviceFormData.purpose,
+        link_surat: serviceFormData.link_surat || null,
         status: "Menunggu ACC"
      };
 
@@ -900,15 +907,27 @@ export default function Dashboard() {
      setTimeout(() => setSuccessMessage(""), 1500);
   };
 
-  const handleRejectRequest = async (reqId: string) => {
+  const confirmRejectRequest = (reqId: string) => {
+     setServiceToReject(reqId);
+     setServiceRejectReason("");
+     setRejectServiceModalOpen(true);
+  };
+
+  const submitRejectRequest = async () => {
+     if (!serviceToReject) return;
+     if (!serviceRejectReason.trim()) {
+        return; // Don't submit without a reason
+     }
+     
      let supabaseSuccess = false;
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
+           // Note: Make sure the Supabase table 'requests' has a 'reject_reason' text column.
            const { error } = await supabase
               .from('requests')
-              .update({ status: 'Ditolak' })
-              .eq('id', reqId);
+              .update({ status: 'Ditolak', reject_reason: serviceRejectReason })
+              .eq('id', serviceToReject);
            if (!error) supabaseSuccess = true;
         }
      } catch (err) {
@@ -919,10 +938,47 @@ export default function Dashboard() {
         setSuccessMessage("Pengajuan ditolak!");
         fetchRequests();
      } else {
-        setRequestsList(prev => prev.map(r => r.id === reqId ? { ...r, status: 'Ditolak' } : r));
+        setRequestsList(prev => prev.map(r => r.id === serviceToReject ? { ...r, status: 'Ditolak', reject_reason: serviceRejectReason } : r));
         setSuccessMessage("Pengajuan ditolak (Simulasi)!");
      }
+     setRejectServiceModalOpen(false);
      setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  const renderServiceRejectModal = () => {
+    if (!rejectServiceModalOpen) return null;
+    return (
+       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+          <div 
+             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             onClick={(e) => e.stopPropagation()}
+          >
+             <div className="p-6">
+                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                   </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Tolak Pengajuan?</h3>
+                <p className="text-gray-500 mb-4 text-center text-sm">Harap berikan alasan penolakan.</p>
+                <div className="mb-6">
+                   <textarea 
+                      value={serviceRejectReason}
+                      onChange={(e) => setServiceRejectReason(e.target.value)}
+                      placeholder="Masukkan alasan..."
+                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none bg-gray-50"
+                      rows={3}
+                      autoFocus
+                   />
+                </div>
+                <div className="flex gap-3 w-full">
+                   <button onClick={() => setRejectServiceModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200">Batal</button>
+                   <button onClick={submitRejectRequest} className="flex-1 px-4 py-2.5 bg-rose-600 text-white font-medium rounded-xl hover:bg-rose-700">Ya, Tolak</button>
+                </div>
+             </div>
+          </div>
+       </div>
+    );
   };
 
   const handleCompleteRequest = async (reqId: string) => {
@@ -1324,7 +1380,7 @@ export default function Dashboard() {
                     </button>
                     <button 
                        onClick={async () => {
-                          await handleRejectRequest(selectedDetailItem.id);
+                          confirmRejectRequest(selectedDetailItem.id);
                           closeDetailModal();
                        }}
                        className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xs text-[13px]"
@@ -1603,7 +1659,7 @@ export default function Dashboard() {
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status</p>
                                <div className="mt-1.5 flex justify-start">
-                                  <StatusBadge status={selectedDetailItem.status} />
+                                  <StatusBadge status={selectedDetailItem.status} alasanPenolakan={selectedDetailItem.reject_reason} />
                                 </div>
                             </div>
                            <div className="col-span-2">
@@ -1620,6 +1676,19 @@ export default function Dashboard() {
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Tujuan / Keperluan</p>
                               <p className="text-ink mt-1 bg-canvas-soft border border-hairline p-3 rounded-xs whitespace-pre-wrap">{selectedDetailItem.purpose}</p>
                            </div>
+                           {selectedDetailItem.link_surat && (
+                              <div className="col-span-2 mt-2">
+                                 <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Link Surat Elektronik</p>
+                                 <a 
+                                    href={selectedDetailItem.link_surat.startsWith('http') ? selectedDetailItem.link_surat : `https://${selectedDetailItem.link_surat}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="text-primary hover:underline mt-1 inline-block text-[13px] break-all bg-canvas-soft border border-hairline p-2 rounded-xs w-full"
+                                 >
+                                    {selectedDetailItem.link_surat}
+                                 </a>
+                              </div>
+                           )}
                         </div>
                      </div>
                   )}
@@ -2249,6 +2318,19 @@ export default function Dashboard() {
                  ></textarea>
               </div>
 
+              <div className="space-y-1.5">
+                 <label className="block text-[13px] font-medium text-ink">Link Surat Elektronik (Opsional)</label>
+                 <input 
+                    type="url"
+                    name="link_surat"
+                    value={serviceFormData.link_surat || ""}
+                    onChange={handleServiceInputChange}
+                    placeholder="https://link-surat-pengajuan..."
+                    className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                 />
+                 <p className="text-[11px] text-ink-mute mt-1">Lampirkan link surat permohonan resmi jika ada (Google Drive, OneDrive, dsb).</p>
+              </div>
+
               <div className="pt-4 border-t border-hairline flex justify-end gap-3">
                  <button 
                     type="button" 
@@ -2503,13 +2585,7 @@ export default function Dashboard() {
                           <button 
                              onClick={(e) => {
                                  e.stopPropagation();
-                                 const reason = window.prompt('Masukkan alasan penolakan berkas:');
-                                 if (reason === null) return;
-                                 if (!reason.trim()) {
-                                    alert('Alasan penolakan tidak boleh kosong!');
-                                    return;
-                                 }
-                                 handleReject(archive.no, reason);
+                                 confirmRejectArchive(archive.no);
                               }}
                              className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 rounded-sm text-[12px] text-center"
                           >
@@ -2626,7 +2702,7 @@ export default function Dashboard() {
                              </td>
                              <td className="p-3 text-ink-mute max-w-[200px] truncate" title={req.purpose}>{req.purpose}</td>
                              <td className="p-3 text-center">
-                                <StatusBadge status={req.status} />
+                                <StatusBadge status={req.status} alasanPenolakan={req.reject_reason} />
                              </td>
                              {role === 'pic_gedung' && (
                                 <td className="p-3">
@@ -2640,7 +2716,10 @@ export default function Dashboard() {
                                                Setujui
                                             </button>
                                             <button 
-                                               onClick={() => handleRejectRequest(req.id)}
+                                               onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  confirmRejectRequest(req.id);
+                                               }}
                                                className="bg-rose-600 hover:bg-rose-700 text-white font-medium px-2 py-1 rounded-sm text-[11px]"
                                             >
                                                Tolak
@@ -2694,7 +2773,9 @@ export default function Dashboard() {
                                 {req.type}
                              </span>
                           </div>
-                          <StatusBadge status={req.status} isSmall={true} />
+                          <div>
+                             <StatusBadge status={req.status} alasanPenolakan={req.reject_reason} isSmall={true} />
+                          </div>
                        </div>
                        <div className="text-[12px] text-ink border-t border-hairline pt-2.5">
                           <p className="font-semibold text-ink-mute text-[9px] uppercase">Detail Pengajuan:</p>
@@ -2716,7 +2797,7 @@ export default function Dashboard() {
                                       Setujui
                                    </button>
                                    <button 
-                                      onClick={(e) => { e.stopPropagation(); handleRejectRequest(req.id); }}
+                                      onClick={(e) => { e.stopPropagation(); confirmRejectRequest(req.id); }}
                                       className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium py-1.5 rounded-sm text-[11px]"
                                    >
                                       Tolak
@@ -2745,6 +2826,7 @@ export default function Dashboard() {
             {renderDetailModal()}
             {renderDeleteModal()}
             {renderRejectModal()}
+            {renderServiceRejectModal()}
          </div>
      );
   }
@@ -2832,8 +2914,11 @@ export default function Dashboard() {
                                          <UserCheck size={12} /> ACC Akses
                                       </button>
                                       <button 
-                                         onClick={() => handleRejectUser(item.id)}
-                                         className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1 rounded-sm text-[11px] flex items-center gap-1"
+                                         onClick={(e) => {
+                                            e.stopPropagation();
+                                            confirmRejectRequest(item.id);
+                                         }}
+                                         className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-sm text-xs transition-colors flex-1"
                                       >
                                          <UserX size={12} /> Tolak
                                       </button>
