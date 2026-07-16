@@ -1108,6 +1108,8 @@ export default function Dashboard() {
      setTimeout(() => setSuccessMessage(""), 4000);
   };
 
+  const uniqueDepartments = Array.from(new Set(archives.map(a => a?.departemen).filter(Boolean)));
+
   const filteredArchives = archives
      .map(item => {
         const q = searchQuery.toLowerCase();
@@ -3505,7 +3507,7 @@ export default function Dashboard() {
       ));
   };
 
-  const uniqueDepartments = Array.from(new Set(archives.map(a => a.departemen).filter(Boolean)));
+
 
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
