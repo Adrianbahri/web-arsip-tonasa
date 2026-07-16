@@ -125,7 +125,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className={`flex-1 flex flex-col pb-16 md:pb-0 min-h-screen transition-all duration-300 w-full ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[256px]'}`}>
+      <main className={`flex-1 flex flex-col pb-16 md:pb-0 h-screen overflow-hidden transition-all duration-300 w-full ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[256px]'}`}>
         
         {/* MOBILE HEADER */}
         <header className="md:hidden bg-canvas border-b border-hairline px-5 py-4 flex justify-between items-center sticky top-0 z-20">
@@ -160,7 +160,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <div className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden flex flex-col">
           {children}
         </div>
       </main>

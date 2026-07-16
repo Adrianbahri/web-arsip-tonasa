@@ -2704,8 +2704,8 @@ export default function Dashboard() {
      const filteredRequests = role === 'pic_gedung' ? requestsList : requestsList.filter(req => req.user_name === user?.name);
 
      return (
-        <div className="space-y-6 max-w-full mx-auto pb-10">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col h-full max-w-full mx-auto">
+           <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
                     Layanan Peminjaman & Kunjungan Arsip
@@ -2737,10 +2737,11 @@ export default function Dashboard() {
            )}
 
            {/* Desktop Table View */}
-           <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
-              <table className="w-full text-left text-[12px] border-collapse min-w-[850px]">
-                 <thead>
-                    <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
+           <div className="hidden md:flex flex-col flex-1 border border-hairline bg-canvas rounded-xs overflow-hidden min-h-0 mb-4">
+              <div className="flex-1 overflow-auto">
+                 <table className="w-full text-left text-[12px] border-collapse min-w-[850px]">
+                    <thead className="sticky top-0 z-10 bg-canvas-soft border-b border-hairline shadow-sm">
+                       <tr className="text-ink font-semibold">
                        <th className="p-3 w-16 text-center">No</th>
                        <th className="p-3">Pemohon</th>
                        <th className="p-3">Jenis Layanan</th>
@@ -2846,6 +2847,7 @@ export default function Dashboard() {
                     )}
                  </tbody>
               </table>
+              </div>
            </div>
 
            {/* Mobile Card List View (Mobile First Design) */}
@@ -3500,10 +3502,10 @@ export default function Dashboard() {
 
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
-    <div className="space-y-6 max-w-full mx-auto pb-10">
+    <div className="flex flex-col h-full max-w-full mx-auto">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
            <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
               Daftar Berkas Arsip
@@ -3565,9 +3567,10 @@ export default function Dashboard() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto overflow-y-auto max-h-[calc(100vh-220px)]">
-         <table className="w-full text-left text-[12px] border-collapse min-w-[1250px]">
-            <thead className="sticky top-0 z-10 bg-canvas-soft border-b border-hairline shadow-sm">
+      <div className="hidden md:flex flex-col flex-1 border border-hairline bg-canvas rounded-xs overflow-hidden min-h-0 mb-4">
+         <div className="flex-1 overflow-auto">
+            <table className="w-full text-left text-[12px] border-collapse min-w-[1250px]">
+               <thead className="sticky top-0 z-10 bg-canvas-soft border-b border-hairline shadow-sm">
                <tr className="text-ink font-semibold">
                   <th className="p-3 w-12 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">No</th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Kode Klas.</th>
@@ -3700,6 +3703,7 @@ export default function Dashboard() {
                )}
             </tbody>
          </table>
+         </div>
       </div>
 
       {/* Mobile Card List View (Mobile First Design) */}
@@ -3799,7 +3803,7 @@ export default function Dashboard() {
       </div>
 
       {/* FOOTER */}
-      <div className="flex justify-between items-center text-ink-mute text-[13px] pt-4 border-t border-hairline mt-4">
+      <div className="flex-none flex justify-between items-center text-ink-mute text-[13px] pt-4 border-t border-hairline mt-auto">
          <span>
             Menampilkan {paginatedArchives.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
             {Math.min(currentPage * itemsPerPage, filteredArchives.length)} dari {filteredArchives.length}
