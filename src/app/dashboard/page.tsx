@@ -3524,7 +3524,7 @@ export default function Dashboard() {
            </p>
         </div>
         
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
            <div className="relative w-full md:w-48 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
