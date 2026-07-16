@@ -2533,6 +2533,8 @@ export default function Dashboard() {
 
   // 2.5 LAYANAN ARSIP (PEMINJAMAN & KUNJUNGAN LIST VIEW FOR ALL ROLES)
   if (activeMenu === "Layanan Arsip") {
+     const filteredRequests = role === 'pic_gedung' ? requestsList : requestsList.filter(req => req.user_name === user?.name);
+
      return (
         <div className="space-y-6 max-w-full mx-auto pb-10">
            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -2582,8 +2584,8 @@ export default function Dashboard() {
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-hairline">
-                    {requestsList.length > 0 ? (
-                       requestsList.map((req, idx) => (
+                    {filteredRequests.length > 0 ? (
+                       filteredRequests.map((req, idx) => (
                           <tr 
                              key={req.id} 
                              onClick={(e) => {
@@ -2671,9 +2673,9 @@ export default function Dashboard() {
            </div>
 
            {/* Mobile Card List View (Mobile First Design) */}
-           <div className="block md:hidden space-y-3">
-              {requestsList.length > 0 ? (
-                 requestsList.map((req, idx) => (
+           <div className="block md:hidden space-y-4">
+              {filteredRequests.length > 0 ? (
+                 filteredRequests.map((req, idx) => (
                     <div 
                        key={req.id}
                        onClick={() => {
