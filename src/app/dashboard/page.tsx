@@ -114,6 +114,9 @@ export default function Dashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [archiveToDelete, setArchiveToDelete] = useState<string | null>(null);
 
+  const [deleteRequestModalOpen, setDeleteRequestModalOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<string | null>(null);
+
   // Reject Modal State
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [archiveToReject, setArchiveToReject] = useState<string | null>(null);
@@ -600,6 +603,44 @@ export default function Dashboard() {
    const confirmDeleteArchive = (no: string) => {
       setArchiveToDelete(no);
       setDeleteModalOpen(true);
+   };
+
+   const confirmDeleteRequest = (id: string) => {
+      setRequestToDelete(id);
+      setDeleteRequestModalOpen(true);
+   };
+
+   const handleDeleteRequest = async () => {
+      if (!requestToDelete) return;
+      const id = requestToDelete;
+      setDeleteRequestModalOpen(false);
+      setRequestToDelete(null);
+
+      let supabaseSuccess = false;
+      try {
+         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+         if (!isMockUrl) {
+            const { error } = await supabase
+               .from('service_requests')
+               .delete()
+               .eq('id', id);
+
+            if (!error) {
+               supabaseSuccess = true;
+            }
+         }
+      } catch (err) {
+         console.warn('Supabase delete request failed:', err);
+      }
+
+      if (supabaseSuccess) {
+         setSuccessMessage('Pengajuan berhasil dihapus dari database.');
+         fetchRequests();
+      } else {
+         setRequests(prev => prev.filter(item => item.id !== id));
+         setSuccessMessage('Pengajuan berhasil dihapus (Simulasi).');
+      }
+      setTimeout(() => setSuccessMessage(''), 1500);
    };
 
    const handleDeleteArchive = async () => {
@@ -1762,6 +1803,46 @@ export default function Dashboard() {
     );
   };
 
+   const renderDeleteRequestModal = () => {
+      if (!deleteRequestModalOpen) return null;
+      return (
+         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+            <div 
+               className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+               onClick={(e) => e.stopPropagation()}
+            >
+               <div className="p-6 text-center">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                     </svg>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Pengajuan?</h3>
+                  <p className="text-gray-500 mb-6">
+                     Apakah Anda yakin ingin menghapus pengajuan layanan ini? Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  
+                  <div className="flex gap-3 w-full">
+                     <button
+                        onClick={() => setDeleteRequestModalOpen(false)}
+                        className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                     >
+                        Batal
+                     </button>
+                     <button
+                        onClick={handleDeleteRequest}
+                        className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/30 transition-all"
+                     >
+                        Ya, Hapus
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      );
+   };
+
   const renderAddUserModal = () => {
      if (!showAddUserModal) return null;
      return (
@@ -2738,14 +2819,19 @@ export default function Dashboard() {
                                          </>
                                       ) : req.status === 'Disetujui' && req.type === 'peminjaman' ? (
                                          <button 
-                                            onClick={() => handleCompleteRequest(req.id)}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3.5 py-1 rounded-sm text-[11px]"
-                                         >
-                                            Kembali (Selesai)
-                                         </button>
-                                      ) : (
-                                         <span className="text-[11px] text-ink-mute-2 font-mono">-</span>
-                                      )}
+                                             onClick={() => handleCompleteRequest(req.id)}
+                                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3.5 py-1 rounded-sm text-[11px]"
+                                          >
+                                             Kembali (Selesai)
+                                          </button>
+                                       ) : (
+                                          <button 
+                                             onClick={(e) => { e.stopPropagation(); confirmDeleteRequest(req.id); }}
+                                             className="bg-transparent border border-red-500/30 text-red-500 hover:bg-red-50 font-medium px-3.5 py-1 rounded-sm text-[11px] transition-colors"
+                                          >
+                                             Hapus
+                                          </button>
+                                       )}
                                    </div>
                                 </td>
                              )}
@@ -2822,7 +2908,12 @@ export default function Dashboard() {
                                    Kembali (Selesai)
                                 </button>
                              ) : (
-                                <span className="text-[11px] text-ink-mute-2 w-full text-center py-1 font-mono">-</span>
+                                <button 
+                                   onClick={(e) => { e.stopPropagation(); confirmDeleteRequest(req.id); }}
+                                   className="flex-1 bg-transparent border border-red-500/30 text-red-500 hover:bg-red-50 font-medium py-1.5 rounded-sm text-[11px] transition-colors"
+                                >
+                                   Hapus Pengajuan
+                                </button>
                              )}
                           </div>
                        )}
@@ -2836,6 +2927,7 @@ export default function Dashboard() {
             </div>
             {renderDetailModal()}
             {renderDeleteModal()}
+            {renderDeleteRequestModal()}
             {renderRejectModal()}
             {renderServiceRejectModal()}
          </div>
