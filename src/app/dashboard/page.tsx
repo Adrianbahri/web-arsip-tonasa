@@ -3570,24 +3570,6 @@ export default function Dashboard() {
               )}
            </div>
 
-           <div className="relative w-full md:w-auto shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors">
-              <Filter size={14} className="text-ink-mute" />
-              <select 
-                 value={statusFilter}
-                 onChange={(e) => setStatusFilter(e.target.value)}
-                 className="bg-transparent border-none text-[12px] text-ink font-medium outline-none pr-6 cursor-pointer"
-              >
-                 <option value="Semua">Semua Status</option>
-                 <option value="Aktif">Berkas Aktif</option>
-                 <option value="Inaktif">Berkas Inaktif</option>
-                 <option value="Permanen">Berkas Permanen</option>
-                 <option value="Dinilai Kembali">Dinilai Kembali</option>
-                 <option value="Ditinjau Kembali">Ditinjau Kembali</option>
-                 <option value="Upaya Pemusnahan">Upaya Pemusnahan</option>
-                 <option value="Dimusnahkan">Dimusnahkan</option>
-                 <option value="Menunggu ACC">Menunggu ACC</option>
-              </select>
-           </div>
 
            {role !== 'user' && (
               <button 
@@ -3641,7 +3623,9 @@ export default function Dashboard() {
                      <div className="flex items-center justify-center gap-1">Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">File Digital</th>
-                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Status</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('status')}>
+                     <div className="flex items-center justify-center gap-1">Status {sortConfig?.key === 'status' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
+                  </th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Aksi</th>
                </tr>
             </thead>
