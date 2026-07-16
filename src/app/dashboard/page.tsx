@@ -3549,7 +3549,7 @@ export default function Dashboard() {
            {role !== 'user' && (
               <button 
                  onClick={handleExportExcel}
-                 className="btn-outline shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto whitespace-nowrap"
+                 className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap"
               >
                  <Download size={14} /> Export Excel
               </button>
@@ -3558,9 +3558,9 @@ export default function Dashboard() {
            {role !== 'user' && (
              <button 
                 onClick={() => setShowAddForm(true)}
-                className="bg-[#e4e4e7] shrink-0 hover:bg-[#d4d4d8] text-[12px] text-ink font-medium px-3 py-1.5 rounded-sm transition-colors border border-hairline-strong w-full md:w-auto text-center whitespace-nowrap"
+                className="bg-primary hover:bg-primary-deep text-on-primary shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap"
              >
-                Tambah Berkas
+                <Plus size={14} /> Tambah Berkas
              </button>
            )}
         </div>
