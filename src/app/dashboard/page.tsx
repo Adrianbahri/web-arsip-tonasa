@@ -3473,38 +3473,38 @@ export default function Dashboard() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto">
+      <div className="hidden md:block border border-hairline bg-canvas rounded-xs overflow-x-auto overflow-y-auto max-h-[calc(100vh-220px)]">
          <table className="w-full text-left text-[12px] border-collapse min-w-[1250px]">
-            <thead>
-               <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
-                  <th className="p-3 w-12 text-center whitespace-nowrap">No</th>
-                  <th className="p-3 whitespace-nowrap">Kode Klas.</th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('jenisBerkas')}>
+            <thead className="sticky top-0 z-10 bg-canvas-soft border-b border-hairline shadow-sm">
+               <tr className="text-ink font-semibold">
+                  <th className="p-3 w-12 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">No</th>
+                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Kode Klas.</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('jenisBerkas')}>
                      <div className="flex items-center gap-1">Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('judulBerkas')}>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('judulBerkas')}>
                      <div className="flex items-center gap-1">Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 whitespace-nowrap">Departemen</th>
-                  <th className="p-3 whitespace-nowrap">Keterangan</th>
-                  <th className="p-3 text-center whitespace-nowrap">Isi Bundel</th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('tahun')}>
+                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Departemen</th>
+                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Keterangan</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Isi Bundel</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('tahun')}>
                      <div className="flex items-center justify-center gap-1">Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 text-center whitespace-nowrap">Tgl Terima</th>
-                  <th className="p-3 whitespace-nowrap">Masa Aktif</th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('gedung')}>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Tgl Terima</th>
+                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Masa Aktif</th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('gedung')}>
                      <div className="flex items-center justify-center gap-1">Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('lorong')}>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('lorong')}>
                      <div className="flex items-center justify-center gap-1">Lorong {sortConfig?.key === 'lorong' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap" onClick={() => handleSort('rak')}>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('rak')}>
                      <div className="flex items-center justify-center gap-1">Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 text-center whitespace-nowrap">File Digital</th>
-                  <th className="p-3 text-center whitespace-nowrap">Status</th>
-                  <th className="p-3 text-center whitespace-nowrap">Aksi</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">File Digital</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Status</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Aksi</th>
                </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
