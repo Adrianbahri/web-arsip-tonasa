@@ -2451,7 +2451,7 @@ export default function Dashboard() {
      const pendingSubmissions = archives.filter(item => item.status === "Menunggu ACC");
      
      return (
-        <div className="space-y-6 max-w-full mx-auto pb-10">
+        <div className="space-y-6 w-full pb-10">
            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
@@ -2945,7 +2945,7 @@ export default function Dashboard() {
      const approvedUsers = usersList.filter(u => u.approved);
 
      return (
-        <div className="space-y-8 max-w-full mx-auto pb-10">
+        <div className="space-y-8 w-full pb-10">
            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
@@ -3299,7 +3299,7 @@ export default function Dashboard() {
      const pendingRequestsCount = requestsList.filter(r => r.status === "Menunggu ACC").length;
      
      return (
-        <div className="space-y-8 max-w-[1280px] mx-auto">
+        <div className="space-y-8 w-full">
            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-hairline">
              <div>
                 <h2 className="text-[18px] md:text-display-md font-medium tracking-tight text-ink">
