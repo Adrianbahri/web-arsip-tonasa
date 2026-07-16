@@ -875,7 +875,8 @@ export default function Dashboard() {
         archive_title: "",
         date: "",
         time_or_return: "",
-        purpose: ""
+        purpose: "",
+        link_surat: ""
      });
      setShowServiceForm(false);
      setTimeout(() => setSuccessMessage(""), 2000);
