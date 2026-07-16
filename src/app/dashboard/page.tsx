@@ -2452,12 +2452,12 @@ export default function Dashboard() {
      
      return (
         <div className="space-y-6 w-full pb-10">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                 <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div className="shrink-0">
+                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
                     Persetujuan (ACC) Berkas Masuk
                  </h2>
-                 <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
                     Periksa berkas digital pengajuan departemen dan tentukan lokasi penyimpanan fisiknya sebelum menyetujui.
                  </p>
               </div>
@@ -2709,11 +2709,11 @@ export default function Dashboard() {
      return (
         <div className="flex flex-col h-full w-full">
            <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <div>
-                 <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+              <div className="shrink-0">
+                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
                     Layanan Peminjaman & Kunjungan Arsip
                  </h2>
-                 <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
                     {role === 'pic_gedung' 
                      ? "Kelola permohonan peminjaman dokumen fisik dan registrasi kunjungan gedung kearsipan."
                      : "Lihat status pengajuan peminjaman berkas atau buat pengajuan kunjungan fisik baru."}
@@ -2946,12 +2946,12 @@ export default function Dashboard() {
 
      return (
         <div className="space-y-8 w-full pb-10">
-           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                 <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div className="shrink-0">
+                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
                     Manajemen & Persetujuan Pengguna
                  </h2>
-                 <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
                     Berikan persetujuan akses (ACC) bagi staf departemen yang mendaftar baru serta kelola akun pengguna aktif.
                  </p>
               </div>
@@ -3230,10 +3230,10 @@ export default function Dashboard() {
      return (
         <div className="space-y-6 max-w-[500px] mx-auto pb-10">
            <div>
-              <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
+              <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
                  Ganti Kata Sandi
               </h2>
-              <p className="text-ink-mute text-[12px] md:text-[14px] mt-1">
+              <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
                  Perbarui kata sandi keamanan akun kearsipan Anda secara mandiri.
               </p>
            </div>
@@ -3300,12 +3300,14 @@ export default function Dashboard() {
      
      return (
         <div className="space-y-8 w-full">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-hairline">
-             <div>
-                <h2 className="text-[18px] md:text-display-md font-medium tracking-tight text-ink">
-                   Selamat Datang, {getRoleName(role)}.
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+             <div className="shrink-0">
+                <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
+                   Selamat Datang, {user?.name || "Admin PIC Gedung"}.
                 </h2>
-                <p className="text-ink-mute mt-1 text-[14px]">Kelola arsip korporasi Anda dengan presisi.</p>
+                <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
+                   Kelola arsip korporasi Anda dengan presisi.
+                </p>
              </div>
              <div className="flex gap-3">
                 {role === 'pic_gedung' && (
