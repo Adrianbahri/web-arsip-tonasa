@@ -2707,7 +2707,7 @@ export default function Dashboard() {
      const filteredRequests = role === 'pic_gedung' ? requestsList : requestsList.filter(req => req.user_name === user?.name);
 
      return (
-        <div className="flex flex-col h-full max-w-full mx-auto">
+        <div className="flex flex-col h-full w-full">
            <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
@@ -3507,7 +3507,7 @@ export default function Dashboard() {
 
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
-    <div className="flex flex-col h-full max-w-full mx-auto">
+    <div className="flex flex-col h-full w-full">
       
       {/* HEADER SECTION */}
       <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
