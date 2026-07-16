@@ -621,7 +621,7 @@ export default function Dashboard() {
          const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
          if (!isMockUrl) {
             const { error } = await supabase
-               .from('service_requests')
+               .from('requests')
                .delete()
                .eq('id', id);
 
@@ -637,7 +637,7 @@ export default function Dashboard() {
          setSuccessMessage('Pengajuan berhasil dihapus dari database.');
          fetchRequests();
       } else {
-         setRequests(prev => prev.filter(item => item.id !== id));
+         setRequestsList(prev => prev.filter(item => item.id !== id));
          setSuccessMessage('Pengajuan berhasil dihapus (Simulasi).');
       }
       setTimeout(() => setSuccessMessage(''), 1500);
