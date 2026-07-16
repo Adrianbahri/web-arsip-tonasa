@@ -1527,7 +1527,7 @@ export default function Dashboard() {
                         <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jenis Berkas</p>
-                              <p className="font-medium text-ink mt-0.5">{selectedDetailItem.jenisBerkas}</p>
+                              <p className="font-medium text-ink mt-0.5 uppercase">{selectedDetailItem.jenisBerkas}</p>
                            </div>
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Departemen</p>
@@ -2574,7 +2574,7 @@ export default function Dashboard() {
                           >
                              <td className="p-3 text-center font-mono text-ink-mute">{index + 1}</td>
                              <td className="p-3 font-medium">{archive.kodeKlasifikasi}</td>
-                             <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
+                             <td className="p-3 text-ink-mute uppercase">{archive.jenisBerkas}</td>
                              <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
                              <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
                              <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
@@ -2649,7 +2649,7 @@ export default function Dashboard() {
                           <div>
                              <span className="font-mono text-[10px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.kodeKlasifikasi}</span>
                              <h4 className="font-bold text-[14px] text-ink mt-1.5">{archive.judulBerkas}</h4>
-                             <p className="text-[12px] text-ink-mute mt-0.5">{archive.jenisBerkas}</p>
+                             <p className="text-[12px] text-ink-mute mt-0.5 uppercase">{archive.jenisBerkas}</p>
                           </div>
                           <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] px-2 py-0.5 rounded-full font-medium">
                              {archive.status}
