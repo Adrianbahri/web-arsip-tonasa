@@ -52,7 +52,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
            
            <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="absolute -right-3.5 top-8 p-1 text-ink-mute bg-canvas border border-hairline hover:text-ink hover:bg-canvas-soft rounded-full transition-colors z-30 shadow-sm"
+              className="absolute -right-3.5 top-8 p-1 text-ink-mute bg-canvas border border-hairline hover:text-ink hover:bg-canvas-soft rounded-full transition-colors z-30"
            >
               {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
            </button>
