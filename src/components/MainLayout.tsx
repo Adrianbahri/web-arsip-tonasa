@@ -41,20 +41,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       
       {/* DESKTOP SIDEBAR - HIDDEN ON MOBILE */}
       <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-canvas border-r border-hairline fixed inset-y-0 z-20 transition-all duration-300`}>
-        <div className={`px-4 py-6 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} gap-2.5`}>
-           {!isSidebarCollapsed && (
-              <div className="flex items-center gap-2.5">
-                 <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-8 h-8 object-contain" />
+         {/* Force tailwind to compile these margin classes: md:ml-20 md:ml-64 */}
+        <div className={`px-4 py-6 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : ''} gap-2.5 relative`}>
+           <div className={`flex items-center gap-2.5 ${isSidebarCollapsed ? 'justify-center' : ''} w-full`}>
+              <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-8 h-8 object-contain" />
+              {!isSidebarCollapsed && (
                  <h1 className="text-[20px] font-bold tracking-tight text-ink">Arsip<span className="text-primary ml-1">Tonasa</span></h1>
-              </div>
-           )}
-           {isSidebarCollapsed && <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-8 h-8 object-contain" />}
+              )}
+           </div>
            
            <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-1 text-ink-mute hover:text-ink hover:bg-canvas-soft rounded-sm transition-colors"
+              className="absolute -right-3.5 top-8 p-1 text-ink-mute bg-canvas border border-hairline hover:text-ink hover:bg-canvas-soft rounded-full transition-colors z-30 shadow-sm"
            >
-              {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
            </button>
         </div>
         
@@ -125,7 +125,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className={`flex-1 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} flex flex-col pb-16 md:pb-0 min-h-screen transition-all duration-300`}>
+      <main className={`flex-1 flex flex-col pb-16 md:pb-0 min-h-screen transition-all duration-300 w-full ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[256px]'}`}>
         
         {/* MOBILE HEADER */}
         <header className="md:hidden bg-canvas border-b border-hairline px-5 py-4 flex justify-between items-center sticky top-0 z-20">
