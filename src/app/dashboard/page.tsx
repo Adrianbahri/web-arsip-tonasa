@@ -3570,21 +3570,21 @@ export default function Dashboard() {
             <thead className="sticky top-0 z-10 bg-canvas-soft border-b border-hairline shadow-sm">
                <tr className="text-ink font-semibold">
                   <th className="p-3 w-12 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">No</th>
-                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Kode Klas.</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Kode Klas.</th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('jenisBerkas')}>
-                     <div className="flex items-center gap-1">Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
+                     <div className="flex items-center justify-center gap-1">Jenis {sortConfig?.key === 'jenisBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('judulBerkas')}>
-                     <div className="flex items-center gap-1">Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
+                     <div className="flex items-center justify-center gap-1">Judul {sortConfig?.key === 'judulBerkas' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
-                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Departemen</th>
-                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Keterangan</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Departemen</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Keterangan</th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Isi Bundel</th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('tahun')}>
                      <div className="flex items-center justify-center gap-1">Tahun {sortConfig?.key === 'tahun' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Tgl Terima</th>
-                  <th className="p-3 whitespace-nowrap bg-canvas-soft border-b border-hairline">Masa Aktif</th>
+                  <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">Masa Aktif</th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('gedung')}>
                      <div className="flex items-center justify-center gap-1">Gedung {sortConfig?.key === 'gedung' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
@@ -3612,11 +3612,11 @@ export default function Dashboard() {
                         className="hover:bg-canvas-soft/50 transition-colors text-ink cursor-pointer"
                      >
                         <td className="p-3 text-center font-mono text-ink-mute">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                        <td className="p-3 font-medium">{archive.kodeKlasifikasi}</td>
-                        <td className="p-3 text-ink-mute">{archive.jenisBerkas}</td>
-                        <td className="p-3 font-medium text-ink">{archive.judulBerkas}</td>
-                        <td className="p-3"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
-                        <td className="p-3 text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
+                        <td className="p-3 text-center font-medium">{archive.kodeKlasifikasi}</td>
+                        <td className="p-3 text-center text-ink-mute uppercase">{archive.jenisBerkas}</td>
+                        <td className="p-3 text-center font-medium text-ink">{archive.judulBerkas}</td>
+                        <td className="p-3 text-center"><span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink">{archive.departemen}</span></td>
+                        <td className="p-3 text-center text-ink-mute text-[11px] max-w-[150px] truncate" title={archive.keterangan}>{archive.keterangan || "-"}</td>
                         <td className="p-3 text-center">
                            <span className="bg-canvas-soft border border-hairline px-2 py-0.5 rounded-md text-[10px] max-w-[200px] truncate inline-block" title={archive.isiBundel?.join(', ')}>
                               {archive.isiBundel?.join(', ') || '-'}
@@ -3624,7 +3624,7 @@ export default function Dashboard() {
                         </td>
                         <td className="p-3 text-center font-mono">{archive.tahun}</td>
                         <td className="p-3 text-center font-mono whitespace-nowrap">{formatDate(archive.tanggalTerima)}</td>
-                        <td className="p-3 text-ink-mute">{archive.jangkaWaktu}</td>
+                        <td className="p-3 text-center text-ink-mute">{archive.jangkaWaktu}</td>
                         <td className="p-3 text-center font-mono font-medium">{archive.gedung || "-"}</td>
                         <td className="p-3 text-center font-mono">{archive.lorong || "-"}</td>
                         <td className="p-3 text-[11px] font-medium whitespace-nowrap">{archive.rak || "-"}</td>
