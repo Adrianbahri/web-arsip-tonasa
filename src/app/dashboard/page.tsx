@@ -2719,11 +2719,11 @@ export default function Dashboard() {
 
               {role !== 'pic_gedung' && (
                  <button 
-                    onClick={() => setShowServiceForm(true)}
-                    className="bg-primary hover:bg-primary-deep text-[14px] text-on-primary font-semibold px-4 py-2.5 rounded-sm transition-colors flex items-center gap-2 self-start md:self-auto"
-                 >
-                    <Plus size={16} /> Buat Pengajuan Layanan
-                 </button>
+                     onClick={() => setShowServiceForm(true)}
+                     className="bg-primary hover:bg-primary-deep text-[12px] text-on-primary font-medium px-3 py-1.5 rounded-sm transition-colors flex items-center gap-2 self-start md:self-auto"
+                  >
+                     <Plus size={14} /> Buat Pengajuan Layanan
+                  </button>
               )}
            </div>
 
@@ -3488,7 +3488,7 @@ export default function Dashboard() {
               <button
                   key={`page-${page}`}
                   onClick={() => setCurrentPage(page as number)}
-                  className={`px-3 py-1 rounded-sm font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-sm font-medium transition-colors ${
                       currentPage === page 
                           ? 'bg-primary text-on-primary' 
                           : 'bg-canvas border border-hairline text-ink hover:bg-canvas-soft'
@@ -3523,16 +3523,16 @@ export default function Dashboard() {
                  placeholder="Search" 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full bg-canvas border border-hairline text-[13px] rounded-xs pl-9 pr-4 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
-           <div className="relative w-full md:w-auto flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-2 bg-canvas hover:border-hairline-strong transition-colors">
+           <div className="relative w-full md:w-auto flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors">
               <Filter size={14} className="text-ink-mute" />
               <select 
                  value={statusFilter}
                  onChange={(e) => setStatusFilter(e.target.value)}
-                 className="bg-transparent border-none text-[13px] text-ink font-medium outline-none pr-6 cursor-pointer"
+                 className="bg-transparent border-none text-[12px] text-ink font-medium outline-none pr-6 cursor-pointer"
               >
                  <option value="Semua">Semua Status</option>
                  <option value="Aktif">Berkas Aktif</option>
@@ -3549,16 +3549,16 @@ export default function Dashboard() {
            {role !== 'user' && (
               <button 
                  onClick={handleExportExcel}
-                 className="btn-outline flex items-center justify-center gap-2 py-2 px-3 text-[13px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto"
+                 className="btn-outline flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] border border-hairline-strong rounded-sm hover:bg-canvas-soft transition-colors w-full md:w-auto"
               >
-                 <Download size={15} /> Export Excel
+                 <Download size={14} /> Export Excel
               </button>
            )}
            
            {role !== 'user' && (
              <button 
                 onClick={() => setShowAddForm(true)}
-                className="bg-[#e4e4e7] hover:bg-[#d4d4d8] text-[14px] text-ink font-medium px-4 py-2 rounded-sm transition-colors border border-hairline-strong w-full md:w-auto text-center"
+                className="bg-[#e4e4e7] hover:bg-[#d4d4d8] text-[12px] text-ink font-medium px-3 py-1.5 rounded-sm transition-colors border border-hairline-strong w-full md:w-auto text-center"
              >
                 Tambah Berkas
              </button>
@@ -3803,16 +3803,16 @@ export default function Dashboard() {
       </div>
 
       {/* FOOTER */}
-      <div className="flex-none flex justify-between items-center text-ink-mute text-[13px] pt-4 border-t border-hairline mt-auto">
+      <div className="flex-none flex justify-between items-center text-ink-mute text-[12px] pt-3 border-t border-hairline mt-auto">
          <span>
             Menampilkan {paginatedArchives.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
             {Math.min(currentPage * itemsPerPage, filteredArchives.length)} dari {filteredArchives.length}
          </span>
-         <div className="flex gap-1.5">
+         <div className="flex gap-1">
             <button 
                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                disabled={currentPage === 1}
-               className="px-2.5 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+               className="px-2 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                Sebelumnya
             </button>
@@ -3820,7 +3820,7 @@ export default function Dashboard() {
             <button 
                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                disabled={currentPage === totalPages}
-               className="px-2.5 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+               className="px-2 py-1 bg-canvas border border-hairline rounded-sm text-ink hover:bg-canvas-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                Selanjutnya
             </button>
