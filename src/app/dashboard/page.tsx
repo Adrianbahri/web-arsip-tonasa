@@ -2705,7 +2705,7 @@ export default function Dashboard() {
 
      return (
         <div className="flex flex-col h-full max-w-full mx-auto">
-           <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+           <div className="flex-none flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
               <div>
                  <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
                     Layanan Peminjaman & Kunjungan Arsip
@@ -3505,7 +3505,7 @@ export default function Dashboard() {
     <div className="flex flex-col h-full max-w-full mx-auto">
       
       {/* HEADER SECTION */}
-      <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex-none flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
         <div>
            <h2 className="text-[18px] md:text-[28px] font-medium tracking-tight text-ink">
               Daftar Berkas Arsip
