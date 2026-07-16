@@ -85,6 +85,8 @@ export default function Dashboard() {
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
+  const [departemenFilter, setDepartemenFilter] = useState<string[]>([]);
+  const [showDeptFilter, setShowDeptFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
 
@@ -93,7 +95,7 @@ export default function Dashboard() {
 
   useEffect(() => {
      setCurrentPage(1);
-  }, [searchQuery, statusFilter, sortConfig]);
+  }, [searchQuery, statusFilter, departemenFilter, sortConfig]);
 
   const handleSort = (key: string) => {
      let direction: 'ascending' | 'descending' = 'ascending';
@@ -1174,7 +1176,8 @@ export default function Dashboard() {
      .filter(item => {
         const matchesStatus = statusFilter === "Semua" || item.status === statusFilter;
         const matchesSearch = searchQuery === "" || item._searchScore > 0;
-        return matchesStatus && matchesSearch;
+        const matchesDept = departemenFilter.length === 0 || departemenFilter.includes(item.departemen);
+        return matchesStatus && matchesSearch && matchesDept;
      })
      .sort((a, b) => {
          if (sortConfig !== null) {
@@ -3500,6 +3503,8 @@ export default function Dashboard() {
       ));
   };
 
+  const uniqueDepartments = Array.from(new Set(archives.map(a => a.departemen).filter(Boolean)));
+
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
     <div className="flex flex-col h-full max-w-full mx-auto">
@@ -3525,6 +3530,42 @@ export default function Dashboard() {
                  onChange={(e) => setSearchQuery(e.target.value)}
                  className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
+           </div>
+
+           <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
+              <Filter size={14} className="text-ink-mute" />
+              <span className="text-[12px] text-ink font-medium select-none">
+                 Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
+              </span>
+              
+              {showDeptFilter && (
+                 <div 
+                    className="absolute top-full mt-2 left-0 w-48 bg-canvas border border-hairline rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                 >
+                    {uniqueDepartments.length === 0 ? (
+                       <div className="p-3 text-[12px] text-ink-mute text-center">Belum ada departemen</div>
+                    ) : (
+                       uniqueDepartments.map(dept => (
+                          <label key={dept as string} className="flex items-center gap-2 px-3 py-2 hover:bg-canvas-soft cursor-pointer text-[12px] text-ink">
+                             <input 
+                                type="checkbox"
+                                className="rounded-xs border-hairline text-primary focus:ring-primary"
+                                checked={departemenFilter.includes(dept as string)}
+                                onChange={(e) => {
+                                   if (e.target.checked) {
+                                      setDepartemenFilter(prev => [...prev, dept as string]);
+                                   } else {
+                                      setDepartemenFilter(prev => prev.filter(d => d !== dept));
+                                   }
+                                }}
+                             />
+                             {dept as string}
+                          </label>
+                       ))
+                    )}
+                 </div>
+              )}
            </div>
 
            <div className="relative w-full md:w-auto shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors">
