@@ -3358,6 +3358,54 @@ export default function Dashboard() {
      );
   }
 
+  const renderPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      
+      if (totalPages <= maxVisible) {
+          for (let i = 1; i <= totalPages; i++) {
+              pages.push(i);
+          }
+      } else {
+          pages.push(1);
+          
+          let startPage = Math.max(2, currentPage - 1);
+          let endPage = Math.min(totalPages - 1, currentPage + 1);
+          
+          if (currentPage <= 2) {
+              endPage = 3;
+          } else if (currentPage >= totalPages - 1) {
+              startPage = totalPages - 2;
+          }
+          
+          if (startPage > 2) pages.push('...');
+          for (let i = startPage; i <= endPage; i++) {
+              pages.push(i);
+          }
+          if (endPage < totalPages - 1) pages.push('...');
+          
+          pages.push(totalPages);
+      }
+      
+      return pages.map((page, index) => (
+          page === '...' ? (
+              <span key={`ellipsis-${index}`} className="px-2 py-1 text-ink-mute">...</span>
+          ) : (
+              <button
+                  key={`page-${page}`}
+                  onClick={() => setCurrentPage(page as number)}
+                  className={`px-3 py-1 rounded-sm font-medium transition-colors ${
+                      currentPage === page 
+                          ? 'bg-primary text-on-primary' 
+                          : 'bg-canvas border border-hairline text-ink hover:bg-canvas-soft'
+                  }`}
+              >
+                  {page}
+              </button>
+          )
+      ));
+  };
+
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
     <div className="space-y-6 max-w-full mx-auto pb-10">
@@ -3672,7 +3720,7 @@ export default function Dashboard() {
             >
                Sebelumnya
             </button>
-            <button className="px-3 py-1 bg-primary text-on-primary rounded-sm font-medium">{currentPage}</button>
+            {renderPageNumbers()}
             <button 
                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                disabled={currentPage === totalPages}
