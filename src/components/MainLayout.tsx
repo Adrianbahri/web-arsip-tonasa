@@ -169,7 +169,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </main>
 
       {/* MOBILE BOTTOM NAVIGATION */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-canvas border-t border-hairline flex justify-around items-center h-16 px-2 z-30">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-canvas border-t border-hairline flex items-center h-16 px-2 z-30 overflow-x-auto hide-scrollbar gap-2">
          {allowedMenuItems.map(item => {
             const Icon = item.icon;
             const isActive = activeMenu === item.name;
@@ -177,10 +177,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                <button 
                   key={item.name}
                   onClick={() => setActiveMenu(item.name)}
-                  className={`flex flex-col items-center gap-1 p-2 ${isActive ? 'text-primary' : 'text-ink-mute hover:text-ink'}`}
+                  className={`flex flex-col items-center justify-center shrink-0 min-w-[72px] gap-1 p-2 ${isActive ? 'text-primary' : 'text-ink-mute hover:text-ink'}`}
                >
                   <Icon size={20} />
-                  <span className="text-[9px] font-medium mt-0.5">{item.name}</span>
+                  <span className="text-[9px] font-medium mt-0.5 whitespace-nowrap">{item.name}</span>
                </button>
             );
          })}
