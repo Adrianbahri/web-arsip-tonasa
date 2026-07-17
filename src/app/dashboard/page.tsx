@@ -177,6 +177,8 @@ export default function Dashboard() {
   });
   
   const [newItemText, setNewItemText] = useState("");
+  const [isCustomDept, setIsCustomDept] = useState(false);
+
 
   const handleAddIsiBundel = () => {
      if (newItemText.trim()) {
@@ -614,6 +616,10 @@ export default function Dashboard() {
    };
 
    const handleEditClick = (archive: any) => {
+      const predefinedDept = ["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"];
+      const dept = archive.departemen || '';
+      setIsCustomDept(!predefinedDept.includes(dept.toUpperCase()) && dept !== '');
+      
       setEditArchiveItem(archive);
       setFormData({
          kodeKlasifikasi: archive.kodeKlasifikasi || '',
@@ -2123,15 +2129,51 @@ export default function Dashboard() {
 
                  <div className="space-y-2">
                     <label className="block text-[13px] font-medium text-ink">Departemen</label>
-                    <input 
-                       type="text" 
-                       name="departemen"
-                       value={formData.departemen}
-                       onChange={handleInputChange}
-                       required
-                       placeholder="Contoh: KEUANGAN, LEGAL, UMUM"
-                       className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
-                    />
+                     {(() => {
+                        const predefinedDept = ["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"];
+                        const currentDept = (formData.departemen || "").toUpperCase();
+                        const isPredefined = predefinedDept.includes(currentDept);
+                        
+                        return (
+                           <div className="flex flex-col gap-2">
+                              <select
+                                 name="departemen_select"
+                                 value={isPredefined ? currentDept : (currentDept === "" ? (isCustomDept ? "LAINNYA" : "") : "LAINNYA")}
+                                 onChange={(e) => {
+                                    if (e.target.value === "LAINNYA") {
+                                       setIsCustomDept(true);
+                                       setFormData(prev => ({ ...prev, departemen: "" }));
+                                    } else {
+                                       setIsCustomDept(false);
+                                       setFormData(prev => ({ ...prev, departemen: e.target.value }));
+                                    }
+                                 }}
+                                 required={!isCustomDept}
+                                 className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                              >
+                                 <option value="" disabled>Pilih Departemen</option>
+                                 {predefinedDept.map(dept => (
+                                    <option key={dept} value={dept}>{dept}</option>
+                                 ))}
+                                 {(role === 'pic_gedung' || isCustomDept || (!isPredefined && currentDept !== "")) && (
+                                    <option value="LAINNYA">Lainnya (Kustom)...</option>
+                                 )}
+                              </select>
+                              
+                              {isCustomDept && (
+                                 <input 
+                                    type="text" 
+                                    name="departemen"
+                                    value={formData.departemen}
+                                    onChange={handleInputChange}
+                                    required={isCustomDept}
+                                    placeholder="Masukkan nama departemen kustom"
+                                    className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
+                                 />
+                              )}
+                           </div>
+                        );
+                     })()}
                  </div>
 
 
@@ -3351,7 +3393,7 @@ export default function Dashboard() {
                   </button>
                 )}
                 <button 
-                  onClick={() => setShowAddForm(true)}
+                  onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
                   className="btn-primary flex items-center gap-2"
                 >
                   <Plus size={16} /> Tambah Arsip
@@ -3617,7 +3659,7 @@ export default function Dashboard() {
            
            {role !== 'user' && (
              <button 
-                onClick={() => setShowAddForm(true)}
+                onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
                 className="bg-primary hover:bg-primary-deep text-on-primary shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap"
              >
                 <Plus size={14} /> Tambah Berkas
