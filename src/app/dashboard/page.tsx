@@ -3790,122 +3790,125 @@ export default function Dashboard() {
       
       {/* HEADER SECTION */}
       <div className="flex-none flex flex-col gap-4 mb-6">
-        <div className="shrink-0">
-           <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+           <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink shrink-0">
               Daftar Berkas Arsip
            </h2>
+           
+           <div className="flex flex-wrap items-center gap-2">
+              {role !== 'user' && (
+                 <>
+                    <button 
+                       onClick={handleExportExcel}
+                       className="border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                    >
+                       <Download size={14} /> Export
+                    </button>
+                    
+                    <label className="border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors cursor-pointer">
+                       <Upload size={14} /> Import
+                       <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
+                    </label>
+                 </>
+              )}
+
+              {(role === 'admin_dept' || role === 'pic_gedung') && (
+                 <button 
+                    onClick={() => setIsRecycleBin(!isRecycleBin)}
+                    className={`flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
+                 >
+                    <Trash2 size={14} /> {isRecycleBin ? 'Kembali' : 'Sampah'}
+                 </button>
+              )}
+
+              {role !== 'user' && (
+                <button 
+                   onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
+                   className="bg-primary hover:bg-primary-deep text-on-primary flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                >
+                   <Plus size={14} /> Tambah Berkas
+                </button>
+              )}
+           </div>
         </div>
         
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full">
-           <div className="relative w-full md:w-36 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 w-full bg-canvas-soft p-3 rounded-sm border border-hairline">
+           <div className="relative w-full md:w-64 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
                  type="text" 
-                 placeholder="Search" 
+                 placeholder="Cari berkas, kode klasifikasi..." 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
               />
            </div>
 
-           <div className="relative shrink-0">
-              <input 
-                 type="text" 
-                 placeholder="Tahun" 
-                 value={yearFilter}
-                 onChange={(e) => setYearFilter(e.target.value)}
-                 className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
-              />
-           </div>
-           
-           <div className="relative shrink-0 flex items-center gap-1">
-              <input 
-                 type="text" 
-                 placeholder="Gedung" 
-                 value={gedungFilter}
-                 onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
-                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
-              />
-              <span className="text-ink-faint">-</span>
-              <input 
-                 type="text" 
-                 placeholder="Lorong" 
-                 value={lorongFilter}
-                 onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
-                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
-              />
-           </div>
-
-           <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
-              <Filter size={14} className="text-ink-mute" />
-              <span className="text-[12px] text-ink font-medium select-none">
-                 Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
-              </span>
+           <div className="flex items-center gap-2">
+              <div className="relative shrink-0">
+                 <input 
+                    type="text" 
+                    placeholder="Tahun" 
+                    value={yearFilter}
+                    onChange={(e) => setYearFilter(e.target.value)}
+                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
+                 />
+              </div>
               
-              {showDeptFilter && (
-                 <div 
-                    className="absolute top-full mt-2 left-0 w-48 bg-canvas border border-hairline rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto"
-                    onClick={(e) => e.stopPropagation()}
-                 >
-                    {uniqueDepartments.length === 0 ? (
-                       <div className="p-3 text-[12px] text-ink-mute text-center">Belum ada departemen</div>
-                    ) : (
-                       uniqueDepartments.map(dept => (
-                          <label key={dept as string} className="flex items-center gap-2 px-3 py-2 hover:bg-canvas-soft cursor-pointer text-[12px] text-ink">
-                             <input 
-                                type="checkbox"
-                                className="rounded-xs border-hairline text-primary focus:ring-primary"
-                                checked={departemenFilter.includes(dept as string)}
-                                onChange={(e) => {
-                                   if (e.target.checked) {
-                                      setDepartemenFilter(prev => [...prev, dept as string]);
-                                   } else {
-                                      setDepartemenFilter(prev => prev.filter(d => d !== dept));
-                                   }
-                                }}
-                             />
-                             {dept as string}
-                          </label>
-                       ))
-                    )}
-                 </div>
-              )}
+              <div className="relative shrink-0 flex items-center gap-1">
+                 <input 
+                    type="text" 
+                    placeholder="Gedung" 
+                    value={gedungFilter}
+                    onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
+                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
+                 />
+                 <span className="text-ink-faint text-[12px] font-medium">-</span>
+                 <input 
+                    type="text" 
+                    placeholder="Lorong" 
+                    value={lorongFilter}
+                    onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
+                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
+                 />
+              </div>
+
+              <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-3 py-2 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer shadow-sm" onClick={() => setShowDeptFilter(!showDeptFilter)}>
+                 <Filter size={14} className="text-ink-mute" />
+                 <span className="text-[12px] text-ink font-medium select-none">
+                    Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
+                 </span>
+                 
+                 {showDeptFilter && (
+                    <div 
+                       className="absolute top-full mt-2 left-0 w-56 bg-canvas border border-hairline rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto"
+                       onClick={(e) => e.stopPropagation()}
+                    >
+                       {uniqueDepartments.length === 0 ? (
+                          <div className="p-3 text-[12px] text-ink-mute text-center">Belum ada departemen</div>
+                       ) : (
+                          uniqueDepartments.map(dept => (
+                             <label key={dept as string} className="flex items-center gap-3 px-3 py-2.5 hover:bg-canvas-soft cursor-pointer text-[12px] text-ink border-b border-hairline/50 last:border-0">
+                                <input 
+                                   type="checkbox"
+                                   className="rounded-xs border-hairline text-primary focus:ring-primary w-4 h-4"
+                                   checked={departemenFilter.includes(dept as string)}
+                                   onChange={(e) => {
+                                      if (e.target.checked) {
+                                         setDepartemenFilter(prev => [...prev, dept as string]);
+                                      } else {
+                                         setDepartemenFilter(prev => prev.filter(d => d !== dept));
+                                      }
+                                   }}
+                                />
+                                {dept as string}
+                             </label>
+                          ))
+                       )}
+                    </div>
+                 )}
+              </div>
            </div>
-
-
-           {role !== 'user' && (
-              <button 
-                 onClick={handleExportExcel}
-                 className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap"
-              >
-                 <Download size={14} /> Export Excel
-              </button>
-           )}
-           
-           {role !== 'user' && (
-              <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
-                 <Upload size={14} /> Import Excel
-                 <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
-              </label>
-           )}
-
-           {(role === 'admin_dept' || role === 'pic_gedung') && (
-              <button 
-                 onClick={() => setIsRecycleBin(!isRecycleBin)}
-                 className={`shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
-              >
-                 <Trash2 size={14} /> {isRecycleBin ? 'Kembali ke Daftar' : 'Tempat Sampah'}
-              </button>
-           )}
-
-           {role !== 'user' && (
-             <button 
-                onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
-                className="bg-primary hover:bg-primary-deep text-on-primary shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap"
-             >
-                <Plus size={14} /> Tambah Berkas
-             </button>
-           )}
         </div>
       </div>
 
