@@ -2694,14 +2694,16 @@ export default function Dashboard() {
      
      return (
         <div className="space-y-6 w-full pb-10">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+           <div className="flex flex-col md:items-start justify-between gap-4 mb-6">
               <div className="shrink-0">
-                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
-                    Persetujuan (ACC) Berkas Masuk
-                 </h2>
-                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
-                    Periksa berkas digital pengajuan departemen dan tentukan lokasi penyimpanan fisiknya sebelum menyetujui.
-                 </p>
+                  <div className="flex-1 min-w-0">
+                     <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink flex items-center gap-2">
+                        Persetujuan Berkas Masuk
+                     </h2>
+                     <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
+                        Periksa berkas digital pengajuan departemen dan tentukan lokasi penyimpanan fisiknya sebelum menyetujui.
+                     </p>
+                  </div>
               </div>
               
               <button 
@@ -3787,17 +3789,14 @@ export default function Dashboard() {
     <div className="flex flex-col h-full w-full">
       
       {/* HEADER SECTION */}
-      <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex-none flex flex-col gap-4 mb-6">
         <div className="shrink-0">
            <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
               Daftar Berkas Arsip
            </h2>
-           <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
-              Cari dan kelola seluruh arsip korporasi yang terdaftar di database.
-           </p>
         </div>
         
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full">
            <div className="relative w-full md:w-36 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
