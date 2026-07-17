@@ -100,14 +100,14 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         
         // JIKA FETCH ERROR (Gagal Terhubung / Offline), AKTIFKAN FALLBACK SIMULASI LOKAL AGAR WEB TIDAK CRASH
         const errString = e.toString() || "";
-        if (errString.includes("Failed to fetch") || errString.includes("TypeError")) {
+        if (errString.includes("Failed to fetch")) {
            // Jika email demo admin, otomatis approved, lainnya butuh acc
            const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur") || email.includes("superadmin");
            
            if (!isApproved && selectedRole === 'user') {
               return {
                  success: false,
-                 error: "Mode Simulasi: Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung. Silakan login menggunakan email admin/pic untuk melakukan ACC."
+                 error: `Mode Simulasi: Akun staf biasa ini belum disetujui (ACC). Error detail: ${errString}`
               };
            }
 
@@ -135,7 +135,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      if (!isApproved && selectedRole === 'user') {
         return {
            success: false,
-           error: "Mode Simulasi: Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung. Silakan login menggunakan email admin/pic untuk melakukan ACC."
+           error: "Mode Simulasi (URL Kosong/Mock): Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung."
         };
      }
 
