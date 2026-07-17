@@ -1550,7 +1550,7 @@ export default function Dashboard() {
               tanggal_terima: row['Tanggal Terima Berkas'] || '',
               jangka_waktu: row['Jangka Waktu Aktif'] || '',
               keterangan: row['Keterangan'] || '',
-              isi_bundel: [],
+              isi_bundel: row['Isi (Lampiran)'] ? row['Isi (Lampiran)'].toString().split(',').map((s: string) => s.trim()).filter(Boolean) : [],
               status: row['Status'] || 'Aktif',
               link_berkas: row['Link PDF (Opsional)'] || '',
               gedung: row['Gedung'] || null,
