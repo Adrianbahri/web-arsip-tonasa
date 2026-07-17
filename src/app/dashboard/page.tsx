@@ -291,7 +291,11 @@ export default function Dashboard() {
                   kodeKlasifikasi: item.kode_klasifikasi,
                   jenisBerkas: item.jenis_berkas,
                   judulBerkas: item.judul_berkas,
-                  departemen: item.departemen,
+                  departemen: (() => {
+                     const d = (item.departemen || "").trim().toUpperCase();
+                     if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(d) || d.includes('KEUANG')) return 'KEUANGAN';
+                     return d;
+                  })(),
                   tahun: item.tahun,
                   tanggalTerima: item.tanggal_terima,
                   jangkaWaktu: item.jangka_waktu,
@@ -389,7 +393,10 @@ export default function Dashboard() {
       e.preventDefault();
       
       const statusVal = role === 'pic_gedung' ? 'Aktif' : 'Menunggu ACC';
-      const deptVal = formData.departemen;
+      let deptVal = (formData.departemen || "").trim().toUpperCase();
+      if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(deptVal) || deptVal.includes('KEUANG')) {
+          deptVal = 'KEUANGAN';
+      }
 
       if (editArchiveItem) {
          // UPDATE MODE
@@ -397,7 +404,7 @@ export default function Dashboard() {
             kode_klasifikasi: formData.kodeKlasifikasi,
             jenis_berkas: formData.jenisBerkas,
             judul_berkas: formData.judulBerkas,
-            departemen: formData.departemen,
+            departemen: deptVal,
             tahun: formData.tahun,
             tanggal_terima: formData.tanggalTerima,
             jangka_waktu: formData.jangkaWaktu,
@@ -445,7 +452,7 @@ export default function Dashboard() {
                      kodeKlasifikasi: formData.kodeKlasifikasi,
                      jenisBerkas: formData.jenisBerkas,
                      judulBerkas: formData.judulBerkas,
-                     departemen: formData.departemen,
+                     departemen: deptVal,
                      tahun: formData.tahun,
                      tanggalTerima: formData.tanggalTerima,
                      jangkaWaktu: formData.jangkaWaktu,
