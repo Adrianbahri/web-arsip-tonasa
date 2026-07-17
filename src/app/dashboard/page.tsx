@@ -253,33 +253,59 @@ export default function Dashboard() {
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
-           const { data, error } = await supabase
-              .from('archives')
-              .select('*')
-              .order('no', { ascending: true });
-           
-           if (!error && data) {
-              const formatted = data.map(item => ({
-                 id: item.id,
-                 no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
-                 kodeKlasifikasi: item.kode_klasifikasi,
-                 jenisBerkas: item.jenis_berkas,
-                 judulBerkas: item.judul_berkas,
-                 departemen: item.departemen,
-                 tahun: item.tahun,
-                 tanggalTerima: item.tanggal_terima,
-                 jangkaWaktu: item.jangka_waktu,
-                 gedung: item.gedung || "",
-                 lorong: item.lorong || "",
-                 rak: item.rak || "",
-                 keterangan: item.keterangan || "",
-                 isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
-                 status: item.status,
-                 linkBerkas: item.link_berkas,
-                 alasanPenolakan: item.alasan_penolakan || ""
-              }));
-              setArchives(formatted);
-           }
+            let allData: any[] = [];
+            let from = 0;
+            const step = 1000;
+            let hasMore = true;
+            let fetchError = false;
+
+            while (hasMore) {
+               const { data, error } = await supabase
+                  .from('archives')
+                  .select('*')
+                  .order('no', { ascending: true })
+                  .range(from, from + step - 1);
+               
+               if (error) {
+                  console.error("Error fetching archives:", error);
+                  fetchError = true;
+                  break;
+               }
+
+               if (data && data.length > 0) {
+                  allData = [...allData, ...data];
+                  if (data.length < step) {
+                     hasMore = false;
+                  } else {
+                     from += step;
+                  }
+               } else {
+                  hasMore = false;
+               }
+            }
+            
+            if (!fetchError) {
+               const formatted = allData.map(item => ({
+                  id: item.id,
+                  no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
+                  kodeKlasifikasi: item.kode_klasifikasi,
+                  jenisBerkas: item.jenis_berkas,
+                  judulBerkas: item.judul_berkas,
+                  departemen: item.departemen,
+                  tahun: item.tahun,
+                  tanggalTerima: item.tanggal_terima,
+                  jangkaWaktu: item.jangka_waktu,
+                  gedung: item.gedung || "",
+                  lorong: item.lorong || "",
+                  rak: item.rak || "",
+                  keterangan: item.keterangan || "",
+                  isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
+                  status: item.status,
+                  linkBerkas: item.link_berkas,
+                  alasanPenolakan: item.alasan_penolakan || ""
+               }));
+               setArchives(formatted);
+            }
         }
      } catch (e) {
         console.warn("Supabase fetch failed, using mock data fallback:", e);
