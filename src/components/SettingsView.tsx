@@ -1,0 +1,390 @@
+"use client";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save } from "lucide-react";
+
+export default function SettingsView() {
+   const [activeTab, setActiveTab] = useState<"master" | "landing">("master");
+   
+   // Master Data State
+   const [departments, setDepartments] = useState<any[]>([]);
+   const [locations, setLocations] = useState<any[]>([]);
+   const [newDept, setNewDept] = useState("");
+   const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "" });
+   
+   // Landing Page State
+   const [landingConfig, setLandingConfig] = useState<any>(null);
+   const [savingLanding, setSavingLanding] = useState(false);
+
+   const [loading, setLoading] = useState(true);
+   const [message, setMessage] = useState("");
+
+   useEffect(() => {
+      fetchMasterData();
+   }, []);
+
+   const fetchMasterData = async () => {
+      setLoading(true);
+      const [deptRes, locRes, landingRes] = await Promise.all([
+         supabase.from('master_departments').select('*').order('name'),
+         supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
+         supabase.from('landing_page_config').select('*').eq('id', 'homepage').single()
+      ]);
+      
+      if (deptRes.data) setDepartments(deptRes.data);
+      if (locRes.data) setLocations(locRes.data);
+      if (landingRes.data) {
+         setLandingConfig(landingRes.data);
+         if (!landingRes.data.sop_items) {
+            setLandingConfig((prev: any) => ({ ...prev, sop_items: [] }));
+         }
+      } else {
+         setLandingConfig({
+            hero_title: '', hero_subtitle: '', hero_image_url: '',
+            sambutan_title: '', sambutan_text: '', sambutan_photo_url: '',
+            sop_title: '', sop_text: '', sop_items: [],
+            pic_title: '', pic_text: '', pic_photo_url: '', pic_whatsapp: '', pic_email: ''
+         });
+      }
+      setLoading(false);
+   };
+
+   // ================== MASTER DATA LOGIC ==================
+   const addDepartment = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newDept.trim()) return;
+      const { error } = await supabase.from('master_departments').insert([{ name: newDept.toUpperCase() }]);
+      if (error) setMessage("Gagal menambah departemen: " + error.message);
+      else { setMessage("Berhasil menambah departemen!"); setNewDept(""); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const deleteDepartment = async (id: string) => {
+      if (!confirm("Hapus departemen ini?")) return;
+      const { error } = await supabase.from('master_departments').delete().eq('id', id);
+      if (error) setMessage("Gagal menghapus: " + error.message);
+      else { setMessage("Departemen dihapus."); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const addLocation = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newLoc.gedung || !newLoc.lorong || !newLoc.rak) return;
+      const { error } = await supabase.from('master_locations').insert([newLoc]);
+      if (error) setMessage("Gagal menambah lokasi: " + error.message);
+      else { setMessage("Berhasil menambah lokasi rak!"); setNewLoc({ gedung: "A", lorong: "", rak: "" }); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const deleteLocation = async (id: string) => {
+      if (!confirm("Hapus lokasi rak ini?")) return;
+      const { error } = await supabase.from('master_locations').delete().eq('id', id);
+      if (error) setMessage("Gagal menghapus: " + error.message);
+      else { setMessage("Lokasi dihapus."); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   // ================== LANDING PAGE LOGIC ==================
+   const saveLandingConfig = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSavingLanding(true);
+      const { error } = await supabase.from('landing_page_config').update(landingConfig).eq('id', 'homepage');
+      if (error) setMessage("Gagal menyimpan tampilan: " + error.message);
+      else setMessage("Tampilan Website Berhasil Disimpan!");
+      setSavingLanding(false);
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const handleLandingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setLandingConfig((prev: any) => ({ ...prev, [name]: value }));
+   };
+
+   return (
+      <div className="space-y-6 pb-10 max-w-4xl">
+         <div className="flex flex-col gap-2 mb-2">
+            <h2 className="text-[24px] font-medium tracking-tight text-ink flex items-center gap-2">
+               <Settings size={24} className="text-primary" /> Pengaturan Sistem
+            </h2>
+            <p className="text-ink-mute text-[13px]">
+               Kelola data master dan sesuaikan tampilan landing page secara terpusat.
+            </p>
+         </div>
+
+         {/* Tabs Selector */}
+         <div className="flex gap-6 border-b border-hairline mb-6">
+            <button 
+               onClick={() => setActiveTab("master")}
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 ${
+                  activeTab === "master" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
+               }`}
+            >
+               <Grid size={16} /> Data Master
+            </button>
+            <button 
+               onClick={() => setActiveTab("landing")}
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 ${
+                  activeTab === "landing" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
+               }`}
+            >
+               <LayoutTemplate size={16} /> Tampilan Website
+            </button>
+         </div>
+
+         {message && (
+            <div className="bg-primary-light/10 border border-primary text-primary px-4 py-2 rounded-sm text-[13px] font-medium">
+               {message}
+            </div>
+         )}
+
+         {loading && <div className="text-[13px] text-ink-mute text-center py-10">Memuat data...</div>}
+
+         {!loading && activeTab === "master" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {/* MASTER DEPARTEMEN */}
+               <div className="bg-canvas border border-hairline rounded-sm p-5 shadow-xs">
+                  <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-4">
+                     <Building size={16} className="text-ink" />
+                     <h3 className="font-semibold text-[14px]">Master Departemen</h3>
+                  </div>
+                  
+                  <form onSubmit={addDepartment} className="flex gap-2 mb-5">
+                     <input 
+                        type="text" 
+                        placeholder="Tambah Departemen..." 
+                        value={newDept}
+                        onChange={(e) => setNewDept(e.target.value)}
+                        className="flex-1 bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-1.5 focus:outline-none focus:border-ink uppercase"
+                     />
+                     <button type="submit" className="bg-primary text-white px-3 py-1.5 rounded-sm hover:bg-primary-deep flex items-center justify-center shrink-0">
+                        <Plus size={16} />
+                     </button>
+                  </form>
+
+                  <ul className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                     {departments.map((d) => (
+                        <li key={d.id} className="flex justify-between items-center bg-canvas-soft border border-hairline p-2 rounded-xs text-[13px]">
+                           <span className="font-medium text-ink">{d.name}</span>
+                           <button onClick={() => deleteDepartment(d.id)} className="text-red-500 hover:text-red-700 p-1 bg-white border border-hairline rounded-xs">
+                              <Trash2 size={14} />
+                           </button>
+                        </li>
+                     ))}
+                     {departments.length === 0 && <div className="text-[12px] text-ink-mute text-center">Belum ada data</div>}
+                  </ul>
+               </div>
+
+               {/* MASTER LOKASI */}
+               <div className="bg-canvas border border-hairline rounded-sm p-5 shadow-xs">
+                  <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-4">
+                     <MapPin size={16} className="text-ink" />
+                     <h3 className="font-semibold text-[14px]">Struktur Lokasi Rak</h3>
+                  </div>
+                  
+                  <form onSubmit={addLocation} className="flex flex-col gap-2 mb-5">
+                     <div className="flex gap-2">
+                        <select 
+                           value={newLoc.gedung}
+                           onChange={(e) => setNewLoc({...newLoc, gedung: e.target.value})}
+                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                        >
+                           <option value="A">Gedung A</option>
+                           <option value="B">Gedung B</option>
+                           <option value="C">Gedung C</option>
+                           <option value="D">Gedung D</option>
+                           <option value="E">Gedung E</option>
+                        </select>
+                        <input 
+                           type="text" 
+                           placeholder="Lorong (Contoh: L1)" 
+                           value={newLoc.lorong}
+                           onChange={(e) => setNewLoc({...newLoc, lorong: e.target.value})}
+                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                        />
+                        <input 
+                           type="text" 
+                           placeholder="Rak (Contoh: R1)" 
+                           value={newLoc.rak}
+                           onChange={(e) => setNewLoc({...newLoc, rak: e.target.value})}
+                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                        />
+                     </div>
+                     <button type="submit" className="w-full bg-primary text-white px-3 py-1.5 rounded-sm hover:bg-primary-deep flex items-center justify-center gap-2 text-[13px]">
+                        <Plus size={16} /> Tambah Lokasi Rak
+                     </button>
+                  </form>
+
+                  <ul className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                     {locations.map((l) => (
+                        <li key={l.id} className="flex justify-between items-center bg-canvas-soft border border-hairline p-2 rounded-xs text-[13px]">
+                           <span className="font-medium text-ink">Gedung {l.gedung} - {l.lorong} - {l.rak}</span>
+                           <button onClick={() => deleteLocation(l.id)} className="text-red-500 hover:text-red-700 p-1 bg-white border border-hairline rounded-xs">
+                              <Trash2 size={14} />
+                           </button>
+                        </li>
+                     ))}
+                     {locations.length === 0 && <div className="text-[12px] text-ink-mute text-center">Belum ada data</div>}
+                  </ul>
+               </div>
+            </div>
+         )}
+
+         {!loading && activeTab === "landing" && landingConfig && (
+            <form onSubmit={saveLandingConfig} className="space-y-6">
+               
+               {/* Hero Section */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-4">
+                  <h3 className="font-semibold text-[15px] border-b border-hairline pb-2 mb-4 text-ink">Hero Banner</h3>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Judul Utama</label>
+                     <input type="text" name="hero_title" value={landingConfig.hero_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Deskripsi Pendek</label>
+                     <textarea name="hero_subtitle" value={landingConfig.hero_subtitle} onChange={handleLandingChange} rows={2} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink"></textarea>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">URL Gambar Latar Belakang (Kosongkan untuk default)</label>
+                     <input type="text" name="hero_image_url" value={landingConfig.hero_image_url} onChange={handleLandingChange} placeholder="/hero-image.jpg" className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                  </div>
+               </div>
+
+               {/* Sambutan */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-4">
+                  <h3 className="font-semibold text-[15px] border-b border-hairline pb-2 mb-4 text-ink">Sambutan Pimpinan</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">Judul Sambutan</label>
+                        <input type="text" name="sambutan_title" value={landingConfig.sambutan_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Link GDrive/Imgur)</label>
+                        <input type="text" name="sambutan_photo_url" value={landingConfig.sambutan_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Teks Sambutan</label>
+                     <textarea name="sambutan_text" value={landingConfig.sambutan_text} onChange={handleLandingChange} rows={5} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink"></textarea>
+                  </div>
+               </div>
+
+               {/* SOP */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-4">
+                  <h3 className="font-semibold text-[15px] border-b border-hairline pb-2 mb-4 text-ink">Prosedur (SOP)</h3>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Judul Bagian Prosedur</label>
+                     <input type="text" name="sop_title" value={landingConfig.sop_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Deskripsi Pendek Prosedur</label>
+                     <textarea name="sop_text" value={landingConfig.sop_text} onChange={handleLandingChange} rows={2} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink"></textarea>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-hairline mt-4">
+                     <div className="flex items-center justify-between mb-3">
+                        <label className="text-[13px] font-semibold text-ink">Daftar Langkah SOP</label>
+                        <button 
+                           type="button" 
+                           onClick={() => {
+                              const currentItems = landingConfig.sop_items || [];
+                              setLandingConfig({ ...landingConfig, sop_items: [...currentItems, { title: "", desc: "" }] });
+                           }}
+                           className="bg-primary/10 text-primary hover:bg-primary hover:text-white px-2 py-1 rounded-sm text-[11px] font-semibold transition-colors flex items-center gap-1"
+                        >
+                           <Plus size={12} /> Tambah Langkah
+                        </button>
+                     </div>
+                     
+                     <div className="space-y-3">
+                        {(landingConfig.sop_items || []).map((item: any, idx: number) => (
+                           <div key={idx} className="flex gap-3 items-start bg-canvas-soft border border-hairline p-3 rounded-xs relative">
+                              <div className="font-bold text-primary/50 text-xl mt-1 w-6 shrink-0">
+                                 {String(idx + 1).padStart(2, '0')}
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                 <input 
+                                    type="text" 
+                                    placeholder="Judul Langkah (contoh: Pemilahan)" 
+                                    value={item.title}
+                                    onChange={(e) => {
+                                       const newItems = [...landingConfig.sop_items];
+                                       newItems[idx].title = e.target.value;
+                                       setLandingConfig({ ...landingConfig, sop_items: newItems });
+                                    }}
+                                    className="w-full bg-white border border-hairline text-[12px] font-semibold rounded-xs px-2 py-1.5 focus:border-ink" 
+                                 />
+                                 <textarea 
+                                    placeholder="Deskripsi..." 
+                                    value={item.desc}
+                                    onChange={(e) => {
+                                       const newItems = [...landingConfig.sop_items];
+                                       newItems[idx].desc = e.target.value;
+                                       setLandingConfig({ ...landingConfig, sop_items: newItems });
+                                    }}
+                                    rows={2} 
+                                    className="w-full bg-white border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:border-ink"
+                                 ></textarea>
+                              </div>
+                              <button 
+                                 type="button" 
+                                 onClick={() => {
+                                    const newItems = [...landingConfig.sop_items];
+                                    newItems.splice(idx, 1);
+                                    setLandingConfig({ ...landingConfig, sop_items: newItems });
+                                 }}
+                                 className="text-red-500 hover:bg-red-50 p-1.5 rounded-sm transition-colors border border-transparent hover:border-red-200"
+                              >
+                                 <Trash2 size={14} />
+                              </button>
+                           </div>
+                        ))}
+                        {(!landingConfig.sop_items || landingConfig.sop_items.length === 0) && (
+                           <div className="text-center py-4 text-ink-mute text-[12px] border border-dashed border-hairline rounded-sm">
+                              Belum ada langkah SOP. Silakan klik "Tambah Langkah".
+                           </div>
+                        )}
+                     </div>
+                  </div>
+               </div>
+
+               {/* PIC Gedung */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-4">
+                  <h3 className="font-semibold text-[15px] border-b border-hairline pb-2 mb-4 text-ink">PIC Gedung</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">Nama & Jabatan (Contoh: Syukur - PIC Gedung)</label>
+                        <input type="text" name="pic_title" value={landingConfig.pic_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Link GDrive/Imgur)</label>
+                        <input type="text" name="pic_photo_url" value={landingConfig.pic_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">Nomor Whatsapp (Awali dengan https://wa.me/...)</label>
+                        <input type="text" name="pic_whatsapp" value={landingConfig.pic_whatsapp} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[12px] font-medium text-ink-mute">Email (Awali dengan mailto:)</label>
+                        <input type="text" name="pic_email" value={landingConfig.pic_email} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     </div>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[12px] font-medium text-ink-mute">Teks Profil PIC</label>
+                     <textarea name="pic_text" value={landingConfig.pic_text} onChange={handleLandingChange} rows={3} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink"></textarea>
+                  </div>
+               </div>
+
+               <div className="flex justify-end pt-4">
+                  <button 
+                     type="submit" 
+                     disabled={savingLanding}
+                     className="bg-primary text-white font-semibold px-6 py-2 rounded-sm hover:bg-primary-deep flex items-center gap-2"
+                  >
+                     {savingLanding ? "Menyimpan..." : <><Save size={16} /> Simpan Perubahan</>}
+                  </button>
+               </div>
+            </form>
+         )}
+      </div>
+   );
+}

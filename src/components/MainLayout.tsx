@@ -12,7 +12,8 @@ import {
   Key,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  History
 } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["pic_gedung", "admin_dept", "user"] },
     { name: "Layanan Arsip", icon: Calendar, roles: ["pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["pic_gedung"] },
+    { name: "Pengaturan", icon: ShieldAlert, roles: ["pic_gedung"] },
+    { name: "Riwayat Log", icon: History, roles: ["pic_gedung", "admin_dept"] },
   ];
 
   const allowedMenuItems = menuItems.filter(item => item.roles.includes(role));

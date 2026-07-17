@@ -4,9 +4,13 @@ import { useRole } from "@/components/RoleContext";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
+import SettingsView from "@/components/SettingsView";
+import AuditLogView from "@/components/AuditLogView";
+import * as XLSX from "xlsx";
 import { 
   FileText, 
-  Clock, 
+  Clock,
+  Upload, 
   Archive, 
   ChevronRight, 
   Plus, 
@@ -244,18 +248,45 @@ export default function Dashboard() {
      }));
   };
 
+  const logActivity = async (action: string, details: string) => {
+     if (!user) return;
+     try {
+        await supabase.from('audit_logs').insert([{
+           user_id: user.id,
+           user_name: user.name || user.email,
+           action,
+           details
+        }]);
+     } catch (err) {
+        console.error("Failed to log activity", err);
+     }
+  };
 
   // Edit Mode State
   const [editArchiveItem, setEditArchiveItem] = useState<any | null>(null);
 
   // Mock / state database records
   const [archives, setArchives] = useState<any[]>([]);
+  const [masterDepartments, setMasterDepartments] = useState<string[]>(["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"]);
+  const [masterLocations, setMasterLocations] = useState<any[]>([]);
 
   // Fetch from Supabase
   const fetchArchives = async () => {
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
+            // Fetch Master Data
+            const [deptRes, locRes] = await Promise.all([
+               supabase.from('master_departments').select('name').order('name'),
+               supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak')
+            ]);
+            
+            if (deptRes.data && deptRes.data.length > 0) {
+               setMasterDepartments(deptRes.data.map(d => d.name));
+            }
+            if (locRes.data) {
+               setMasterLocations(locRes.data);
+            }
             let allData: any[] = [];
             let from = 0;
             const step = 1000;
@@ -445,6 +476,7 @@ export default function Dashboard() {
          }
 
          if (supabaseSuccess) {
+            logActivity('EDIT_ARCHIVE', `Memperbarui arsip: ${formData.judulBerkas}`);
             setSuccessMessage('Arsip berhasil diperbarui di Database!');
             fetchArchives();
          } else {
@@ -510,6 +542,7 @@ export default function Dashboard() {
          }
 
          if (supabaseSuccess) {
+            logActivity('CREATE_ARCHIVE', `Menambahkan arsip baru: ${formData.judulBerkas}`);
             setSuccessMessage(role === 'pic_gedung' ? 'Arsip berhasil disimpan di Database!' : 'Pengajuan dikirim ke Database!');
             fetchArchives();
          } else {
@@ -593,6 +626,7 @@ export default function Dashboard() {
      }
 
      if (supabaseSuccess) {
+        logActivity('APPROVE_ARCHIVE', `Menerima dan menempatkan arsip di Rak`);
         setSuccessMessage("Status berkas diperbarui di database!");
         fetchArchives();
      } else {
@@ -617,9 +651,8 @@ export default function Dashboard() {
    };
 
    const handleEditClick = (archive: any) => {
-      const predefinedDept = ["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"];
       const dept = archive.departemen || '';
-      setIsCustomDept(!predefinedDept.includes(dept.toUpperCase()) && dept !== '');
+      setIsCustomDept(!masterDepartments.includes(dept.toUpperCase()) && dept !== '');
       
       setEditArchiveItem(archive);
       setFormData({
@@ -658,7 +691,6 @@ export default function Dashboard() {
       setDeleteRequestModalOpen(false);
       setRequestToDelete(null);
 
-      let supabaseSuccess = false;
       try {
          const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
          if (!isMockUrl) {
@@ -667,20 +699,18 @@ export default function Dashboard() {
                .delete()
                .eq('id', id);
 
-            if (!error) {
-               supabaseSuccess = true;
+            if (error) {
+               console.error("Supabase Error deleting request:", error);
+               alert("Gagal menghapus pengajuan dari database: " + error.message);
+               return;
             }
          }
-      } catch (err) {
-         console.warn('Supabase delete request failed:', err);
-      }
-
-      if (supabaseSuccess) {
+         
          setSuccessMessage('Pengajuan berhasil dihapus dari database.');
          fetchRequests();
-      } else {
-         setRequestsList(prev => prev.filter(item => item.id !== id));
-         setSuccessMessage('Pengajuan berhasil dihapus (Simulasi).');
+      } catch (err: any) {
+         console.warn('Supabase delete request failed:', err);
+         alert("Terjadi kesalahan sistem saat menghapus: " + err.message);
       }
       setTimeout(() => setSuccessMessage(''), 1500);
    };
@@ -713,6 +743,7 @@ export default function Dashboard() {
       }
 
       if (supabaseSuccess) {
+         logActivity('DELETE_ARCHIVE', `Menghapus arsip dari sistem`);
          setSuccessMessage('Berkas berhasil dihapus dari database.');
          fetchArchives();
       } else {
@@ -1341,6 +1372,56 @@ export default function Dashboard() {
      document.body.removeChild(link);
   };
 
+  // IMPORT EXCEL (XLSX)
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const file = e.target.files?.[0];
+     if (!file) return;
+
+     const reader = new FileReader();
+     reader.onload = async (evt) => {
+        try {
+           const bstr = evt.target?.result;
+           const wb = XLSX.read(bstr, { type: 'binary' });
+           const wsname = wb.SheetNames[0];
+           const ws = wb.Sheets[wsname];
+           const data = XLSX.utils.sheet_to_json(ws);
+           
+           if (!data || data.length === 0) {
+              setSuccessMessage("File Excel kosong atau format tidak sesuai.");
+              return;
+           }
+
+           const recordsToInsert = data.map((row: any) => ({
+              kode_klasifikasi: row['Kode Klasifikasi'] || '',
+              jenis_berkas: row['Jenis Berkas'] || '',
+              judul_berkas: row['Judul Berkas'] || '',
+              departemen: row['Departemen'] || 'KEUANGAN',
+              tahun: String(row['Tahun'] || new Date().getFullYear()),
+              tanggal_terima: row['Tanggal Terima Berkas'] || '',
+              jangka_waktu: row['Jangka Waktu Aktif'] || '',
+              keterangan: row['Keterangan'] || '',
+              isi_bundel: [],
+              status: row['Status'] || 'Aktif',
+              link_berkas: row['Link PDF (Opsional)'] || '',
+              gedung: row['Gedung'] || null,
+              lorong: row['Lorong'] || null,
+              rak: row['Rak'] || null
+           }));
+
+           const { error } = await supabase.from('archives').insert(recordsToInsert);
+           if (error) throw error;
+
+           logActivity('IMPORT_EXCEL', `Mengimpor ${recordsToInsert.length} arsip dari Excel`);
+           setSuccessMessage(`Berhasil mengimpor ${recordsToInsert.length} arsip dari Excel!`);
+           fetchArchives();
+        } catch (error) {
+           console.error("Gagal import excel:", error);
+           setSuccessMessage("Gagal mengimpor Excel. Pastikan format tabel sesuai.");
+        }
+     };
+     reader.readAsBinaryString(file);
+  };
+
   const closeDetailModal = () => {
      setSelectedDetailItem(null);
      setDetailType(null);
@@ -1377,6 +1458,7 @@ export default function Dashboard() {
         }
 
         if (supabaseSuccess) {
+           logActivity('APPROVE_ARCHIVE', `Menerima dan menempatkan arsip di Rak`);
            setSuccessMessage("Status berkas diperbarui di database!");
            fetchArchives();
         } else {
@@ -1634,37 +1716,25 @@ export default function Dashboard() {
                         {selectedDetailItem.status === 'Menunggu ACC' && role === 'pic_gedung' ? (
                            <div className="border-t border-hairline pt-4 space-y-3">
                               <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Tentukan Lokasi Fisik Penyimpanan</h5>
-                              <div className="grid grid-cols-3 gap-3">
-                                 <div>
-                                    <label className="block text-[10px] font-semibold text-ink mb-1">Gedung</label>
-                                    <input 
-                                       type="text"
-                                       value={approvalLocation.gedung}
-                                       onChange={(e) => setApprovalLocation(prev => ({ ...prev, gedung: e.target.value }))}
-                                       placeholder="e.g. A"
-                                       className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
-                                    />
-                                 </div>
-                                 <div>
-                                    <label className="block text-[10px] font-semibold text-ink mb-1">Lorong</label>
-                                    <input 
-                                       type="text"
-                                       value={approvalLocation.lorong}
-                                       onChange={(e) => setApprovalLocation(prev => ({ ...prev, lorong: e.target.value }))}
-                                       placeholder="e.g. 20"
-                                       className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
-                                    />
-                                 </div>
-                                 <div>
-                                    <label className="block text-[10px] font-semibold text-ink mb-1">Rak</label>
-                                    <input 
-                                       type="text"
-                                       value={approvalLocation.rak}
-                                       onChange={(e) => setApprovalLocation(prev => ({ ...prev, rak: e.target.value }))}
-                                       placeholder="e.g. RAK G"
-                                       className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
-                                    />
-                                 </div>
+                              <div className="mt-2">
+                                 <label className="block text-[10px] font-semibold text-ink mb-1">Pilih Lokasi Rak</label>
+                                 <select 
+                                    className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
+                                    value={JSON.stringify(approvalLocation)}
+                                    onChange={(e) => {
+                                       try {
+                                          const loc = JSON.parse(e.target.value);
+                                          setApprovalLocation(loc);
+                                       } catch (err) {}
+                                    }}
+                                 >
+                                    <option value='{"gedung":"A","lorong":"","rak":""}' disabled>Pilih Lokasi Rak...</option>
+                                    {masterLocations.map(l => (
+                                       <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak})}>
+                                          Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak}
+                                       </option>
+                                    ))}
+                                 </select>
                               </div>
                            </div>
                         ) : (
@@ -2145,9 +2215,8 @@ export default function Dashboard() {
                  <div className="space-y-2">
                     <label className="block text-[13px] font-medium text-ink">Departemen</label>
                      {(() => {
-                        const predefinedDept = ["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"];
                         const currentDept = (formData.departemen || "").toUpperCase();
-                        const isPredefined = predefinedDept.includes(currentDept);
+                        const isPredefined = masterDepartments.includes(currentDept);
                         
                         return (
                            <div className="flex flex-col gap-2">
@@ -2167,7 +2236,7 @@ export default function Dashboard() {
                                  className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
                               >
                                  <option value="" disabled>Pilih Departemen</option>
-                                 {predefinedDept.map(dept => (
+                                 {masterDepartments.map(dept => (
                                     <option key={dept} value={dept}>{dept}</option>
                                  ))}
                                  {(role === 'pic_gedung' || isCustomDept || (!isPredefined && currentDept !== "")) && (
@@ -2577,43 +2646,25 @@ export default function Dashboard() {
                     <MapPin size={18} className="text-primary" />
                     <h3 className="font-semibold text-[14px]">Tentukan Lokasi Fisik Penyimpanan</h3>
                  </div>
-                 <div className="grid grid-cols-3 gap-3">
-                    <div>
-                       <label className="block text-[11px] font-medium text-ink mb-1">Gedung</label>
-                       <input 
-                          type="text" 
-                          name="gedung"
-                          value={approvalLocation.gedung}
-                          onChange={handleLocationChange}
-                          required
-                          placeholder="e.g. A"
-                          className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink"
-                       />
-                    </div>
-                    <div>
-                       <label className="block text-[11px] font-medium text-ink mb-1">Lorong</label>
-                       <input 
-                          type="text" 
-                          name="lorong"
-                          value={approvalLocation.lorong}
-                          onChange={handleLocationChange}
-                          required
-                          placeholder="e.g. 20"
-                          className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink"
-                       />
-                    </div>
-                    <div>
-                       <label className="block text-[11px] font-medium text-ink mb-1">Rak</label>
-                       <input 
-                          type="text" 
-                          name="rak"
-                          value={approvalLocation.rak}
-                          onChange={handleLocationChange}
-                          required
-                          placeholder="e.g. RAK G"
-                          className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink"
-                       />
-                    </div>
+                 <div className="mt-2">
+                    <label className="block text-[11px] font-medium text-ink mb-1">Pilih Lokasi Rak</label>
+                    <select 
+                       className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink text-ink font-mono"
+                       value={JSON.stringify(approvalLocation)}
+                       onChange={(e) => {
+                          try {
+                             const loc = JSON.parse(e.target.value);
+                             setApprovalLocation(loc);
+                          } catch (err) {}
+                       }}
+                    >
+                       <option value='{"gedung":"A","lorong":"","rak":""}' disabled>Pilih Lokasi Rak...</option>
+                       {masterLocations.map(l => (
+                          <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak})}>
+                             Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak}
+                          </option>
+                       ))}
+                    </select>
                  </div>
                  <div className="flex justify-end gap-2 pt-2 border-t border-hairline">
                     <button 
@@ -3029,6 +3080,16 @@ export default function Dashboard() {
             {renderServiceRejectModal()}
          </div>
      );
+  }
+
+  // PENGATURAN SISTEM (MASTER DATA)
+  if (activeMenu === "Pengaturan" && role === 'pic_gedung') {
+     return <SettingsView />;
+  }
+
+  // AUDIT TRAIL (RIWAYAT LOG)
+  if (activeMenu === "Riwayat Log" && (role === 'pic_gedung' || role === 'admin_dept')) {
+     return <AuditLogView />;
   }
 
   // 3. PERSETUJUAN USER / MANAJEMEN USER (PIC Gedung ONLY)
@@ -3711,6 +3772,13 @@ export default function Dashboard() {
               >
                  <Download size={14} /> Export Excel
               </button>
+           )}
+           
+           {role !== 'user' && (
+              <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
+                 <Upload size={14} /> Import Excel
+                 <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
+              </label>
            )}
            
            {role !== 'user' && (
