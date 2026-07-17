@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type Role = 'pic_gedung' | 'admin_dept' | 'user';
+type Role = 'superadmin' | 'pic_gedung' | 'admin_dept' | 'user';
 
 interface UserProfile {
   id?: string;
@@ -102,7 +102,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         const errString = e.toString() || "";
         if (errString.includes("Failed to fetch") || errString.includes("TypeError")) {
            // Jika email demo admin, otomatis approved, lainnya butuh acc
-           const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur");
+           const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur") || email.includes("superadmin");
            
            if (!isApproved && selectedRole === 'user') {
               return {
@@ -131,7 +131,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      }
 
      // FALLBACK SIMULASI MURNI JIKA URL MOCK
-     const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur");
+     const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur") || email.includes("superadmin");
      if (!isApproved && selectedRole === 'user') {
         return {
            success: false,
@@ -172,7 +172,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
         // SignUp ke Supabase Auth dengan metadata nama, role, dan default approved = false
         // PIC Gedung diset otomatis approved = true agar bisa menyetujui user lain
-        const isPic = selectedRole === 'pic_gedung';
+        const isPic = selectedRole === 'pic_gedung' || selectedRole === 'superadmin';
         
         const { data, error } = await supabase.auth.signUp({
            email,

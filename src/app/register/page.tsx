@@ -12,7 +12,7 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<'pic_gedung' | 'admin_dept' | 'user'>('user');
+  const [selectedRole, setSelectedRole] = useState<'superadmin' | 'pic_gedung' | 'admin_dept' | 'user'>('user');
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -144,7 +144,8 @@ export default function Register() {
                >
                   <option value="user">User Biasa (Staff)</option>
                   <option value="admin_dept">Admin Departemen (HRD/Keuangan)</option>
-                  <option value="pic_gedung">PIC Gedung Arsip</option>
+                  <option value="pic_gedung">Admin Gedung (PIC Arsip)</option>
+                  <option value="superadmin">Superadmin (System)</option>
                </select>
             </div>
 

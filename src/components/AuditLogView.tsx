@@ -13,9 +13,13 @@ export default function AuditLogView() {
 
    const fetchLogs = async () => {
       setLoading(true);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
       const { data, error } = await supabase
          .from('audit_logs')
          .select('*')
+         .gte('created_at', thirtyDaysAgo.toISOString())
          .order('created_at', { ascending: false })
          .limit(100); // Batasi 100 log terakhir
 

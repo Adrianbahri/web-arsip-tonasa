@@ -409,7 +409,7 @@ export default function Dashboard() {
 
   // Fetch profiles list when PIC navigates to Manajemen User
   useEffect(() => {
-     if (activeMenu === "Manajemen User" && role === 'pic_gedung') {
+     if (activeMenu === "Manajemen User" && role === 'superadmin') {
         fetchUsers();
      }
      if (activeMenu === "Layanan Arsip") {
@@ -435,7 +435,7 @@ export default function Dashboard() {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
-      const statusVal = role === 'pic_gedung' ? 'Aktif' : 'Menunggu ACC';
+      const statusVal = (role === 'superadmin' || role === 'pic_gedung') ? 'Aktif' : 'Menunggu ACC';
       let deptVal = (formData.departemen || "").trim().toUpperCase();
       if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(deptVal) || deptVal.includes('KEUANG')) {
           deptVal = 'KEUANGAN';
@@ -523,9 +523,9 @@ export default function Dashboard() {
             tahun: formData.tahun,
             tanggal_terima: formData.tanggalTerima,
             jangka_waktu: formData.jangkaWaktu,
-            gedung: role === 'pic_gedung' ? formData.gedung : null,
-            lorong: role === 'pic_gedung' ? formData.lorong : null,
-            rak: role === 'pic_gedung' ? formData.rak : null,
+            gedung: (role === 'superadmin' || role === 'pic_gedung') ? formData.gedung : null,
+            lorong: (role === 'superadmin' || role === 'pic_gedung') ? formData.lorong : null,
+            rak: (role === 'superadmin' || role === 'pic_gedung') ? formData.rak : null,
             status: statusVal,
             keterangan: formData.keterangan,
             isi_bundel: JSON.stringify(formData.isiBundel),
@@ -552,7 +552,7 @@ export default function Dashboard() {
 
          if (supabaseSuccess) {
             logActivity('CREATE_ARCHIVE', `Menambahkan arsip baru: ${formData.judulBerkas}`);
-            setSuccessMessage(role === 'pic_gedung' ? 'Arsip berhasil disimpan di Database!' : 'Pengajuan dikirim ke Database!');
+            setSuccessMessage((role === 'superadmin' || role === 'pic_gedung') ? 'Arsip berhasil disimpan di Database!' : 'Pengajuan dikirim ke Database!');
             fetchArchives();
          } else {
             const newRecord = {
@@ -564,16 +564,16 @@ export default function Dashboard() {
                tahun: formData.tahun,
                tanggalTerima: formData.tanggalTerima,
                jangkaWaktu: formData.jangkaWaktu,
-               gedung: role === 'pic_gedung' ? formData.gedung : '',
-               lorong: role === 'pic_gedung' ? formData.lorong : '',
-               rak: role === 'pic_gedung' ? formData.rak : '',
+               gedung: (role === 'superadmin' || role === 'pic_gedung') ? formData.gedung : '',
+               lorong: (role === 'superadmin' || role === 'pic_gedung') ? formData.lorong : '',
+               rak: (role === 'superadmin' || role === 'pic_gedung') ? formData.rak : '',
                status: statusVal,
                keterangan: formData.keterangan,
                isiBundel: formData.isiBundel,
                linkBerkas: formData.linkBerkas
             };
             setArchives(prev => [...prev, newRecord]);
-            setSuccessMessage(role === 'pic_gedung' ? 'Arsip disimpan (Simulasi)!' : 'Pengajuan terkirim (Simulasi)!');
+            setSuccessMessage((role === 'superadmin' || role === 'pic_gedung') ? 'Arsip disimpan (Simulasi)!' : 'Pengajuan terkirim (Simulasi)!');
          }
       }
       
@@ -594,7 +594,7 @@ export default function Dashboard() {
            lorong: "",
            rak: "",
            linkBerkas: "",
-           status: role === 'pic_gedung' ? "Aktif" : "Menunggu ACC",
+           status: (role === 'superadmin' || role === 'pic_gedung') ? "Aktif" : "Menunggu ACC",
            keterangan: "",
            isiBundel: []
         });
@@ -1363,7 +1363,8 @@ export default function Dashboard() {
   const totalPages = Math.ceil(filteredArchives.length / itemsPerPage) || 1;
 
   const getRoleName = (r: string) => {
-     if (r === 'pic_gedung') return 'Admin PIC Gedung';
+     if (r === 'superadmin') return 'Superadmin';
+     if (r === 'pic_gedung') return 'Admin Gedung';
      if (r === 'admin_dept') return 'Admin Departemen';
      return 'Staf Biasa';
   };
@@ -1373,6 +1374,7 @@ export default function Dashboard() {
      const active = archives.filter(item => item.status === 'Aktif').length;
      const inactive = archives.filter(item => item.status === 'Inaktif').length;
      return {
+        superadmin: { total: archives.length, active, inactive },
         pic_gedung: { total: archives.length, active, inactive },
         admin_dept: { total: archives.filter(i => i.departemen === 'KEUANGAN').length, active: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Aktif').length, inactive: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Inaktif').length },
         user: { total: archives.length, active, inactive }
@@ -1564,7 +1566,7 @@ export default function Dashboard() {
      };
 
      const renderFooterActions = () => {
-        if (detailType === 'archive' && selectedDetailItem.status === 'Menunggu ACC' && role === 'pic_gedung') {
+        if (detailType === 'archive' && selectedDetailItem.status === 'Menunggu ACC' && (role === 'superadmin' || role === 'pic_gedung')) {
            return (
               <div className="flex gap-2 w-full md:w-auto">
                  <button 
@@ -1589,7 +1591,7 @@ export default function Dashboard() {
            );
         }
 
-        if (detailType === 'user' && role === 'pic_gedung') {
+        if (detailType === 'user' && role === 'superadmin') {
            if (!selectedDetailItem.approved) {
               return (
                  <div className="flex gap-2 w-full md:w-auto">
@@ -1639,7 +1641,7 @@ export default function Dashboard() {
            }
         }
 
-        if (detailType === 'request' && role === 'pic_gedung') {
+        if (detailType === 'request' && (role === 'superadmin' || role === 'pic_gedung')) {
            if (selectedDetailItem.status === 'Menunggu ACC') {
               return (
                  <div className="flex gap-2 w-full md:w-auto">
@@ -1794,7 +1796,7 @@ export default function Dashboard() {
                            </div>
                         </div>
 
-                        {selectedDetailItem.status === 'Menunggu ACC' && role === 'pic_gedung' ? (
+                        {selectedDetailItem.status === 'Menunggu ACC' && (role === 'superadmin' || role === 'pic_gedung') ? (
                            <div className="border-t border-hairline pt-4 space-y-3">
                               <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Tentukan Lokasi Fisik Penyimpanan</h5>
                               <div className="mt-2">
@@ -1877,7 +1879,7 @@ export default function Dashboard() {
                         <div className="grid grid-cols-2 gap-4 border-t border-hairline pt-4 text-[13px]">
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Jabatan Peran</p>
-                              <p className="font-semibold text-ink mt-0.5 capitalize">{selectedDetailItem.role === 'pic_gedung' ? 'PIC Gedung' : selectedDetailItem.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}</p>
+                              <p className="font-semibold text-ink mt-0.5 capitalize">{selectedDetailItem.role === 'superadmin' ? 'Superadmin' : selectedDetailItem.role === 'pic_gedung' ? 'Admin Gedung' : selectedDetailItem.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}</p>
                            </div>
                            <div>
                               <p className="text-ink-mute text-[11px] uppercase tracking-wider font-semibold">Status ACC</p>
@@ -2104,7 +2106,7 @@ export default function Dashboard() {
                        >
                           <option value="user">User Biasa</option>
                           <option value="admin_dept">Admin Departemen</option>
-                          <option value="pic_gedung">PIC Gedung</option>
+                          <option value="pic_gedung">Admin Gedung</option>
                        </select>
                     </div>
                     <div>
@@ -2231,7 +2233,7 @@ export default function Dashboard() {
                  <h2 className="text-[18px] md:text-display-md font-medium tracking-tight text-ink">
                     {editArchiveItem 
                      ? 'Edit Berkas Arsip' 
-                     : (role === 'pic_gedung' ? 'Tambah Berkas Arsip' : 'Ajukan Berkas Arsip Baru')}
+                     : ((role === 'superadmin' || role === 'pic_gedung') ? 'Tambah Berkas Arsip' : 'Ajukan Berkas Arsip Baru')}
                  </h2>
                  <p className="text-ink-mute text-[12px] md:text-[14px]">
                     {editArchiveItem 
@@ -2320,7 +2322,7 @@ export default function Dashboard() {
                                  {masterDepartments.map(dept => (
                                     <option key={dept} value={dept}>{dept}</option>
                                  ))}
-                                 {(role === 'pic_gedung' || isCustomDept || (!isPredefined && currentDept !== "")) && (
+                                 {((role === 'superadmin' || role === 'pic_gedung') || isCustomDept || (!isPredefined && currentDept !== "")) && (
                                     <option value="LAINNYA">Lainnya (Kustom)...</option>
                                  )}
                               </select>
@@ -2412,7 +2414,7 @@ export default function Dashboard() {
                     />
                  </div>
 
-                 {role === 'pic_gedung' && (
+                 {(role === 'superadmin' || role === 'pic_gedung') && (
                     <>
                        <div className="space-y-2">
                           <label className="block text-[13px] font-medium text-ink">Gedung</label>
@@ -2453,7 +2455,7 @@ export default function Dashboard() {
                     </>
                  )}
 
-                 {role === 'pic_gedung' && (
+                 {(role === 'superadmin' || role === 'pic_gedung') && (
                     <div className="space-y-2">
                        <label className="block text-[13px] font-medium text-ink">Status Berkas</label>
                        <select 
@@ -2530,7 +2532,7 @@ export default function Dashboard() {
                  >
                     {editArchiveItem 
                      ? 'Simpan Perubahan' 
-                     : (role === 'pic_gedung' ? 'Simpan Berkas' : 'Ajukan Berkas')}
+                     : ((role === 'superadmin' || role === 'pic_gedung') ? 'Simpan Berkas' : 'Ajukan Berkas')}
                  </button>
               </div>
            </form>
@@ -2689,7 +2691,7 @@ export default function Dashboard() {
   }
 
   // 2. PERSETUJUAN (ACC) PAGE VIEW (PIC Gedung ONLY)
-  if (activeMenu === "Persetujuan (ACC)" && role === 'pic_gedung') {
+  if (activeMenu === "Persetujuan (ACC)" && (role === 'superadmin' || role === 'pic_gedung')) {
      const pendingSubmissions = archives.filter(item => item.status === "Menunggu ACC");
      
      return (
@@ -2930,7 +2932,7 @@ export default function Dashboard() {
 
   // 2.5 LAYANAN ARSIP (PEMINJAMAN & KUNJUNGAN LIST VIEW FOR ALL ROLES)
   if (activeMenu === "Layanan Arsip") {
-     const filteredRequests = role === 'pic_gedung' ? requestsList : requestsList.filter(req => req.user_name === user?.name);
+     const filteredRequests = (role === 'superadmin' || role === 'pic_gedung') ? requestsList : requestsList.filter(req => req.user_name === user?.name);
 
      return (
         <div className="flex flex-col h-full w-full">
@@ -2946,7 +2948,7 @@ export default function Dashboard() {
                  </p>
               </div>
 
-              {role !== 'pic_gedung' && (
+              {(role !== 'superadmin' && role !== 'pic_gedung') && (
                  <button 
                      onClick={() => setShowServiceForm(true)}
                      className="bg-primary hover:bg-primary-deep text-[12px] text-on-primary font-medium px-3 py-1.5 rounded-sm transition-colors flex items-center gap-2 self-start md:self-auto"
@@ -2978,7 +2980,7 @@ export default function Dashboard() {
                        <th className="p-3 text-center">Tanggal / Waktu</th>
                        <th className="p-3">Keperluan</th>
                        <th className="p-3 text-center">Status</th>
-                       {role === 'pic_gedung' && <th className="p-3 text-center">Tindakan</th>}
+                       {(role === 'superadmin' || role === 'pic_gedung') && <th className="p-3 text-center">Tindakan</th>}
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-hairline">
@@ -3026,7 +3028,7 @@ export default function Dashboard() {
                              <td className="p-3 text-center">
                                 <StatusBadge status={req.status} alasanPenolakan={req.reject_reason} />
                              </td>
-                             {role === 'pic_gedung' && (
+                             {(role === 'superadmin' || role === 'pic_gedung') && (
                                 <td className="p-3">
                                    <div className="flex items-center justify-center gap-2">
                                       {req.status === 'Menunggu ACC' ? (
@@ -3069,7 +3071,7 @@ export default function Dashboard() {
                        ))
                     ) : (
                        <tr>
-                          <td colSpan={role === 'pic_gedung' ? 8 : 7} className="p-8 text-center text-ink-mute text-[14px]">
+                          <td colSpan={(role === 'superadmin' || role === 'pic_gedung') ? 8 : 7} className="p-8 text-center text-ink-mute text-[14px]">
                              Tidak ada riwayat pengajuan layanan saat ini.
                           </td>
                        </tr>
@@ -3114,7 +3116,7 @@ export default function Dashboard() {
                                  : `Jadwal: ${formatDate(req.date)} (${req.time_or_return})`}
                           </p>
                        </div>
-                       {role === 'pic_gedung' && (
+                       {(role === 'superadmin' || role === 'pic_gedung') && (
                           <div className="flex gap-2 pt-2 border-t border-hairline">
                              {req.status === 'Menunggu ACC' ? (
                                 <>
@@ -3166,17 +3168,17 @@ export default function Dashboard() {
   }
 
   // PENGATURAN SISTEM (MASTER DATA)
-  if (activeMenu === "Pengaturan" && role === 'pic_gedung') {
+  if (activeMenu === "Pengaturan" && role === 'superadmin') {
      return <SettingsView />;
   }
 
   // AUDIT TRAIL (RIWAYAT LOG)
-  if (activeMenu === "Riwayat Log" && (role === 'pic_gedung' || role === 'admin_dept')) {
+  if (activeMenu === "Riwayat Log" && role === 'superadmin') {
      return <AuditLogView />;
   }
 
   // 3. PERSETUJUAN USER / MANAJEMEN USER (PIC Gedung ONLY)
-  if (activeMenu === "Manajemen User" && role === 'pic_gedung') {
+  if (activeMenu === "Manajemen User" && role === 'superadmin') {
      const pendingUsers = usersList.filter(u => !u.approved);
      const approvedUsers = usersList.filter(u => u.approved);
 
@@ -3363,7 +3365,7 @@ export default function Dashboard() {
                              <td className="p-3 font-mono text-ink-mute">{item.email}</td>
                              <td className="p-3">
                                 <span className="font-mono text-xs bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize">
-                                   {item.role === 'pic_gedung' ? 'Admin PIC Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                                   {item.role === 'superadmin' ? 'Superadmin' : item.role === 'pic_gedung' ? 'Admin Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
                                 </span>
                              </td>
                              <td className="p-3 text-center">
@@ -3373,7 +3375,7 @@ export default function Dashboard() {
                              </td>
                              <td className="p-3">
                                 <div className="flex items-center justify-center gap-3">
-                                   {item.role !== 'pic_gedung' ? (
+                                   {item.role !== 'superadmin' ? (
                                       <>
                                          <button 
                                             onClick={() => handleResetUserPassword(item.name, item.email)}
@@ -3423,14 +3425,14 @@ export default function Dashboard() {
                              <h4 className="font-semibold text-[14px] text-ink truncate">{item.name}</h4>
                              <p className="font-mono text-[11px] text-ink-mute truncate">{item.email}</p>
                              <span className="font-mono text-[9px] bg-hairline-cool px-1.5 py-0.5 rounded-xs text-ink capitalize mt-1 inline-block">
-                                {item.role === 'pic_gedung' ? 'Admin PIC Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
+                                {item.role === 'superadmin' ? 'Superadmin' : item.role === 'pic_gedung' ? 'Admin Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
                              </span>
                           </div>
                           <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2 py-0.5 rounded-full font-medium">
                              Aktif
                           </span>
                        </div>
-                       {item.role !== 'pic_gedung' && (
+                       {item.role !== 'superadmin' && (
                           <div className="flex gap-2 pt-2 border-t border-hairline">
                              <button 
                                 onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
@@ -3529,7 +3531,7 @@ export default function Dashboard() {
   }
 
   // 4. VIEW: DASHBOARD (HOME SCREEN FOR ADMINS)
-  if (activeMenu === "Dashboard" && role !== 'user') {
+  if (activeMenu === "Dashboard") {
      const pendingCount = archives.filter(item => item.status === "Menunggu ACC").length;
      const pendingUsersCount = usersList.filter(u => !u.approved).length;
      const pendingRequestsCount = requestsList.filter(r => r.status === "Menunggu ACC").length;
@@ -3539,14 +3541,14 @@ export default function Dashboard() {
            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
              <div className="shrink-0">
                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink">
-                   Selamat Datang, {user?.name || "Admin PIC Gedung"}.
+                   Selamat Datang, {user?.name || (role === 'superadmin' ? "Superadmin" : role === 'pic_gedung' ? "Admin Gedung" : role === 'admin_dept' ? "Admin Departemen" : "User") }.
                 </h2>
                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
                    Kelola arsip korporasi Anda dengan presisi.
                 </p>
              </div>
              <div className="flex gap-3">
-                {role === 'pic_gedung' && (
+                {(role === 'superadmin' || role === 'pic_gedung') && (
                   <button className="btn-outline flex items-center gap-2">
                     <FileText size={16} /> Laporan Bulanan
                   </button>
@@ -3562,7 +3564,7 @@ export default function Dashboard() {
 
            {/* Alerts for Pending Submissions and Pending User Approvals */}
            <div className="space-y-3">
-              {role === 'pic_gedung' && pendingCount > 0 && (
+              {(role === 'superadmin' || role === 'pic_gedung') && pendingCount > 0 && (
                  <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Clock className="text-amber-600" />
@@ -3580,7 +3582,7 @@ export default function Dashboard() {
                  </div>
               )}
 
-              {role === 'pic_gedung' && pendingRequestsCount > 0 && (
+              {(role === 'superadmin' || role === 'pic_gedung') && pendingRequestsCount > 0 && (
                  <div className="bg-purple-50 border border-purple-200 text-purple-800 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Calendar className="text-purple-600" />
@@ -3598,7 +3600,7 @@ export default function Dashboard() {
                  </div>
               )}
 
-              {role === 'pic_gedung' && pendingUsersCount > 0 && (
+              {role === 'superadmin' && pendingUsersCount > 0 && (
                  <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Users className="text-blue-600" />
@@ -3622,7 +3624,7 @@ export default function Dashboard() {
                  <div className="flex items-center gap-2 mb-4 text-ink-mute">
                     <FileText size={16} className="text-ink" />
                     <p className="text-[13px] font-medium">
-                       {role === 'pic_gedung' ? 'Total (Semua Dept)' : 'Total Arsip'}
+                       {(role === 'superadmin' || role === 'pic_gedung') ? 'Total (Semua Dept)' : 'Total Arsip'}
                     </p>
                  </div>
                  <h3 className="text-display-md text-ink">{stats[role].total}</h3>
@@ -3812,7 +3814,7 @@ export default function Dashboard() {
                  </>
               )}
 
-              {(role === 'admin_dept' || role === 'pic_gedung') && (
+              {(role === 'superadmin' || role === 'pic_gedung' || role === 'admin_dept') && (
                  <button 
                     onClick={() => setIsRecycleBin(!isRecycleBin)}
                     className={`col-span-2 md:col-span-1 w-full md:w-auto flex items-center justify-center gap-2 py-2 px-4 text-[14px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}

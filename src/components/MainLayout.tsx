@@ -28,13 +28,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // Simplified Menu items with new Layanan Arsip (peminjaman & kunjungan) accessible to all roles
   const menuItems = [
-    { name: "Dashboard", icon: LayoutDashboard, roles: ["pic_gedung", "admin_dept"] },
-    { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["pic_gedung"] },
-    { name: "Daftar Arsip", icon: FolderOpen, roles: ["pic_gedung", "admin_dept", "user"] },
-    { name: "Layanan Arsip", icon: Calendar, roles: ["pic_gedung", "admin_dept", "user"] },
-    { name: "Manajemen User", icon: Users, roles: ["pic_gedung"] },
-    { name: "Pengaturan", icon: ShieldAlert, roles: ["pic_gedung"] },
-    { name: "Riwayat Log", icon: History, roles: ["pic_gedung", "admin_dept"] },
+    { name: "Dashboard", icon: LayoutDashboard, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
+    { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["superadmin", "pic_gedung"] },
+    { name: "Daftar Arsip", icon: FolderOpen, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
+    { name: "Layanan Arsip", icon: Calendar, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
+    { name: "Manajemen User", icon: Users, roles: ["superadmin"] },
+    { name: "Pengaturan", icon: ShieldAlert, roles: ["superadmin"] },
+    { name: "Riwayat Log", icon: History, roles: ["superadmin"] },
   ];
 
   const allowedMenuItems = menuItems.filter(item => item.roles.includes(role));
@@ -99,7 +99,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <div className="flex-1 min-w-0">
                  <p className="text-[14px] font-semibold text-ink truncate leading-tight">{user?.name || "Syukur"}</p>
                  <p className="text-[12px] text-ink-mute leading-tight capitalize">
-                    {role === 'pic_gedung' ? 'Admin PIC Gedung' : role === 'admin_dept' ? 'Admin Departemen' : 'User Biasa'}
+                    {role === 'superadmin' ? 'Superadmin' : role === 'pic_gedung' ? 'Admin PIC Gedung' : role === 'admin_dept' ? 'Admin Departemen' : 'User Biasa'}
                  </p>
               </div>
            )}
