@@ -145,7 +145,6 @@ export default function Register() {
                   <option value="user">User Biasa (Staff)</option>
                   <option value="admin_dept">Admin Departemen (HRD/Keuangan)</option>
                   <option value="pic_gedung">Admin Gedung (PIC Arsip)</option>
-                  <option value="superadmin">Superadmin (System)</option>
                </select>
             </div>
 
