@@ -3884,7 +3884,7 @@ export default function Dashboard() {
            )}
            
            {role !== 'user' && (
-                           <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
+              <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
                  <Upload size={14} /> Import Excel
                  <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
               </label>
@@ -3898,15 +3898,7 @@ export default function Dashboard() {
                  <Trash2 size={14} /> {isRecycleBin ? 'Kembali ke Daftar' : 'Tempat Sampah'}
               </button>
            )}
-        </div>
-      </div>
 
-      {isRecycleBin && (
-         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[13px] flex items-center gap-2">
-            <Trash2 size={16} /> 
-            <strong>Mode Tempat Sampah:</strong> Anda sedang melihat arsip yang telah dihapus.
-         </div>
-      )}   
            {role !== 'user' && (
              <button 
                 onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
@@ -3917,6 +3909,13 @@ export default function Dashboard() {
            )}
         </div>
       </div>
+
+      {isRecycleBin && (
+         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[13px] flex items-center gap-2">
+            <Trash2 size={16} /> 
+            <strong>Mode Tempat Sampah:</strong> Anda sedang melihat arsip yang telah dihapus.
+         </div>
+      )}
 
       {/* Desktop Table View */}
       <div className="hidden md:flex flex-col flex-1 border border-hairline bg-canvas rounded-xs overflow-hidden min-h-0 mb-4">
