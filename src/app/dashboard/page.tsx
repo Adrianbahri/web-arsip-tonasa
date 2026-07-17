@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRole } from "@/components/RoleContext";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
 import { 
   FileText, 
   Clock, 
@@ -1267,16 +1268,30 @@ export default function Dashboard() {
   };
   const stats = getStats();
 
-  // Reactive Stats per Department for the Chart
-  const getDeptStats = () => {
-     const depts = ["KEUANGAN", "PERLENGKAPAN", "HRD", "LEGAL"];
-     return depts.map(dept => {
-        const count = archives.filter(item => item.departemen.toUpperCase() === dept).length;
-        return { name: dept, count };
-     });
-  };
-  const deptStats = getDeptStats();
-  const maxDeptCount = Math.max(...deptStats.map(d => d.count), 1);
+  // Analytics Calculations
+  const uniqueDepartmentsForStats = Array.from(new Set(archives.map(a => a?.departemen).filter(Boolean)));
+  const deptStats = uniqueDepartmentsForStats.map(dept => ({
+      name: dept,
+      count: archives.filter(item => item.departemen.toUpperCase() === dept.toUpperCase()).length
+  })).sort((a, b) => b.count - a.count).slice(0, 7); // Top 7 departments
+
+  // Calculate Yearly Trend
+  const yearlyDataMap = archives.reduce((acc, item) => {
+      const year = item.tahun || new Date().getFullYear().toString();
+      if (!acc[year]) acc[year] = 0;
+      acc[year]++;
+      return acc;
+  }, {} as Record<string, number>);
+  const yearlyTrendData = Object.keys(yearlyDataMap)
+      .sort((a, b) => a.localeCompare(b))
+      .map(year => ({ year, count: yearlyDataMap[year] }));
+
+  // Summary Metrics
+  const totalArchives = archives.length;
+  const totalActiveDepts = uniqueDepartmentsForStats.length;
+  const pendingApprovals = archives.filter(item => item.status === 'Menunggu ACC').length;
+  const currentYear = new Date().getFullYear().toString();
+  const archivesThisYear = yearlyDataMap[currentYear] || 0;
 
   // EXPORT EXCEL (CSV)
   const handleExportExcel = () => {
@@ -3489,46 +3504,87 @@ export default function Dashboard() {
               </div>
            </div>
 
-           {/* STATS CHART CARD (REPLACES RECENT ARCHIVES LIST) */}
-           <div className="bg-canvas border border-hairline rounded-sm p-6 space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-hairline">
-                 <div>
-                    <h3 className="text-[15px] font-bold text-ink tracking-tight">Statistik Arsip per Departemen</h3>
-                    <p className="text-[12px] text-ink-mute">Perbandingan jumlah dokumen kearsipan yang tersimpan aktif di dalam sistem.</p>
+           {/* SUMMARY CARDS */}
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-canvas border border-hairline rounded-sm p-4 flex flex-col gap-2 shadow-xs hover:shadow-sm transition-shadow">
+                 <div className="flex items-center justify-between text-ink-mute">
+                    <span className="text-[12px] font-semibold uppercase tracking-wider">Total Arsip</span>
+                    <Archive size={16} />
                  </div>
-                 <div className="flex items-center gap-1.5 text-[11px] font-semibold text-ink-mute bg-canvas-soft border border-hairline px-2.5 py-1 rounded-xs">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Total Berkas
-                 </div>
+                 <span className="text-3xl font-bold text-ink">{totalArchives}</span>
               </div>
+              <div className="bg-canvas border border-hairline rounded-sm p-4 flex flex-col gap-2 shadow-xs hover:shadow-sm transition-shadow">
+                 <div className="flex items-center justify-between text-ink-mute">
+                    <span className="text-[12px] font-semibold uppercase tracking-wider">Departemen Aktif</span>
+                    <Users size={16} />
+                 </div>
+                 <span className="text-3xl font-bold text-ink">{totalActiveDepts}</span>
+              </div>
+              <div className="bg-canvas border border-hairline rounded-sm p-4 flex flex-col gap-2 shadow-xs hover:shadow-sm transition-shadow">
+                 <div className="flex items-center justify-between text-ink-mute">
+                    <span className="text-[12px] font-semibold uppercase tracking-wider">Arsip {currentYear}</span>
+                    <Calendar size={16} />
+                 </div>
+                 <span className="text-3xl font-bold text-ink">{archivesThisYear}</span>
+              </div>
+              <div className="bg-canvas border border-hairline rounded-sm p-4 flex flex-col gap-2 shadow-xs hover:shadow-sm transition-shadow">
+                 <div className="flex items-center justify-between text-ink-mute">
+                    <span className="text-[12px] font-semibold uppercase tracking-wider">Menunggu ACC</span>
+                    <Clock size={16} className="text-amber-500" />
+                 </div>
+                 <span className="text-3xl font-bold text-amber-600">{pendingApprovals}</span>
+              </div>
+           </div>
 
-              {/* Grid Bar Chart with custom rich styling */}
-              <div className="space-y-5">
-                 {deptStats.map((dept) => {
-                    const percentage = (dept.count / maxDeptCount) * 100;
-                    return (
-                       <div key={dept.name} className="space-y-1.5 group">
-                          <div className="flex justify-between items-center text-[12px]">
-                             <span className="font-semibold text-ink group-hover:text-primary transition-colors tracking-tight">{dept.name}</span>
-                             <span className="font-mono font-bold text-ink bg-canvas-soft border border-hairline px-2 py-0.5 rounded-xs text-[11px]">{dept.count} Berkas</span>
-                          </div>
-                          <div className="w-full h-8 bg-canvas-soft border border-hairline rounded-xs overflow-hidden relative">
-                             {/* Animated Gradient Bar Fill */}
-                             <div 
-                                style={{ width: `${percentage}%` }} 
-                                className="h-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-500 ease-out flex items-center justify-end px-3 relative min-w-[20px]"
-                             >
-                                {percentage > 12 && (
-                                   <span className="text-[10px] font-extrabold text-white relative z-10 font-mono">
-                                      {Math.round(percentage)}%
-                                   </span>
-                                )}
-                             </div>
-                          </div>
-                       </div>
-                    );
-                 })}
-              </div>
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               {/* BAR CHART */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 flex flex-col">
+                  <div className="mb-6">
+                     <h3 className="text-[15px] font-bold text-ink tracking-tight">Statistik per Departemen</h3>
+                     <p className="text-[12px] text-ink-mute">Total arsip untuk 7 departemen teratas</p>
+                  </div>
+                  <div className="h-[300px] w-full">
+                     <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={deptStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                           <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <Tooltip 
+                              cursor={{ fill: '#F3F4F6' }} 
+                              contentStyle={{ borderRadius: '4px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: 'bold' }} 
+                           />
+                           <Bar dataKey="count" fill="#E11D48" radius={[4, 4, 0, 0]} barSize={32} />
+                        </BarChart>
+                     </ResponsiveContainer>
+                  </div>
+               </div>
+
+               {/* AREA CHART */}
+               <div className="bg-canvas border border-hairline rounded-sm p-6 flex flex-col">
+                  <div className="mb-6">
+                     <h3 className="text-[15px] font-bold text-ink tracking-tight">Tren Arsip per Tahun</h3>
+                     <p className="text-[12px] text-ink-mute">Pertumbuhan jumlah dokumen dari waktu ke waktu</p>
+                  </div>
+                  <div className="h-[300px] w-full">
+                     <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={yearlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                           <defs>
+                              <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                                 <stop offset="5%" stopColor="#E11D48" stopOpacity={0.3}/>
+                                 <stop offset="95%" stopColor="#E11D48" stopOpacity={0}/>
+                              </linearGradient>
+                           </defs>
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                           <XAxis dataKey="year" tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <Tooltip 
+                              contentStyle={{ borderRadius: '4px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: 'bold' }} 
+                           />
+                           <Area type="monotone" dataKey="count" stroke="#E11D48" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                        </AreaChart>
+                     </ResponsiveContainer>
+                  </div>
+               </div>
            </div>
         </div>
      );
