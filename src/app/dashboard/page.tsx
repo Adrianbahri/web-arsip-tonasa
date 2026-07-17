@@ -3832,7 +3832,7 @@ export default function Dashboard() {
            </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 w-full bg-canvas-soft p-3 rounded-sm border border-hairline">
+        <div className="flex flex-wrap items-center gap-2 w-full">
            <div className="relative w-full md:w-64 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
@@ -3840,41 +3840,40 @@ export default function Dashboard() {
                  placeholder="Cari berkas, kode klasifikasi..." 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
+                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
-           <div className="flex items-center gap-2">
-              <div className="relative shrink-0">
-                 <input 
-                    type="text" 
-                    placeholder="Tahun" 
-                    value={yearFilter}
-                    onChange={(e) => setYearFilter(e.target.value)}
-                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
-                 />
-              </div>
-              
-              <div className="relative shrink-0 flex items-center gap-1">
-                 <input 
-                    type="text" 
-                    placeholder="Gedung" 
-                    value={gedungFilter}
-                    onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
-                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
-                 />
-                 <span className="text-ink-faint text-[12px] font-medium">-</span>
-                 <input 
-                    type="text" 
-                    placeholder="Lorong" 
-                    value={lorongFilter}
-                    onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
-                    className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink shadow-sm" 
-                 />
-              </div>
+           <div className="relative shrink-0">
+              <input 
+                 type="text" 
+                 placeholder="Tahun" 
+                 value={yearFilter}
+                 onChange={(e) => setYearFilter(e.target.value)}
+                 className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+           </div>
+           
+           <div className="relative shrink-0 flex items-center gap-1">
+              <input 
+                 type="text" 
+                 placeholder="Gedung" 
+                 value={gedungFilter}
+                 onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
+                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+              <span className="text-ink-faint text-[12px] font-medium">-</span>
+              <input 
+                 type="text" 
+                 placeholder="Lorong" 
+                 value={lorongFilter}
+                 onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
+                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+           </div>
 
-              <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-3 py-2 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer shadow-sm" onClick={() => setShowDeptFilter(!showDeptFilter)}>
-                 <Filter size={14} className="text-ink-mute" />
+           <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
+              <Filter size={14} className="text-ink-mute" />
                  <span className="text-[12px] text-ink font-medium select-none">
                     Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
                  </span>
