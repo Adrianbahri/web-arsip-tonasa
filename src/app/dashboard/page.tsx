@@ -2320,7 +2320,7 @@ export default function Dashboard() {
   // 1. ADD ARCHIVE FORM VIEW
   if (showAddForm) {
      return (
-        <div className="space-y-6 max-w-[800px] mx-auto pb-10">
+        <div className="space-y-6 w-full pb-10">
            <div className="pb-4 border-b border-hairline flex items-center gap-4">
               <button 
                  onClick={() => {
@@ -2661,7 +2661,7 @@ export default function Dashboard() {
   // 1.5 LAYANAN PEMINJAMAN / KUNJUNGAN FORM VIEW (NEW FORM FOR USERS)
   if (showServiceForm) {
      return (
-        <div className="space-y-6 max-w-[600px] mx-auto pb-10">
+        <div className="space-y-6 w-full pb-10">
            <div className="pb-4 border-b border-hairline flex items-center gap-4">
               <button 
                  onClick={() => setShowServiceForm(false)} 
