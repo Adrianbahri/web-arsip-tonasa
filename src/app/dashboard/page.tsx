@@ -3795,17 +3795,17 @@ export default function Dashboard() {
               Daftar Berkas Arsip
            </h2>
            
-           <div className="flex flex-wrap items-center gap-2">
+           <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full md:w-auto">
               {role !== 'user' && (
                  <>
                     <button 
                        onClick={handleExportExcel}
-                       className="border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                       className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
                     >
                        <Download size={14} /> Export
                     </button>
                     
-                    <label className="border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors cursor-pointer">
+                    <label className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors cursor-pointer">
                        <Upload size={14} /> Import
                        <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
                     </label>
@@ -3815,7 +3815,7 @@ export default function Dashboard() {
               {(role === 'admin_dept' || role === 'pic_gedung') && (
                  <button 
                     onClick={() => setIsRecycleBin(!isRecycleBin)}
-                    className={`flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
+                    className={`w-full md:w-auto flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
                  >
                     <Trash2 size={14} /> {isRecycleBin ? 'Kembali' : 'Sampah'}
                  </button>
@@ -3824,7 +3824,7 @@ export default function Dashboard() {
               {role !== 'user' && (
                 <button 
                    onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
-                   className="bg-primary hover:bg-primary-deep text-on-primary flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                   className="col-span-2 md:col-span-1 w-full md:w-auto bg-primary hover:bg-primary-deep text-on-primary flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
                 >
                    <Plus size={14} /> Tambah Berkas
                 </button>
@@ -3832,8 +3832,8 @@ export default function Dashboard() {
            </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2 w-full">
-           <div className="relative w-full md:w-64 shrink-0">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full mt-2 md:mt-0">
+           <div className="col-span-2 relative w-full md:w-64 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
                  type="text" 
@@ -3844,23 +3844,23 @@ export default function Dashboard() {
               />
            </div>
 
-           <div className="relative shrink-0">
+           <div className="relative w-full md:w-20 shrink-0">
               <input 
                  type="text" 
                  placeholder="Tahun" 
                  value={yearFilter}
                  onChange={(e) => setYearFilter(e.target.value)}
-                 className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
            
-           <div className="relative shrink-0 flex items-center gap-1">
+           <div className="relative w-full md:w-auto shrink-0 flex items-center gap-1">
               <input 
                  type="text" 
                  placeholder="Gedung" 
                  value={gedungFilter}
                  onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
-                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-1/2 md:w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
               <span className="text-ink-faint text-[12px] font-medium">-</span>
               <input 
@@ -3868,15 +3868,17 @@ export default function Dashboard() {
                  placeholder="Lorong" 
                  value={lorongFilter}
                  onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
-                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-1/2 md:w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
-           <div className="relative shrink-0 flex items-center gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
-              <Filter size={14} className="text-ink-mute" />
+           <div className="col-span-2 md:col-span-1 relative w-full md:w-auto shrink-0 flex items-center justify-between md:justify-start gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
+              <div className="flex items-center gap-2">
+                 <Filter size={14} className="text-ink-mute" />
                  <span className="text-[12px] text-ink font-medium select-none">
                     Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
                  </span>
+              </div>
                  
                  {showDeptFilter && (
                     <div 
