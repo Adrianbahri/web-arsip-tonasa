@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 type Role = 'pic_gedung' | 'admin_dept' | 'user';
 
 interface UserProfile {
+  id?: string;
   email: string;
   role: Role;
   name: string;
@@ -111,6 +112,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
            }
 
            const mockUser: UserProfile = {
+              id: 'mock-id-' + Math.random().toString(36).substring(7),
               email: email,
               role: selectedRole,
               name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
@@ -138,6 +140,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      }
 
      const mockUser: UserProfile = {
+        id: 'mock-id-' + Math.random().toString(36).substring(7),
         email: email,
         role: selectedRole,
         name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),

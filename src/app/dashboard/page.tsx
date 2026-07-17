@@ -30,7 +30,8 @@ import {
   Calendar,
   BookOpen,
   MapPin,
-  X
+  X,
+  RefreshCw
 } from "lucide-react";
 
 const formatDate = (dateStr: string) => {
@@ -95,12 +96,20 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
 
+  // Advanced Search Filters
+  const [yearFilter, setYearFilter] = useState("");
+  const [gedungFilter, setGedungFilter] = useState("");
+  const [lorongFilter, setLorongFilter] = useState("");
+  
+  // Recycle Bin State
+  const [isRecycleBin, setIsRecycleBin] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 100;
 
   useEffect(() => {
      setCurrentPage(1);
-  }, [searchQuery, statusFilter, departemenFilter, sortConfig]);
+  }, [searchQuery, statusFilter, departemenFilter, yearFilter, gedungFilter, lorongFilter, sortConfig, isRecycleBin]);
 
   const handleSort = (key: string) => {
      let direction: 'ascending' | 'descending' = 'ascending';
@@ -729,29 +738,85 @@ export default function Dashboard() {
             const queryField = isNoNumeric ? 'no' : 'id';
             const queryVal = isNoNumeric ? Number(no) : no;
 
+            // Soft Delete by setting deleted_at
             const { error } = await supabase
                .from('archives')
-               .delete()
+               .update({ deleted_at: new Date().toISOString() })
                .eq(queryField, queryVal);
 
             if (!error) {
                supabaseSuccess = true;
+               logActivity('Hapus Arsip', `Memindahkan arsip ${queryVal} ke tempat sampah`);
+            } else {
+               alert("Gagal memindahkan ke tempat sampah: " + error.message);
             }
          }
-      } catch (err) {
-         console.warn('Supabase delete failed:', err);
+      } catch (err: any) {
+         console.warn('Supabase delete skipped, fallback to mock delete:', err);
       }
 
-      if (supabaseSuccess) {
-         logActivity('DELETE_ARCHIVE', `Menghapus arsip dari sistem`);
-         setSuccessMessage('Berkas berhasil dihapus dari database.');
-         fetchArchives();
-      } else {
-         setArchives(prev => prev.filter(item => item.no !== no));
-         setSuccessMessage('Berkas berhasil dihapus (Simulasi).');
-      }
+      setArchives(archives.map(a => a.no === no || a.id === no ? { ...a, deleted_at: new Date().toISOString() } : a));
+      setSuccessMessage(supabaseSuccess ? 'Berhasil dipindahkan ke tempat sampah!' : 'Berhasil dipindahkan (Mode Simulasi)!');
       closeDetailModal();
-      setTimeout(() => setSuccessMessage(''), 1500);
+      setTimeout(() => setSuccessMessage(''), 3000);
+   };
+
+   const handleHardDeleteArchive = async (id: string | number) => {
+      if (!confirm("Apakah Anda yakin ingin menghapus data ini PERMANEN dari database? Data yang dihapus permanen tidak bisa dikembalikan.")) return;
+      
+      let supabaseSuccess = false;
+      try {
+         const isNoNumeric = !isNaN(Number(id));
+         const queryField = isNoNumeric ? 'no' : 'id';
+         const queryVal = isNoNumeric ? Number(id) : id;
+
+         const { error } = await supabase
+            .from('archives')
+            .delete()
+            .eq(queryField, queryVal);
+
+         if (!error) {
+            supabaseSuccess = true;
+            logActivity('Hapus Permanen', `Menghapus arsip ${queryVal} secara permanen dari sistem`);
+         } else {
+            alert("Gagal menghapus permanen: " + error.message);
+         }
+      } catch (err: any) {
+         console.warn('Supabase hard delete failed:', err);
+      }
+
+      setArchives(archives.filter(a => a.no !== id && a.id !== id));
+      setSuccessMessage(supabaseSuccess ? 'Data berhasil dihapus permanen!' : 'Dihapus permanen (Simulasi)');
+      closeDetailModal();
+      setTimeout(() => setSuccessMessage(''), 3000);
+   };
+
+   const handleRestoreArchive = async (id: string | number) => {
+      let supabaseSuccess = false;
+      try {
+         const isNoNumeric = !isNaN(Number(id));
+         const queryField = isNoNumeric ? 'no' : 'id';
+         const queryVal = isNoNumeric ? Number(id) : id;
+
+         const { error } = await supabase
+            .from('archives')
+            .update({ deleted_at: null })
+            .eq(queryField, queryVal);
+
+         if (!error) {
+            supabaseSuccess = true;
+            logActivity('Pulihkan Arsip', `Memulihkan arsip ${queryVal} dari tempat sampah`);
+         } else {
+            alert("Gagal memulihkan arsip: " + error.message);
+         }
+      } catch (err: any) {
+         console.warn('Supabase restore failed:', err);
+      }
+
+      setArchives(archives.map(a => a.no === id || a.id === id ? { ...a, deleted_at: null } : a));
+      setSuccessMessage(supabaseSuccess ? 'Arsip berhasil dipulihkan!' : 'Dipulihkan (Simulasi)');
+      closeDetailModal();
+      setTimeout(() => setSuccessMessage(''), 3000);
    };
 
    const handlePinjamClick = (archive: any) => {
@@ -1247,10 +1312,26 @@ export default function Dashboard() {
         return { ...item, _searchScore: score };
      })
      .filter(item => {
+        // Recycle Bin Filter
+        const isDeleted = item.deleted_at !== null && item.deleted_at !== undefined;
+        if (isRecycleBin && !isDeleted) return false;
+        if (!isRecycleBin && isDeleted) return false;
+        
+        // Departemen Role Filter for Recycle Bin (PIC sees all, Dept Admin sees only theirs)
+        if (isRecycleBin && role === 'admin_dept' && user?.name) {
+           const userDept = user.name.split('-')[1]?.trim()?.toUpperCase() || "";
+           if (userDept && item.departemen?.toUpperCase() !== userDept) return false;
+        }
+
         const matchesStatus = statusFilter === "Semua" || item.status === statusFilter;
         const matchesSearch = searchQuery === "" || item._searchScore > 0;
         const matchesDept = departemenFilter.length === 0 || departemenFilter.includes(item.departemen);
-        return matchesStatus && matchesSearch && matchesDept;
+        
+        const matchesYear = yearFilter === "" || (item.kurunWaktu && item.kurunWaktu.toString().includes(yearFilter));
+        const matchesGedung = gedungFilter === "" || item.gedung === gedungFilter;
+        const matchesLorong = lorongFilter === "" || item.lorong === lorongFilter;
+
+        return matchesStatus && matchesSearch && matchesDept && matchesYear && matchesGedung && matchesLorong;
      })
      .sort((a, b) => {
          if (sortConfig !== null) {
@@ -3717,7 +3798,7 @@ export default function Dashboard() {
         </div>
         
         <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
-           <div className="relative w-full md:w-48 shrink-0">
+           <div className="relative w-full md:w-36 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
                  type="text" 
@@ -3725,6 +3806,34 @@ export default function Dashboard() {
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                  className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+           </div>
+
+           <div className="relative shrink-0">
+              <input 
+                 type="text" 
+                 placeholder="Tahun" 
+                 value={yearFilter}
+                 onChange={(e) => setYearFilter(e.target.value)}
+                 className="w-20 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+           </div>
+           
+           <div className="relative shrink-0 flex items-center gap-1">
+              <input 
+                 type="text" 
+                 placeholder="Gedung" 
+                 value={gedungFilter}
+                 onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
+                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+              />
+              <span className="text-ink-faint">-</span>
+              <input 
+                 type="text" 
+                 placeholder="Lorong" 
+                 value={lorongFilter}
+                 onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
+                 className="w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
@@ -3775,12 +3884,29 @@ export default function Dashboard() {
            )}
            
            {role !== 'user' && (
-              <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
+                           <label className="bg-emerald-100 border border-emerald-300 hover:bg-emerald-200 text-emerald-800 shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
                  <Upload size={14} /> Import Excel
                  <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
               </label>
            )}
-           
+
+           {(role === 'admin_dept' || role === 'pic_gedung') && (
+              <button 
+                 onClick={() => setIsRecycleBin(!isRecycleBin)}
+                 className={`shrink-0 flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors w-full md:w-auto whitespace-nowrap ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
+              >
+                 <Trash2 size={14} /> {isRecycleBin ? 'Kembali ke Daftar' : 'Tempat Sampah'}
+              </button>
+           )}
+        </div>
+      </div>
+
+      {isRecycleBin && (
+         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[13px] flex items-center gap-2">
+            <Trash2 size={16} /> 
+            <strong>Mode Tempat Sampah:</strong> Anda sedang melihat arsip yang telah dihapus.
+         </div>
+      )}   
            {role !== 'user' && (
              <button 
                 onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
@@ -3896,26 +4022,53 @@ export default function Dashboard() {
                                  )
                               ) : (
                                  <>
-                                    <button 
-                                       onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleEditClick(archive);
-                                       }}
-                                       className="p-1 text-ink-mute hover:text-ink hover:bg-canvas-soft rounded-sm transition-colors"
-                                       title="Edit"
-                                    >
-                                       <Edit3 size={14} />
-                                    </button>
-                                    <button 
-                                       onClick={(e) => {
-                                          e.stopPropagation();
-                                          confirmDeleteArchive(archive.no);
-                                       }}
-                                       className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
-                                       title="Hapus"
-                                    >
-                                       <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
-                                    </button>
+                                    {isRecycleBin ? (
+                                       <>
+                                          <button 
+                                             onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRestoreArchive(archive.no || archive.id);
+                                             }}
+                                             className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-sm transition-colors"
+                                             title="Pulihkan"
+                                          >
+                                             <RefreshCw size={14} />
+                                          </button>
+                                          <button 
+                                             onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleHardDeleteArchive(archive.no || archive.id);
+                                             }}
+                                             className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
+                                             title="Hapus Permanen"
+                                          >
+                                             <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
+                                          </button>
+                                       </>
+                                    ) : (
+                                       <>
+                                          <button 
+                                             onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditClick(archive);
+                                             }}
+                                             className="p-1 text-ink-mute hover:text-ink hover:bg-canvas-soft rounded-sm transition-colors"
+                                             title="Edit"
+                                          >
+                                             <Edit3 size={14} />
+                                          </button>
+                                          <button 
+                                             onClick={(e) => {
+                                                e.stopPropagation();
+                                                confirmDeleteArchive(archive.no);
+                                             }}
+                                             className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
+                                             title="Hapus"
+                                          >
+                                             <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
+                                          </button>
+                                       </>
+                                    )}
                                  </>
                               )}
                            </div>
@@ -4000,24 +4153,49 @@ export default function Dashboard() {
                         )
                      ) : (
                         <div className="flex gap-2">
-                           <button 
-                              onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleEditClick(archive);
-                              }}
-                              className="flex items-center gap-1 border border-hairline hover:bg-canvas-soft px-2 py-1 rounded-sm text-[10px] text-ink font-medium transition-colors"
-                           >
-                              <Edit3 size={10} /> Edit
-                           </button>
-                           <button 
-                              onClick={(e) => {
-                                 e.stopPropagation();
-                                 confirmDeleteArchive(archive.no);
-                              }}
-                              className="flex items-center gap-1 border border-transparent bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
-                           >
-                              <Trash2 size={10} /> Hapus
-                           </button>
+                           {isRecycleBin ? (
+                              <>
+                                 <button 
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleRestoreArchive(archive.no || archive.id);
+                                    }}
+                                    className="flex items-center gap-1 border border-emerald-600 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
+                                 >
+                                    <RefreshCw size={10} /> Pulihkan
+                                 </button>
+                                 <button 
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleHardDeleteArchive(archive.no || archive.id);
+                                    }}
+                                    className="flex items-center gap-1 border border-transparent bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
+                                 >
+                                    <Trash2 size={10} /> Hapus Permanen
+                                 </button>
+                              </>
+                           ) : (
+                              <>
+                                 <button 
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleEditClick(archive);
+                                    }}
+                                    className="flex items-center gap-1 border border-hairline hover:bg-canvas-soft px-2 py-1 rounded-sm text-[10px] text-ink font-medium transition-colors"
+                                 >
+                                    <Edit3 size={10} /> Edit
+                                 </button>
+                                 <button 
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       confirmDeleteArchive(archive.no);
+                                    }}
+                                    className="flex items-center gap-1 border border-transparent bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
+                                 >
+                                    <Trash2 size={10} /> Hapus
+                                 </button>
+                              </>
+                           )}
                         </div>
                      )}
                   </div>
