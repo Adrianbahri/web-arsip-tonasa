@@ -148,6 +148,9 @@ export default function Dashboard() {
   const [newUserForm, setNewUserForm] = useState({ name: '', email: '', role: 'user', password: '' });
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [addUserError, setAddUserError] = useState("");
+  const [showChangeRoleModal, setShowChangeRoleModal] = useState(false);
+  const [userToChangeRole, setUserToChangeRole] = useState<any>(null);
+  const [newRole, setNewRole] = useState<string>("user");
 
   // Layanan Peminjaman & Kunjungan State
   const [requestsList, setRequestsList] = useState<any[]>([]);
@@ -1003,10 +1006,74 @@ export default function Dashboard() {
      setTimeout(() => setSuccessMessage(""), 1500);
   };
 
-  // Reset User Password (PIC Gedung ONLY)
-  const handleResetUserPassword = (name: string, email: string) => {
-     setSuccessMessage(`Sukses! Kata sandi untuk ${name} (${email}) berhasil di-reset menjadi kata sandi bawaan: 'Tonasa123'. Silakan infokan ke pengguna.`);
-     setTimeout(() => setSuccessMessage(""), 6000);
+  // Cabut Akses (Blokir) Pengguna Aktif
+  const handleBlockUser = async (userId: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('profiles')
+              .update({ approved: false })
+              .eq('id', userId);
+           
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Akses pengguna berhasil dicabut (Diblokir).");
+        fetchUsers();
+     } else {
+        setUsersList(prev => prev.map(u => u.id === userId ? { ...u, approved: false } : u));
+        setSuccessMessage("Akses dicabut (Simulasi)!");
+     }
+     setTimeout(() => setSuccessMessage(""), 2000);
+  };
+
+  // Ubah Jabatan Pengguna Aktif
+  const handleChangeRole = async (userId: string, newRole: string) => {
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase
+              .from('profiles')
+              .update({ role: newRole })
+              .eq('id', userId);
+           
+           if (!error) supabaseSuccess = true;
+        }
+     } catch (err) {
+        console.error(err);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Jabatan pengguna berhasil diubah!");
+        fetchUsers();
+        setShowChangeRoleModal(false);
+     } else {
+        setUsersList(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+        setSuccessMessage("Jabatan diubah (Simulasi)!");
+        setShowChangeRoleModal(false);
+     }
+     setTimeout(() => setSuccessMessage(""), 2000);
+  };
+
+  // Reset User Password via Email
+  const handleResetUserPassword = async (name: string, email: string) => {
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           await supabase.auth.resetPasswordForEmail(email);
+        }
+     } catch (err) {
+        console.error(err);
+     }
+     setSuccessMessage(`Email berisi tautan reset sandi telah dikirimkan ke ${email}. Silakan infokan ke pengguna untuk mengecek kotak masuk/spam mereka.`);
+     setTimeout(() => setSuccessMessage(""), 5000);
   };
 
   // Layanan Peminjaman & Kunjungan: Submit Request
@@ -2144,6 +2211,57 @@ export default function Dashboard() {
      );
   };
 
+  const renderChangeRoleModal = () => {
+     if (!showChangeRoleModal || !userToChangeRole) return null;
+
+     return (
+        <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
+           <div className="bg-canvas border border-hairline rounded-sm shadow-xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
+              <div className="p-4 border-b border-hairline flex items-center justify-between bg-canvas-soft">
+                 <h3 className="font-semibold text-ink text-[14px]">Ubah Jabatan Pengguna</h3>
+                 <button onClick={() => setShowChangeRoleModal(false)} className="text-ink-mute hover:text-ink">
+                    <X size={18} />
+                 </button>
+              </div>
+              <div className="p-5">
+                 <div className="mb-4">
+                    <p className="text-[13px] text-ink-mute mb-1">Pengguna:</p>
+                    <p className="font-medium text-ink">{userToChangeRole.name}</p>
+                    <p className="text-[12px] text-ink-mute font-mono">{userToChangeRole.email}</p>
+                 </div>
+                 <div>
+                    <label className="block text-[13px] font-medium text-ink mb-1.5">Pilih Jabatan Baru</label>
+                    <select 
+                       value={newRole}
+                       onChange={(e) => setNewRole(e.target.value)}
+                       className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 outline-none focus:border-ink"
+                    >
+                       <option value="user">Staf Biasa</option>
+                       <option value="admin_dept">Admin Departemen</option>
+                       <option value="pic_gedung">Admin Gedung</option>
+                       <option value="superadmin">Superadmin</option>
+                    </select>
+                 </div>
+              </div>
+              <div className="p-4 border-t border-hairline bg-canvas-soft flex justify-end gap-3">
+                 <button 
+                    onClick={() => setShowChangeRoleModal(false)}
+                    className="px-4 py-2 text-[13px] font-semibold text-ink-mute hover:text-ink transition-colors"
+                 >
+                    Batal
+                 </button>
+                 <button 
+                    onClick={() => handleChangeRole(userToChangeRole.id, newRole)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-sm text-[13px] font-semibold transition-colors flex items-center gap-2"
+                 >
+                    Simpan Perubahan
+                 </button>
+              </div>
+           </div>
+        </div>
+     );
+  };
+
   {/* REJECT CONFIRMATION MODAL */}
   const renderRejectModal = () => {
     if (!rejectModalOpen) return null;
@@ -3262,7 +3380,7 @@ export default function Dashboard() {
                                       <button 
                                          onClick={(e) => {
                                             e.stopPropagation();
-                                            confirmRejectRequest(item.id);
+                                            handleRejectUser(item.id);
                                          }}
                                          className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-sm text-xs transition-colors flex-1"
                                       >
@@ -3378,7 +3496,19 @@ export default function Dashboard() {
                                    {item.role !== 'superadmin' ? (
                                       <>
                                          <button 
-                                            onClick={() => handleResetUserPassword(item.name, item.email)}
+                                            onClick={(e) => {
+                                               e.stopPropagation();
+                                               setUserToChangeRole(item);
+                                               setNewRole(item.role);
+                                               setShowChangeRoleModal(true);
+                                            }}
+                                            className="p-1 text-ink-mute hover:text-blue-700 transition-colors"
+                                            title="Ubah Jabatan Pengguna"
+                                         >
+                                            <Edit3 size={14} className="text-blue-600 hover:text-blue-800" />
+                                         </button>
+                                         <button 
+                                            onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
                                             className="p-1 text-ink-mute hover:text-amber-700 transition-colors"
                                             title="Reset Password Pengguna"
                                          >
@@ -3387,7 +3517,9 @@ export default function Dashboard() {
                                          <button 
                                             onClick={(e) => {
                                                e.stopPropagation();
-                                               confirmDeleteArchive(item.id);
+                                               if (confirm(`Apakah Anda yakin ingin MENCABUT AKSES (Blokir) pengguna ${item.name}?`)) {
+                                                  handleBlockUser(item.id);
+                                               }
                                             }}
                                             className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
                                             title="Cabut Akses Pengguna"
@@ -3433,17 +3565,34 @@ export default function Dashboard() {
                           </span>
                        </div>
                        {item.role !== 'superadmin' && (
-                          <div className="flex gap-2 pt-2 border-t border-hairline">
+                          <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline">
                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
-                                className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
-                                title="Reset Password"
+                                onClick={(e) => {
+                                   e.stopPropagation();
+                                   setUserToChangeRole(item);
+                                   setNewRole(item.role);
+                                   setShowChangeRoleModal(true);
+                                }}
+                                className="flex-1 min-w-[30%] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                title="Ubah Jabatan"
                              >
-                                <Key size={12} /> Reset Password
+                                <Edit3 size={12} /> Ubah Jabatan
                              </button>
                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleRejectUser(item.id); }}
-                                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
+                                className="flex-1 min-w-[30%] bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
+                                title="Reset Password"
+                             >
+                                <Key size={12} /> Reset Sandi
+                             </button>
+                             <button 
+                                onClick={(e) => {
+                                   e.stopPropagation();
+                                   if (confirm(`Apakah Anda yakin ingin MENCABUT AKSES pengguna ${item.name}?`)) {
+                                      handleBlockUser(item.id);
+                                   }
+                                }}
+                                className="flex-1 min-w-[30%] bg-rose-600 hover:bg-rose-700 text-white py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
                                 title="Cabut Akses"
                              >
                                 <Trash2 size={12} /> Cabut Akses
@@ -3457,6 +3606,7 @@ export default function Dashboard() {
                {renderDeleteModal()}
                {renderRejectModal()}
                {renderAddUserModal()}
+               {renderChangeRoleModal()}
            </div>
 
         </div>
