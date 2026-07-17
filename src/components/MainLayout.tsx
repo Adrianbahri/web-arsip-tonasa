@@ -13,7 +13,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  History
+  History,
+  Settings
 } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -33,7 +34,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
     { name: "Layanan Arsip", icon: Calendar, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["superadmin"] },
-    { name: "Pengaturan", icon: ShieldAlert, roles: ["superadmin"] },
+    { name: "Pengaturan", icon: Settings, roles: ["superadmin"] },
     { name: "Riwayat Log", icon: History, roles: ["superadmin"] },
   ];
 
