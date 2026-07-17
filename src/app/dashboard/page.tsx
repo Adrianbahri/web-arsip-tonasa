@@ -1488,7 +1488,9 @@ export default function Dashboard() {
         "Gedung",
         "Lorong",
         "Rak",
-        "Link Berkas Digital",
+        "Keterangan",
+        "Isi (Lampiran)",
+        "Link PDF (Opsional)",
         "Status"
      ];
 
@@ -1506,6 +1508,8 @@ export default function Dashboard() {
            `"${(item.gedung || "-").replace(/"/g, '""')}"`,
            `"${(item.lorong || "-").replace(/"/g, '""')}"`,
            `"${(item.rak || "-").replace(/"/g, '""')}"`,
+           `"${(item.keterangan || "").replace(/"/g, '""')}"`,
+           `"${(item.isiBundel?.join(', ') || "").replace(/"/g, '""')}"`,
            `"${item.linkBerkas || ""}"`,
            `"${item.status}"`
         ].join(","))
