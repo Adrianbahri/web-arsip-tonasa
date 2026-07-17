@@ -101,7 +101,7 @@ export default function SettingsView() {
    };
 
    return (
-      <div className="space-y-6 pb-10 max-w-4xl">
+      <div className="space-y-6 pb-10 w-full">
          <div className="flex flex-col gap-2 mb-2">
             <h2 className="text-[24px] font-medium tracking-tight text-ink flex items-center gap-2">
                <Settings size={24} className="text-primary" /> Pengaturan Sistem
