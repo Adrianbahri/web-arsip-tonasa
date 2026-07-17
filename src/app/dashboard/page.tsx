@@ -3800,13 +3800,13 @@ export default function Dashboard() {
                  <>
                     <button 
                        onClick={handleExportExcel}
-                       className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                       className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink text-[14px] font-medium flex items-center justify-center gap-2 py-2 px-4 rounded-sm transition-colors"
                     >
-                       <Download size={14} /> Export
+                       <Download size={16} /> Export
                     </button>
                     
-                    <label className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink-strong flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors cursor-pointer">
-                       <Upload size={14} /> Import
+                    <label className="w-full md:w-auto border border-hairline-strong bg-canvas hover:bg-canvas-soft text-ink text-[14px] font-medium flex items-center justify-center gap-2 py-2 px-4 rounded-sm transition-colors cursor-pointer">
+                       <Upload size={16} /> Import
                        <input type="file" accept=".xlsx, .xls" onChange={handleImportExcel} className="hidden" />
                     </label>
                  </>
@@ -3815,18 +3815,18 @@ export default function Dashboard() {
               {(role === 'admin_dept' || role === 'pic_gedung') && (
                  <button 
                     onClick={() => setIsRecycleBin(!isRecycleBin)}
-                    className={`w-full md:w-auto flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
+                    className={`w-full md:w-auto flex items-center justify-center gap-2 py-2 px-4 text-[14px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
                  >
-                    <Trash2 size={14} /> {isRecycleBin ? 'Kembali' : 'Sampah'}
+                    <Trash2 size={16} /> {isRecycleBin ? 'Kembali' : 'Sampah'}
                  </button>
               )}
 
               {role !== 'user' && (
                 <button 
                    onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
-                   className="col-span-2 md:col-span-1 w-full md:w-auto bg-primary hover:bg-primary-deep text-on-primary flex items-center justify-center gap-2 py-1.5 px-3 text-[12px] font-medium rounded-sm transition-colors"
+                   className="col-span-2 md:col-span-1 w-full md:w-auto bg-primary hover:bg-primary-deep text-on-primary text-[14px] font-medium flex items-center justify-center gap-2 py-2 px-4 rounded-sm transition-colors"
                 >
-                   <Plus size={14} /> Tambah Berkas
+                   <Plus size={16} /> Tambah Berkas
                 </button>
               )}
            </div>
@@ -3840,7 +3840,7 @@ export default function Dashboard() {
                  placeholder="Cari berkas, kode klasifikasi..." 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs pl-9 pr-4 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-full bg-canvas border border-hairline text-[14px] rounded-sm pl-9 pr-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
@@ -3850,7 +3850,7 @@ export default function Dashboard() {
                  placeholder="Tahun" 
                  value={yearFilter}
                  onChange={(e) => setYearFilter(e.target.value)}
-                 className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-full bg-canvas border border-hairline text-[14px] rounded-sm px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
            
@@ -3860,22 +3860,22 @@ export default function Dashboard() {
                  placeholder="Gedung" 
                  value={gedungFilter}
                  onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
-                 className="w-1/2 md:w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-1/2 md:w-20 bg-canvas border border-hairline text-[14px] rounded-sm px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
-              <span className="text-ink-faint text-[12px] font-medium">-</span>
+              <span className="text-ink-faint text-[14px] font-medium">-</span>
               <input 
                  type="text" 
                  placeholder="Lorong" 
                  value={lorongFilter}
                  onChange={(e) => setLorongFilter(e.target.value.toUpperCase())}
-                 className="w-1/2 md:w-16 bg-canvas border border-hairline text-[12px] rounded-xs px-2.5 py-1.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className="w-1/2 md:w-20 bg-canvas border border-hairline text-[14px] rounded-sm px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
               />
            </div>
 
-           <div className="col-span-2 md:col-span-1 relative w-full md:w-auto shrink-0 flex items-center justify-between md:justify-start gap-2 border border-hairline rounded-xs px-2.5 py-1.5 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
+           <div className="col-span-2 md:col-span-1 relative w-full md:w-auto shrink-0 flex items-center justify-between md:justify-start gap-2 border border-hairline rounded-sm px-3 py-2 bg-canvas hover:border-hairline-strong transition-colors cursor-pointer" onClick={() => setShowDeptFilter(!showDeptFilter)}>
               <div className="flex items-center gap-2">
-                 <Filter size={14} className="text-ink-mute" />
-                 <span className="text-[12px] text-ink font-medium select-none">
+                 <Filter size={16} className="text-ink-mute" />
+                 <span className="text-[14px] text-ink font-medium select-none">
                     Departemen {departemenFilter.length > 0 ? `(${departemenFilter.length})` : ''}
                  </span>
               </div>
@@ -3886,10 +3886,10 @@ export default function Dashboard() {
                        onClick={(e) => e.stopPropagation()}
                     >
                        {uniqueDepartments.length === 0 ? (
-                          <div className="p-3 text-[12px] text-ink-mute text-center">Belum ada departemen</div>
+                          <div className="p-3 text-[14px] text-ink-mute text-center">Belum ada departemen</div>
                        ) : (
                           uniqueDepartments.map(dept => (
-                             <label key={dept as string} className="flex items-center gap-3 px-3 py-2.5 hover:bg-canvas-soft cursor-pointer text-[12px] text-ink border-b border-hairline/50 last:border-0">
+                             <label key={dept as string} className="flex items-center gap-3 px-3 py-2.5 hover:bg-canvas-soft cursor-pointer text-[14px] text-ink border-b border-hairline/50 last:border-0">
                                 <input 
                                    type="checkbox"
                                    className="rounded-xs border-hairline text-primary focus:ring-primary w-4 h-4"
@@ -3913,8 +3913,8 @@ export default function Dashboard() {
       </div>
 
       {isRecycleBin && (
-         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[13px] flex items-center gap-2">
-            <Trash2 size={16} /> 
+         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[14px] flex items-center gap-2">
+            <Trash2 size={18} /> 
             <strong>Mode Tempat Sampah:</strong> Anda sedang melihat arsip yang telah dihapus.
          </div>
       )}
