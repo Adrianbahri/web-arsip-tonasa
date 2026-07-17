@@ -3833,7 +3833,7 @@ export default function Dashboard() {
         </div>
         
         <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full mt-2 md:mt-0">
-           <div className="col-span-2 relative w-full md:w-64 shrink-0">
+           <div className="col-span-2 relative w-full md:flex-1 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
                  type="text" 
