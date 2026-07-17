@@ -3834,7 +3834,7 @@ export default function Dashboard() {
            </div>
         </div>
         
-        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full mt-2 md:mt-0">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full mt-2 md:mt-0 relative z-30">
            <div className="col-span-2 relative w-full md:flex-1 shrink-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input 
@@ -3884,7 +3884,7 @@ export default function Dashboard() {
                  
                  {showDeptFilter && (
                     <div 
-                       className="absolute top-full mt-2 left-0 w-56 bg-canvas border border-hairline rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto"
+                       className="absolute top-full mt-2 right-0 w-56 bg-canvas border border-hairline rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto"
                        onClick={(e) => e.stopPropagation()}
                     >
                        {uniqueDepartments.length === 0 ? (
