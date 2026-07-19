@@ -31,7 +31,8 @@ import {
   BookOpen,
   MapPin,
   X,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from "lucide-react";
 
 const formatDate = (dateStr: string) => {
@@ -123,7 +124,8 @@ export default function Dashboard() {
   const [approvalLocation, setApprovalLocation] = useState({
      gedung: "A",
      lorong: "",
-     rak: ""
+     rak: "",
+      baris: ""
   });
 
   // Delete Modal State
@@ -187,6 +189,7 @@ export default function Dashboard() {
      gedung: "",
      lorong: "",
      rak: "",
+      baris: "",
      linkBerkas: "",
      status: "Menunggu ACC",
      keterangan: "",
@@ -195,6 +198,43 @@ export default function Dashboard() {
   
   const [newItemText, setNewItemText] = useState("");
   const [isCustomDept, setIsCustomDept] = useState(false);
+
+  // Duplicate Check States
+  const [duplicateAlertModalOpen, setDuplicateAlertModalOpen] = useState(false);
+  const [foundDuplicateRecord, setFoundDuplicateRecord] = useState<any | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
+
+  const [bulkDuplicateAlertModalOpen, setBulkDuplicateAlertModalOpen] = useState(false);
+  const [bulkDuplicates, setBulkDuplicates] = useState<any[]>([]); // { duplicateRecord, newRecord }
+  const [bulkNewRecords, setBulkNewRecords] = useState<any[]>([]); // purely new records
+
+  // Helper Duplicate Check
+  const findDuplicate = (record: any, isEditMode: boolean = false, currentNo?: string | number) => {
+     return archives.find(item => {
+        if (isEditMode && item.no === currentNo) return false;
+        if (item.deleted_at) return false; // ignore deleted
+
+        const isSameName = item.judulBerkas?.toLowerCase() === record.judulBerkas?.toLowerCase();
+        const isSameType = item.jenisBerkas?.toLowerCase() === record.jenisBerkas?.toLowerCase();
+        const isSameDept = item.departemen?.toLowerCase() === record.departemen?.toLowerCase();
+        
+        let isSameLocation = true;
+        if (record.gedung || record.lorong || record.rak || record.baris) {
+           isSameLocation = (item.gedung || '') === (record.gedung || '') &&
+                            (item.lorong || '') === (record.lorong || '') &&
+                            (item.rak || '') === (record.rak || '') &&
+                            (item.baris || '') === (record.baris || '');
+        }
+
+        const normalizeArray = (arr: any) => {
+           if (!Array.isArray(arr)) return [];
+           return arr.map(a => String(a).toLowerCase().trim()).sort();
+        };
+        const isSameBundel = JSON.stringify(normalizeArray(item.isiBundel)) === JSON.stringify(normalizeArray(record.isiBundel));
+
+        return isSameName && isSameType && isSameDept && isSameLocation && isSameBundel;
+     });
+  };
 
 
   const handleAddIsiBundel = () => {
@@ -348,6 +388,7 @@ export default function Dashboard() {
                   gedung: item.gedung || "",
                   lorong: item.lorong || "",
                   rak: item.rak || "",
+                  baris: item.baris || "",
                   keterangan: item.keterangan || "",
                   isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
                   status: item.status,
@@ -435,13 +476,25 @@ export default function Dashboard() {
      setApprovalLocation(prev => ({ ...prev, [name]: value }));
   };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent, bypassDuplicateCheck: boolean = false) => {
+      if (e) e.preventDefault();
       
       const statusVal = (role === 'superadmin' || role === 'pic_gedung') ? 'Aktif' : 'Menunggu ACC';
       let deptVal = (formData.departemen || "").trim().toUpperCase();
       if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(deptVal) || deptVal.includes('KEUANG')) {
           deptVal = 'KEUANGAN';
+      }
+
+      // 1. Pengecekan Duplikat untuk Insert
+      if (!editArchiveItem && !bypassDuplicateCheck) {
+         const tempPayload = { ...formData, departemen: deptVal };
+         const existingDup = findDuplicate(tempPayload, false);
+         if (existingDup) {
+            setFoundDuplicateRecord(existingDup);
+            setPendingFormData(tempPayload);
+            setDuplicateAlertModalOpen(true);
+            return; // Pause submit
+         }
       }
 
       if (editArchiveItem) {
@@ -457,6 +510,7 @@ export default function Dashboard() {
             gedung: formData.gedung,
             lorong: formData.lorong,
             rak: formData.rak,
+            baris: formData.baris,
             status: formData.status,
             keterangan: formData.keterangan,
             isi_bundel: JSON.stringify(formData.isiBundel),
@@ -506,6 +560,7 @@ export default function Dashboard() {
                      gedung: formData.gedung,
                      lorong: formData.lorong,
                      rak: formData.rak,
+            baris: formData.baris,
                      status: formData.status,
                      keterangan: formData.keterangan,
                      isiBundel: formData.isiBundel,
@@ -529,6 +584,7 @@ export default function Dashboard() {
             gedung: (role === 'superadmin' || role === 'pic_gedung') ? formData.gedung : null,
             lorong: (role === 'superadmin' || role === 'pic_gedung') ? formData.lorong : null,
             rak: (role === 'superadmin' || role === 'pic_gedung') ? formData.rak : null,
+            baris: (role === 'superadmin' || role === 'pic_gedung') ? formData.baris : null,
             status: statusVal,
             keterangan: formData.keterangan,
             isi_bundel: JSON.stringify(formData.isiBundel),
@@ -570,6 +626,7 @@ export default function Dashboard() {
                gedung: (role === 'superadmin' || role === 'pic_gedung') ? formData.gedung : '',
                lorong: (role === 'superadmin' || role === 'pic_gedung') ? formData.lorong : '',
                rak: (role === 'superadmin' || role === 'pic_gedung') ? formData.rak : '',
+            baris: (role === 'superadmin' || role === 'pic_gedung') ? formData.baris : '',
                status: statusVal,
                keterangan: formData.keterangan,
                isiBundel: formData.isiBundel,
@@ -596,13 +653,94 @@ export default function Dashboard() {
            gedung: "",
            lorong: "",
            rak: "",
+      baris: "",
            linkBerkas: "",
-           status: (role === 'superadmin' || role === 'pic_gedung') ? "Aktif" : "Menunggu ACC",
+         status: (role === 'superadmin' || role === 'pic_gedung') ? "Aktif" : "Menunggu ACC",
            keterangan: "",
            isiBundel: []
         });
      }, 1500);
   };
+
+  const handleConfirmDuplicateTimpa = async () => {
+      setDuplicateAlertModalOpen(false);
+      if (!foundDuplicateRecord || !pendingFormData) return;
+      
+      // We will perform an UPDATE on foundDuplicateRecord.no using pendingFormData
+      const statusVal = (role === 'superadmin' || role === 'pic_gedung') ? 'Aktif' : 'Menunggu ACC';
+      
+      const payload = {
+         kode_klasifikasi: pendingFormData.kodeKlasifikasi,
+         jenis_berkas: pendingFormData.jenisBerkas,
+         judul_berkas: pendingFormData.judulBerkas,
+         departemen: pendingFormData.departemen,
+         tahun: pendingFormData.tahun,
+         tanggal_terima: pendingFormData.tanggalTerima,
+         jangka_waktu: pendingFormData.jangkaWaktu,
+         gedung: (role === 'superadmin' || role === 'pic_gedung') ? pendingFormData.gedung : foundDuplicateRecord.gedung,
+         lorong: (role === 'superadmin' || role === 'pic_gedung') ? pendingFormData.lorong : foundDuplicateRecord.lorong,
+         rak: (role === 'superadmin' || role === 'pic_gedung') ? pendingFormData.rak : foundDuplicateRecord.rak,
+         baris: (role === 'superadmin' || role === 'pic_gedung') ? pendingFormData.baris : foundDuplicateRecord.baris,
+         status: statusVal,
+         keterangan: pendingFormData.keterangan,
+         isi_bundel: JSON.stringify(pendingFormData.isiBundel),
+         link_berkas: pendingFormData.linkBerkas
+      };
+
+      let supabaseSuccess = false;
+      try {
+         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+         if (!isMockUrl) {
+            const no = foundDuplicateRecord.no || foundDuplicateRecord.id;
+            const isNoNumeric = !isNaN(Number(no));
+            const queryField = isNoNumeric ? 'no' : 'id';
+            const queryVal = isNoNumeric ? Number(no) : no;
+
+            const { error } = await supabase
+               .from('archives')
+               .update(payload)
+               .eq(queryField, queryVal);
+
+            if (!error) supabaseSuccess = true;
+         }
+      } catch (err) {
+         console.warn('Supabase update failed:', err);
+      }
+
+      if (supabaseSuccess) {
+         logActivity('OVERWRITE_ARCHIVE', `Menimpa arsip duplikat: ${pendingFormData.judulBerkas}`);
+         setSuccessMessage('Arsip duplikat berhasil ditimpa!');
+         fetchArchives();
+      } else {
+         setSuccessMessage('Arsip duplikat berhasil ditimpa (Simulasi)!');
+      }
+
+      setFoundDuplicateRecord(null);
+      setPendingFormData(null);
+      
+      setTimeout(() => {
+         setSuccessMessage("");
+         setShowAddForm(false);
+         setFormData({
+            kodeKlasifikasi: "",
+            jenisBerkas: "",
+            judulBerkas: "",
+            departemen: "",
+            tahun: new Date().getFullYear().toString(),
+            tanggalTerima: "",
+            jangkaWaktu: "",
+            gedung: "",
+            lorong: "",
+            rak: "",
+      baris: "",
+            linkBerkas: "",
+            status: (role === 'superadmin' || role === 'pic_gedung') ? "Aktif" : "Menunggu ACC",
+            keterangan: "",
+            isiBundel: []
+         });
+      }, 1500);
+  };
+
 
   const handleApprove = (no: string) => {
      setSelectedApprovalId(no);
@@ -625,6 +763,7 @@ export default function Dashboard() {
                  gedung: approvalLocation.gedung,
                  lorong: approvalLocation.lorong,
                  rak: approvalLocation.rak,
+                 baris: approvalLocation.baris,
                  status: "Aktif"
               })
               .eq(queryField, queryVal);
@@ -649,6 +788,7 @@ export default function Dashboard() {
                  gedung: approvalLocation.gedung,
                  lorong: approvalLocation.lorong,
                  rak: approvalLocation.rak,
+                 baris: approvalLocation.baris,
                  status: "Aktif"
               };
            }
@@ -658,7 +798,8 @@ export default function Dashboard() {
      }
 
      setSelectedApprovalId(null);
-     setApprovalLocation({ gedung: "A", lorong: "", rak: "" });
+     setApprovalLocation({ gedung: "A", lorong: "", rak: "",
+      baris: "" });
      setTimeout(() => setSuccessMessage(""), 1500);
    };
 
@@ -678,6 +819,7 @@ export default function Dashboard() {
          gedung: archive.gedung || '',
          lorong: archive.lorong || '',
          rak: archive.rak || '',
+         baris: archive.baris || '',
          linkBerkas: archive.linkBerkas || '',
          status: archive.status || 'Menunggu ACC',
          keterangan: archive.keterangan || '',
@@ -1488,6 +1630,7 @@ export default function Dashboard() {
         "Gedung",
         "Lorong",
         "Rak",
+        "Baris",
         "Keterangan",
         "Isi (Lampiran)",
         "Link PDF (Opsional)",
@@ -1508,6 +1651,7 @@ export default function Dashboard() {
            `"${(item.gedung || "-").replace(/"/g, '""')}"`,
            `"${(item.lorong || "-").replace(/"/g, '""')}"`,
            `"${(item.rak || "-").replace(/"/g, '""')}"`,
+           `"${(item.baris || "-").replace(/"/g, '""')}"`,
            `"${(item.keterangan || "").replace(/"/g, '""')}"`,
            `"${(item.isiBundel?.join(', ') || "").replace(/"/g, '""')}"`,
            `"${item.linkBerkas || ""}"`,
@@ -1545,7 +1689,7 @@ export default function Dashboard() {
               return;
            }
 
-           const recordsToInsert = data.map((row: any) => ({
+           const recordsFromExcel = data.map((row: any) => ({
               kode_klasifikasi: row['Kode Klasifikasi'] || '',
               jenis_berkas: row['Jenis Berkas'] || '',
               judul_berkas: row['Judul Berkas'] || '',
@@ -1559,21 +1703,130 @@ export default function Dashboard() {
               link_berkas: row['Link PDF (Opsional)'] || '',
               gedung: row['Gedung'] || null,
               lorong: row['Lorong'] || null,
-              rak: row['Rak'] || null
+              rak: row['Rak'] ? String(row['Rak']).replace(/^(?i:rak\s+)/i, '').trim() : null,
+              baris: row['Baris'] || null
            }));
 
-           const { error } = await supabase.from('archives').insert(recordsToInsert);
-           if (error) throw error;
+           // Duplicate checking
+           const duplicatesFound: any[] = [];
+           const newRecordsToInsert: any[] = [];
 
-           logActivity('IMPORT_EXCEL', `Mengimpor ${recordsToInsert.length} arsip dari Excel`);
-           setSuccessMessage(`Berhasil mengimpor ${recordsToInsert.length} arsip dari Excel!`);
-           fetchArchives();
+           for (const rec of recordsFromExcel) {
+              // Convert to the format expected by findDuplicate
+              const tempPayload = {
+                 judulBerkas: rec.judul_berkas,
+                 jenisBerkas: rec.jenis_berkas,
+                 departemen: rec.departemen,
+                 gedung: rec.gedung,
+                 lorong: rec.lorong,
+                 rak: rec.rak,
+                 baris: rec.baris,
+                 isiBundel: rec.isi_bundel
+              };
+              const existingDup = findDuplicate(tempPayload, false);
+              if (existingDup) {
+                 duplicatesFound.push({ duplicateRecord: existingDup, newRecord: rec });
+              } else {
+                 newRecordsToInsert.push(rec);
+              }
+           }
+
+           if (duplicatesFound.length > 0) {
+              setBulkDuplicates(duplicatesFound);
+              setBulkNewRecords(newRecordsToInsert);
+              setBulkDuplicateAlertModalOpen(true);
+              return; // Pause the import flow
+           }
+
+           if (newRecordsToInsert.length > 0) {
+              const { error } = await supabase.from('archives').insert(newRecordsToInsert);
+              if (error) throw error;
+              logActivity('IMPORT_EXCEL', `Mengimpor ${newRecordsToInsert.length} arsip dari Excel`);
+              setSuccessMessage(`Berhasil mengimpor ${newRecordsToInsert.length} arsip dari Excel!`);
+              fetchArchives();
+           } else {
+              setSuccessMessage("Tidak ada data baru untuk diimpor.");
+           }
         } catch (error) {
            console.error("Gagal import excel:", error);
            setSuccessMessage("Gagal mengimpor Excel. Pastikan format tabel sesuai.");
         }
      };
      reader.readAsBinaryString(file);
+     e.target.value = ''; // Reset file input
+  };
+
+  const executeBulkImport = async (overwrite: boolean) => {
+     setBulkDuplicateAlertModalOpen(false);
+     setSuccessMessage("Sedang memproses import...");
+     let successCount = 0;
+     let updateCount = 0;
+
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase.co');
+        if (!isMockUrl) {
+           // Insert new records
+           if (bulkNewRecords.length > 0) {
+              const { error } = await supabase.from('archives').insert(bulkNewRecords);
+              if (!error) successCount += bulkNewRecords.length;
+           }
+
+           // Overwrite duplicates if requested
+           if (overwrite && bulkDuplicates.length > 0) {
+              for (const dup of bulkDuplicates) {
+                 const no = dup.duplicateRecord.no || dup.duplicateRecord.id;
+                 const isNoNumeric = !isNaN(Number(no));
+                 const queryField = isNoNumeric ? 'no' : 'id';
+                 const queryVal = isNoNumeric ? Number(no) : no;
+
+                 // Only update the existing fields using the new record from excel
+                 // Merging existing gedung/lorong/rak if the new record doesn't have it (optional, but let's replace entirely if it's overwrite)
+                 const payloadToUpdate = {
+                    ...dup.newRecord,
+                    gedung: dup.newRecord.gedung || dup.duplicateRecord.gedung,
+                    lorong: dup.newRecord.lorong || dup.duplicateRecord.lorong,
+                    rak: dup.newRecord.rak || dup.duplicateRecord.rak,
+                    baris: dup.newRecord.baris || dup.duplicateRecord.baris,
+                 };
+
+                 const { error: upErr } = await supabase
+                    .from('archives')
+                    .update(payloadToUpdate)
+                    .eq(queryField, queryVal);
+                 
+                 if (!upErr) updateCount++;
+              }
+           }
+        } else {
+            successCount += bulkNewRecords.length;
+            if (overwrite) updateCount += bulkDuplicates.length;
+        }
+
+        let msg = '';
+        if (successCount > 0) msg += `Berhasil mengimpor ${successCount} data baru. `;
+        if (updateCount > 0) msg += `Berhasil menimpa ${updateCount} data duplikat. `;
+        if (successCount === 0 && updateCount === 0) msg = "Tidak ada data yang diproses.";
+        
+        logActivity('IMPORT_EXCEL', msg);
+        setSuccessMessage(msg);
+        fetchArchives();
+
+     } catch (err) {
+        console.error("Gagal import excel:", err);
+        setSuccessMessage("Terjadi kesalahan saat memproses data Excel.");
+     }
+
+     setBulkDuplicates([]);
+     setBulkNewRecords([]);
+     setTimeout(() => setSuccessMessage(""), 3000);
+  };
+
+  const handleBulkDuplicateTimpa = () => executeBulkImport(true);
+  const handleBulkDuplicateLewati = () => executeBulkImport(false);
+  const handleBulkDuplicateBatal = () => {
+     setBulkDuplicateAlertModalOpen(false);
+     setBulkDuplicates([]);
+     setBulkNewRecords([]);
   };
 
   const closeDetailModal = () => {
@@ -1599,6 +1852,7 @@ export default function Dashboard() {
                     gedung: approvalLocation.gedung,
                     lorong: approvalLocation.lorong,
                     rak: approvalLocation.rak,
+                 baris: approvalLocation.baris,
                     status: "Aktif"
                  })
                  .eq(queryField, queryVal);
@@ -1623,6 +1877,7 @@ export default function Dashboard() {
                     gedung: approvalLocation.gedung,
                     lorong: approvalLocation.lorong,
                     rak: approvalLocation.rak,
+                 baris: approvalLocation.baris,
                     status: "Aktif"
                  };
               }
@@ -1632,7 +1887,8 @@ export default function Dashboard() {
         }
 
         closeDetailModal();
-        setApprovalLocation({ gedung: "A", lorong: "", rak: "" });
+        setApprovalLocation({ gedung: "A", lorong: "", rak: "",
+      baris: "" });
         setTimeout(() => setSuccessMessage(""), 1500);
      };
 
@@ -1884,8 +2140,8 @@ export default function Dashboard() {
                                  >
                                     <option value='{"gedung":"A","lorong":"","rak":""}' disabled>Pilih Lokasi Rak...</option>
                                     {masterLocations.map(l => (
-                                       <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak})}>
-                                          Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak}
+                                       <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak, baris: l.baris})}>
+                                          Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak} - Baris {l.baris}
                                        </option>
                                     ))}
                                  </select>
@@ -2341,6 +2597,7 @@ export default function Dashboard() {
                        gedung: "",
                        lorong: "",
                        rak: "",
+      baris: "",
                        linkBerkas: "",
                        status: "Menunggu ACC",
                        keterangan: "",
@@ -2562,18 +2819,30 @@ export default function Dashboard() {
                              className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
                           />
                        </div>
-                       <div className="space-y-2">
-                          <label className="block text-[13px] font-medium text-ink">Rak</label>
-                          <input 
-                             type="text" 
-                             name="rak"
-                             value={formData.rak}
-                             onChange={handleInputChange}
-                             required
-                             placeholder="Contoh: RAK G BARIS 1"
-                             className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
-                          />
-                       </div>
+                                               <div className="space-y-2">
+                           <label className="block text-[13px] font-medium text-ink">Rak</label>
+                           <input 
+                              type="text" 
+                              name="rak"
+                              value={formData.rak}
+                              onChange={handleInputChange}
+                              required
+                              placeholder="Contoh: A"
+                              className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="block text-[13px] font-medium text-ink">Baris</label>
+                           <input 
+                              type="text" 
+                              name="baris"
+                              value={formData.baris}
+                              onChange={handleInputChange}
+                              required
+                              placeholder="Contoh: 1"
+                              className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink text-ink"
+                           />
+                        </div>
                     </>
                  )}
 
@@ -2638,6 +2907,7 @@ export default function Dashboard() {
                           gedung: "",
                           lorong: "",
                           rak: "",
+      baris: "",
                           linkBerkas: "",
                           status: "Menunggu ACC",
                           keterangan: "",
@@ -2867,8 +3137,8 @@ export default function Dashboard() {
                     >
                        <option value='{"gedung":"A","lorong":"","rak":""}' disabled>Pilih Lokasi Rak...</option>
                        {masterLocations.map(l => (
-                          <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak})}>
-                             Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak}
+                          <option key={l.id} value={JSON.stringify({gedung: l.gedung, lorong: l.lorong, rak: l.rak, baris: l.baris})}>
+                             Gedung {l.gedung} - Lorong {l.lorong} - Rak {l.rak} - Baris {l.baris}
                           </option>
                        ))}
                     </select>
@@ -3938,7 +4208,86 @@ export default function Dashboard() {
       ));
   };
 
+  const renderDuplicateAlertModal = () => {
+     if (!duplicateAlertModalOpen || !foundDuplicateRecord) return null;
+     return (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+           <div className="bg-canvas border border-hairline rounded-sm shadow-2xl max-w-[500px] w-full p-6 text-ink">
+              <h3 className="font-bold text-[16px] text-ink flex items-center gap-2 mb-3">
+                 <AlertTriangle size={20} className="text-amber-500" />
+                 Peringatan Duplikasi Data
+              </h3>
+              <p className="text-[13px] text-ink-mute mb-4">
+                 Sistem mendeteksi bahwa data dengan Judul, Jenis, Departemen, dan Lokasi yang sama sudah ada di database:
+              </p>
+              <div className="bg-canvas-soft border border-hairline p-3 rounded-xs mb-5 text-[12px] space-y-1">
+                 <p><span className="font-semibold">Judul Berkas:</span> {foundDuplicateRecord.judulBerkas}</p>
+                 <p><span className="font-semibold">Jenis Berkas:</span> {foundDuplicateRecord.jenisBerkas}</p>
+                 <p><span className="font-semibold">Departemen:</span> {foundDuplicateRecord.departemen}</p>
+                 <p><span className="font-semibold">Lokasi:</span> Gedung {foundDuplicateRecord.gedung || '-'} / Lorong {foundDuplicateRecord.lorong || '-'} / Rak {foundDuplicateRecord.rak || '-'} / Baris {foundDuplicateRecord.baris || '-'}</p>
+              </div>
+              <div className="flex justify-end gap-2">
+                 <button 
+                    onClick={() => {
+                       setDuplicateAlertModalOpen(false);
+                       setFoundDuplicateRecord(null);
+                       setPendingFormData(null);
+                    }}
+                    className="px-4 py-2 bg-canvas hover:bg-canvas-soft border border-hairline rounded-xs text-[13px] font-semibold"
+                 >
+                    Batal
+                 </button>
+                 <button 
+                    onClick={handleConfirmDuplicateTimpa}
+                    className="px-4 py-2 bg-primary hover:bg-primary-deep text-on-primary rounded-xs text-[13px] font-semibold transition-colors"
+                 >
+                    Timpa Data Lama
+                 </button>
+              </div>
+           </div>
+        </div>
+     );
+  };
 
+  const renderBulkDuplicateAlertModal = () => {
+     if (!bulkDuplicateAlertModalOpen) return null;
+     return (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+           <div className="bg-canvas border border-hairline rounded-sm shadow-2xl max-w-[500px] w-full p-6 text-ink animate-in zoom-in-95 duration-200">
+              <h3 className="font-bold text-[16px] text-ink flex items-center gap-2 mb-3">
+                 <AlertTriangle size={20} className="text-amber-500" />
+                 Duplikasi Data Saat Import
+              </h3>
+              <p className="text-[13px] text-ink-mute mb-2">
+                 Ditemukan <span className="font-bold text-amber-600">{bulkDuplicates.length}</span> data duplikat dalam file Excel. Terdapat <span className="font-bold text-primary">{bulkNewRecords.length}</span> data baru yang siap diimpor.
+              </p>
+              <p className="text-[13px] text-ink-mute mb-5">
+                 Apakah Anda ingin menimpa data yang sudah ada dengan data dari Excel, atau melewati data duplikat tersebut?
+              </p>
+              <div className="flex flex-col gap-2">
+                 <button 
+                    onClick={handleBulkDuplicateTimpa}
+                    className="w-full text-left px-4 py-3 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xs text-primary font-semibold text-[13px] transition-colors"
+                 >
+                    Timpa Duplikat & Simpan Data Baru
+                 </button>
+                 <button 
+                    onClick={handleBulkDuplicateLewati}
+                    className="w-full text-left px-4 py-3 bg-canvas-soft hover:bg-hairline-cool border border-hairline rounded-xs text-ink font-semibold text-[13px] transition-colors"
+                 >
+                    Lewati Duplikat (Hanya Simpan Data Baru)
+                 </button>
+                 <button 
+                    onClick={handleBulkDuplicateBatal}
+                    className="w-full mt-2 text-center px-4 py-2 text-ink-mute hover:text-ink text-[13px] transition-colors"
+                 >
+                    Batalkan Seluruh Proses Import
+                 </button>
+              </div>
+           </div>
+        </div>
+     );
+  };
 
   // 4. VIEW: DAFTAR ARSIP GENERAL PAGE
   return (
@@ -4106,6 +4455,9 @@ export default function Dashboard() {
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('rak')}>
                      <div className="flex items-center justify-center gap-1">Rak {sortConfig?.key === 'rak' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
                   </th>
+                  <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('baris')}>
+                     <div className="flex items-center justify-center gap-1">Baris {sortConfig?.key === 'baris' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
+                  </th>
                   <th className="p-3 text-center whitespace-nowrap bg-canvas-soft border-b border-hairline">File Digital</th>
                   <th className="p-3 cursor-pointer select-none group hover:text-ink-strong whitespace-nowrap bg-canvas-soft border-b border-hairline" onClick={() => handleSort('status')}>
                      <div className="flex items-center justify-center gap-1">Status {sortConfig?.key === 'status' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-50">↕</span>}</div>
@@ -4141,7 +4493,8 @@ export default function Dashboard() {
                         <td className="p-3 text-center text-ink-mute">{archive.jangkaWaktu}</td>
                         <td className="p-3 text-center font-mono font-medium">{archive.gedung || "-"}</td>
                         <td className="p-3 text-center font-mono">{archive.lorong || "-"}</td>
-                        <td className="p-3 text-[11px] font-medium whitespace-nowrap">{archive.rak || "-"}</td>
+                        <td className="p-3 text-[11px] font-medium whitespace-nowrap text-center">{archive.rak || "-"}</td>
+                        <td className="p-3 text-[11px] font-medium whitespace-nowrap text-center">{archive.baris || "-"}</td>
                         <td className="p-3 text-center">
                            {archive.linkBerkas && archive.linkBerkas !== '-' ? (
                               <a 
@@ -4274,7 +4627,7 @@ export default function Dashboard() {
                      </div>
                      <div className="col-span-2">
                         <p className="text-ink-mute text-[9px] uppercase">Letak Fisik Penyimpanan</p>
-                        <p className="font-medium text-[11px] mt-0.5">Gedung {archive.gedung || "-"} / Lorong {archive.lorong || "-"} / {archive.rak || "-"}</p>
+                        <p className="font-medium text-[11px] mt-0.5">Gedung {archive.gedung || "-"} / Lorong {archive.lorong || "-"} / Rak {archive.rak || "-"} / Baris {archive.baris || "-"}</p>
                      </div>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-hairline">
@@ -4389,8 +4742,9 @@ export default function Dashboard() {
             </button>
          </div>
       </div>
-
       {/* MODAL DIALOG DETAIL DENGAN BACKDROP BLUR (BACKDROP-BLUR OVERLAY) */}
+      {renderDuplicateAlertModal()}
+      {renderBulkDuplicateAlertModal()}
       {renderDetailModal()}
       {renderDeleteModal()}
       {renderRejectModal()}
