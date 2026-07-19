@@ -4366,12 +4366,12 @@ export default function Dashboard() {
       </div>
 
       {/* FOOTER */}
-      <div className="flex-none flex justify-between items-center text-ink-mute text-[12px] pt-3 border-t border-hairline mt-auto">
+      <div className="flex-none flex flex-col md:flex-row md:justify-between items-center gap-4 md:gap-0 text-ink-mute text-[12px] pt-3 border-t border-hairline mt-auto">
          <span>
             Menampilkan {paginatedArchives.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
             {Math.min(currentPage * itemsPerPage, filteredArchives.length)} dari {filteredArchives.length}
          </span>
-         <div className="flex gap-1">
+         <div className="flex flex-wrap justify-center gap-1">
             <button 
                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                disabled={currentPage === 1}
