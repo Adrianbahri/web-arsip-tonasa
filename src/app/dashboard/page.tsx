@@ -49,23 +49,23 @@ const StatusBadge = ({ status, alasanPenolakan, isSmall = false }: { status: str
    switch (status) {
       case 'Aktif':
       case 'Disetujui':
-         colorClasses = 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]';
+         colorClasses = 'bg-[#def7ec] dark:bg-emerald-500/10 text-[#03543f] dark:text-emerald-400 border-[#bdf5db] dark:border-emerald-500/20';
          break;
       case 'Inaktif':
-         colorClasses = 'bg-amber-50 text-amber-700 border-amber-200';
+         colorClasses = 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20';
          break;
       case 'Permanen':
-         colorClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+         colorClasses = 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
          break;
       case 'Selesai':
-         colorClasses = 'bg-blue-50 text-blue-700 border-blue-100';
+         colorClasses = 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-500/20';
          break;
       case 'Menunggu ACC':
-         colorClasses = 'bg-amber-100 text-amber-800 border-amber-300';
+         colorClasses = 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-500/30';
          break;
       case 'Ditolak':
       default:
-         colorClasses = 'bg-red-50 text-red-700 border-red-200';
+         colorClasses = 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20';
          break;
    }
 
@@ -1346,7 +1346,7 @@ export default function Dashboard() {
     return (
        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
           <div 
-             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             className="bg-canvas border border-hairline rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
              onClick={(e) => e.stopPropagation()}
           >
              <div className="p-6">
@@ -1362,13 +1362,13 @@ export default function Dashboard() {
                       value={serviceRejectReason}
                       onChange={(e) => setServiceRejectReason(e.target.value)}
                       placeholder="Masukkan alasan..."
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none bg-gray-50"
+                      className="w-full border border-hairline rounded-xl px-3 py-2.5 text-sm text-ink focus:ring-2 focus:ring-rose-500 outline-none resize-none bg-canvas-soft"
                       rows={3}
                       autoFocus
                    />
                 </div>
                 <div className="flex gap-3 w-full">
-                   <button onClick={() => setRejectServiceModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200">Batal</button>
+                   <button onClick={() => setRejectServiceModalOpen(false)} className="flex-1 px-4 py-2.5 bg-canvas-soft text-ink font-medium rounded-xl hover:bg-hairline">Batal</button>
                    <button onClick={submitRejectRequest} className="flex-1 px-4 py-2.5 bg-rose-600 text-white font-medium rounded-xl hover:bg-rose-700">Ya, Tolak</button>
                 </div>
              </div>
@@ -2237,8 +2237,8 @@ export default function Dashboard() {
                   {detailType === 'request' && (
                      <div className="space-y-4">
                         <div>
-                           <span className={`inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-xs uppercase ${
-                              selectedDetailItem.type === 'peminjaman' ? 'bg-blue-50 text-blue-800' : 'bg-purple-50 text-purple-800'
+                           <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-xs capitalize ${
+                              selectedDetailItem.type === 'peminjaman' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-800 dark:text-purple-400'
                            }`}>
                               {selectedDetailItem.type}
                            </span>
@@ -2312,7 +2312,7 @@ export default function Dashboard() {
     return (
        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
           <div 
-             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             className="bg-canvas border border-hairline rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
              onClick={(e) => e.stopPropagation()}
           >
              <div className="p-6 text-center">
@@ -2330,7 +2330,7 @@ export default function Dashboard() {
                 <div className="flex gap-3 w-full">
                    <button
                       onClick={() => setDeleteModalOpen(false)}
-                      className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                      className="flex-1 px-4 py-2.5 bg-canvas-soft text-ink font-medium rounded-xl hover:bg-hairline transition-colors"
                    >
                       Batal
                    </button>
@@ -2352,7 +2352,7 @@ export default function Dashboard() {
       return (
          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
             <div 
-               className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+               className="bg-canvas border border-hairline rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
                onClick={(e) => e.stopPropagation()}
             >
                <div className="p-6 text-center">
@@ -2370,7 +2370,7 @@ export default function Dashboard() {
                   <div className="flex gap-3 w-full">
                      <button
                         onClick={() => setDeleteRequestModalOpen(false)}
-                        className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-canvas-soft text-ink font-medium rounded-xl hover:bg-hairline transition-colors"
                      >
                         Batal
                      </button>
@@ -2533,7 +2533,7 @@ export default function Dashboard() {
     return (
        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
           <div 
-             className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             className="bg-canvas border border-hairline rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
              onClick={(e) => e.stopPropagation()}
           >
              <div className="p-6">
@@ -2555,7 +2555,7 @@ export default function Dashboard() {
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       placeholder="Masukkan alasan penolakan..."
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none resize-none bg-gray-50"
+                      className="w-full border border-hairline rounded-xl px-3 py-2.5 text-sm text-ink focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none resize-none bg-canvas-soft"
                       rows={3}
                       autoFocus
                    />
@@ -2564,7 +2564,7 @@ export default function Dashboard() {
                 <div className="flex gap-3 w-full">
                    <button
                       onClick={() => setRejectModalOpen(false)}
-                      className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                      className="flex-1 px-4 py-2.5 bg-canvas-soft text-ink font-medium rounded-xl hover:bg-hairline transition-colors"
                    >
                       Batal
                    </button>
@@ -3397,8 +3397,8 @@ export default function Dashboard() {
                              <td className="p-3">
                                 <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-xs capitalize ${
                                    req.type === 'peminjaman' 
-                                   ? 'bg-blue-50 text-blue-700 border border-blue-100' 
-                                   : 'bg-purple-50 text-purple-700 border border-purple-100'
+                                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20' 
+                                   : 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-100 dark:border-purple-500/20'
                                 }`}>
                                    {req.type === 'peminjaman' ? <BookOpen size={12} /> : <MapPin size={12} />}
                                    {req.type}
