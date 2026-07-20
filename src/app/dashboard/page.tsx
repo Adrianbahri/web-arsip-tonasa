@@ -23,6 +23,7 @@ import {
   Trash2,
   ExternalLink,
   Download,
+  ShieldAlert,
   UserCheck,
   UserX,
   Users,
@@ -321,6 +322,8 @@ export default function Dashboard() {
   const [archives, setArchives] = useState<any[]>([]);
   const [masterDepartments, setMasterDepartments] = useState<string[]>(["KEUANGAN", "LEGAL", "HUMAS", "TONASA IV", "PENGADAAN", "PRODUKSI", "DIREKSI"]);
   const [masterLocations, setMasterLocations] = useState<any[]>([]);
+  const [masterRetensi, setMasterRetensi] = useState<any[]>([]);
+  const [retensiAlerts, setRetensiAlerts] = useState<{ id: string, judulBerkas: string, kategori: string, umur: number, tipeAlert: 'Inaktif' | 'Musnah' }[]>([]);
 
   // Fetch from Supabase
   const fetchArchives = async () => {
@@ -328,9 +331,10 @@ export default function Dashboard() {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
             // Fetch Master Data
-            const [deptRes, locRes] = await Promise.all([
+            const [deptRes, locRes, retensiRes] = await Promise.all([
                supabase.from('master_departments').select('name').order('name'),
-               supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak')
+               supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
+               supabase.from('master_retensi').select('*')
             ]);
             
             if (deptRes.data && deptRes.data.length > 0) {
@@ -339,6 +343,10 @@ export default function Dashboard() {
             if (locRes.data) {
                setMasterLocations(locRes.data);
             }
+            
+            const retensiRules = retensiRes.data || [];
+            setMasterRetensi(retensiRules);
+
             let allData: any[] = [];
             let from = 0;
             const step = 1000;
@@ -396,13 +404,33 @@ export default function Dashboard() {
                   alasanPenolakan: item.alasan_penolakan || ""
                }));
                setArchives(formatted);
+               
+               // Calculate Retensi Alerts
+               const currentYear = new Date().getFullYear();
+               const alerts: any[] = [];
+               
+               formatted.forEach(arc => {
+                  if (arc.status === 'Aktif' || arc.status === 'Inaktif') {
+                     const rule = retensiRules.find(r => r.kategori.toLowerCase() === (arc.jenisBerkas || '').toLowerCase());
+                     if (rule) {
+                        const arcYear = parseInt(arc.tahun);
+                        if (!isNaN(arcYear)) {
+                           const age = currentYear - arcYear;
+                           if (age >= (rule.masa_aktif_tahun + rule.masa_inaktif_tahun) && arc.status !== 'Dimusnahkan') {
+                              alerts.push({ id: arc.id, judulBerkas: arc.judulBerkas, kategori: rule.kategori, umur: age, tipeAlert: 'Musnah' });
+                           } else if (age >= rule.masa_aktif_tahun && arc.status === 'Aktif') {
+                              alerts.push({ id: arc.id, judulBerkas: arc.judulBerkas, kategori: rule.kategori, umur: age, tipeAlert: 'Inaktif' });
+                           }
+                        }
+                     }
+                  }
+               });
+               setRetensiAlerts(alerts);
             }
-        }
+        } else {}
      } catch (e) {
         console.warn("Supabase fetch failed, using mock data fallback:", e);
      }
-  };
-
   // Fetch Users for PIC Gedung
   const fetchUsers = async () => {
      try {
@@ -3993,6 +4021,27 @@ export default function Dashboard() {
 
            {/* Alerts for Pending Submissions and Pending User Approvals */}
            <div className="space-y-3">
+              {(role === 'superadmin' || role === 'pic_gedung') && retensiAlerts.length > 0 && (
+                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-sm p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                       <ShieldAlert className="text-red-600 dark:text-red-400 shrink-0" />
+                       <div>
+                          <h3 className="font-semibold text-sm">Peringatan Jadwal Retensi Arsip (JRA)</h3>
+                          <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">Terdapat {retensiAlerts.length} arsip yang memasuki masa Inaktif atau harus Dimusnahkan berdasarkan aturan retensi.</p>
+                       </div>
+                    </div>
+                    <button 
+                       onClick={() => {
+                          setSearchQuery(retensiAlerts[0].kategori);
+                          setActiveMenu("Daftar Arsip");
+                       }}
+                       className="bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-900 dark:text-red-200 border border-red-300 dark:border-red-700 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors shrink-0"
+                    >
+                       Tinjau Arsip
+                    </button>
+                 </div>
+              )}
+
               {(role === 'superadmin' || role === 'pic_gedung') && pendingCount > 0 && (
                  <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">

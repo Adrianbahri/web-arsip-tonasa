@@ -1,16 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save } from "lucide-react";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock } from "lucide-react";
 
 export default function SettingsView() {
-   const [activeTab, setActiveTab] = useState<"master" | "landing">("master");
+   const [activeTab, setActiveTab] = useState<"master" | "landing" | "retensi">("master");
    
    // Master Data State
    const [departments, setDepartments] = useState<any[]>([]);
    const [locations, setLocations] = useState<any[]>([]);
+   const [retensiRules, setRetensiRules] = useState<any[]>([]);
    const [newDept, setNewDept] = useState("");
    const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "" });
+   const [newRetensi, setNewRetensi] = useState({ kategori: "", masa_aktif_tahun: 5, masa_inaktif_tahun: 5 });
    
    // Landing Page State
    const [landingConfig, setLandingConfig] = useState<any>(null);
@@ -25,14 +27,16 @@ export default function SettingsView() {
 
    const fetchMasterData = async () => {
       setLoading(true);
-      const [deptRes, locRes, landingRes] = await Promise.all([
+      const [deptRes, locRes, retensiRes, landingRes] = await Promise.all([
          supabase.from('master_departments').select('*').order('name'),
          supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
+         supabase.from('master_retensi').select('*').order('kategori'),
          supabase.from('landing_page_config').select('*').eq('id', 'homepage').single()
       ]);
       
       if (deptRes.data) setDepartments(deptRes.data);
       if (locRes.data) setLocations(locRes.data);
+      if (retensiRes.data) setRetensiRules(retensiRes.data);
       if (landingRes.data) {
          setLandingConfig(landingRes.data);
          if (!landingRes.data.sop_items) {
@@ -50,6 +54,23 @@ export default function SettingsView() {
    };
 
    // ================== MASTER DATA LOGIC ==================
+   const addRetensi = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newRetensi.kategori.trim()) return;
+      const { error } = await supabase.from('master_retensi').insert([newRetensi]);
+      if (error) setMessage("Gagal menambah jadwal retensi: " + error.message);
+      else { setMessage("Berhasil menambah jadwal retensi!"); setNewRetensi({ kategori: "", masa_aktif_tahun: 5, masa_inaktif_tahun: 5 }); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const deleteRetensi = async (id: string) => {
+      if (!confirm("Hapus jadwal retensi ini?")) return;
+      const { error } = await supabase.from('master_retensi').delete().eq('id', id);
+      if (error) setMessage("Gagal menghapus: " + error.message);
+      else { setMessage("Jadwal retensi dihapus."); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
    const addDepartment = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!newDept.trim()) return;
@@ -112,18 +133,26 @@ export default function SettingsView() {
          </div>
 
          {/* Tabs Selector */}
-         <div className="flex gap-6 border-b border-hairline mb-6">
+         <div className="flex gap-6 border-b border-hairline mb-6 overflow-x-auto hide-scrollbar">
             <button 
                onClick={() => setActiveTab("master")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 ${
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "master" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
                }`}
             >
                <Grid size={16} /> Data Master
             </button>
             <button 
+               onClick={() => setActiveTab("retensi")}
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === "retensi" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
+               }`}
+            >
+               <Clock size={16} /> Jadwal Retensi (JRA)
+            </button>
+            <button 
                onClick={() => setActiveTab("landing")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 ${
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "landing" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
                }`}
             >
@@ -225,6 +254,95 @@ export default function SettingsView() {
                      ))}
                      {locations.length === 0 && <div className="text-[12px] text-ink-mute text-center">Belum ada data</div>}
                   </ul>
+               </div>
+            </div>
+         )}
+
+         {!loading && activeTab === "retensi" && (
+            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs max-w-3xl">
+               <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-5">
+                  <Clock size={18} className="text-primary" />
+                  <div>
+                     <h3 className="font-semibold text-[15px] text-ink">Jadwal Retensi Arsip (JRA)</h3>
+                     <p className="text-[12px] text-ink-mute mt-0.5">Atur berapa lama sebuah kategori arsip disimpan di Rak Aktif dan Inaktif sebelum dimusnahkan.</p>
+                  </div>
+               </div>
+               
+               <form onSubmit={addRetensi} className="flex flex-col md:flex-row gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
+                  <div className="flex-1 space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">Kategori Arsip (Jenis Berkas)</label>
+                     <input 
+                        type="text" 
+                        placeholder="Contoh: Surat Keputusan" 
+                        value={newRetensi.kategori}
+                        onChange={(e) => setNewRetensi({...newRetensi, kategori: e.target.value})}
+                        className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
+                     />
+                  </div>
+                  <div className="w-full md:w-32 space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">Masa Aktif</label>
+                     <div className="relative">
+                        <input 
+                           type="number" 
+                           min="0"
+                           value={newRetensi.masa_aktif_tahun}
+                           onChange={(e) => setNewRetensi({...newRetensi, masa_aktif_tahun: parseInt(e.target.value) || 0})}
+                           className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink pr-12"
+                        />
+                        <span className="absolute right-3 top-2 text-[12px] text-ink-mute">Tahun</span>
+                     </div>
+                  </div>
+                  <div className="w-full md:w-32 space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">Masa Inaktif</label>
+                     <div className="relative">
+                        <input 
+                           type="number" 
+                           min="0"
+                           value={newRetensi.masa_inaktif_tahun}
+                           onChange={(e) => setNewRetensi({...newRetensi, masa_inaktif_tahun: parseInt(e.target.value) || 0})}
+                           className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink pr-12"
+                        />
+                        <span className="absolute right-3 top-2 text-[12px] text-ink-mute">Tahun</span>
+                     </div>
+                  </div>
+                  <div className="flex items-end">
+                     <button type="submit" className="h-[34px] w-full bg-primary text-white px-4 rounded-sm hover:bg-primary-deep flex items-center justify-center gap-2 text-[13px] font-medium transition-colors">
+                        <Plus size={16} /> Tambah
+                     </button>
+                  </div>
+               </form>
+
+               <div className="overflow-x-auto border border-hairline rounded-sm">
+                  <table className="w-full text-left border-collapse">
+                     <thead>
+                        <tr className="bg-canvas-soft border-b border-hairline text-[12px] text-ink-mute uppercase tracking-wider">
+                           <th className="p-3 font-medium">Kategori Arsip</th>
+                           <th className="p-3 font-medium text-center">Aktif (Tahun)</th>
+                           <th className="p-3 font-medium text-center">Inaktif (Tahun)</th>
+                           <th className="p-3 font-medium text-center">Aksi</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {retensiRules.length > 0 ? retensiRules.map((r) => (
+                           <tr key={r.id} className="border-b border-hairline last:border-0 text-[13px] hover:bg-canvas-soft transition-colors">
+                              <td className="p-3 font-medium text-ink">{r.kategori}</td>
+                              <td className="p-3 text-center">{r.masa_aktif_tahun}</td>
+                              <td className="p-3 text-center">{r.masa_inaktif_tahun}</td>
+                              <td className="p-3 text-center">
+                                 <button onClick={() => deleteRetensi(r.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 p-1.5 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors inline-flex">
+                                    <Trash2 size={14} />
+                                 </button>
+                              </td>
+                           </tr>
+                        )) : (
+                           <tr>
+                              <td colSpan={4} className="p-6 text-center text-[13px] text-ink-mute">
+                                 Belum ada aturan jadwal retensi. Silakan tambahkan di atas.
+                              </td>
+                           </tr>
+                        )}
+                     </tbody>
+                  </table>
                </div>
             </div>
          )}
