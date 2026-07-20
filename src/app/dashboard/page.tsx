@@ -2036,7 +2036,7 @@ export default function Dashboard() {
                      </button>
                      <button 
                         onClick={() => confirmDeleteArchive(selectedDetailItem.no)}
-                        className="flex-1 md:flex-none border border-transparent bg-red-50 hover:bg-red-100 text-primary font-semibold px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5 transition-colors"
+                        className="flex-1 md:flex-none border border-transparent bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-primary dark:text-red-400 font-semibold px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5 transition-colors"
                      >
                         <Trash2 size={14} /> Hapus Berkas
                      </button>
@@ -3766,7 +3766,7 @@ export default function Dashboard() {
                                 </span>
                              </td>
                              <td className="p-3 text-center">
-                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                                <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] px-2 py-0.5 rounded-full font-medium">
                                    Aktif (Disetujui)
                                 </span>
                              </td>
@@ -3784,14 +3784,14 @@ export default function Dashboard() {
                                             className="p-1 text-ink-mute hover:text-blue-700 transition-colors"
                                             title="Ubah Jabatan Pengguna"
                                          >
-                                            <Edit3 size={14} className="text-blue-600 hover:text-blue-800" />
+                                            <Edit3 size={14} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" />
                                          </button>
                                          <button 
                                             onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
                                             className="p-1 text-ink-mute hover:text-amber-700 transition-colors"
                                             title="Reset Password Pengguna"
                                          >
-                                            <Key size={14} className="text-amber-600 hover:text-amber-800" />
+                                            <Key size={14} className="text-amber-600 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400" />
                                          </button>
                                          <button 
                                             onClick={(e) => {
@@ -3800,10 +3800,10 @@ export default function Dashboard() {
                                                   handleBlockUser(item.id);
                                                }
                                             }}
-                                            className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
+                                            className="p-1 text-ink-mute hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-sm transition-colors"
                                             title="Cabut Akses Pengguna"
                                          >
-                                            <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
+                                            <Trash2 size={14} className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300" />
                                          </button>
                                       </>
                                    ) : (
@@ -4325,7 +4325,7 @@ export default function Dashboard() {
               {(role === 'superadmin' || role === 'pic_gedung' || role === 'admin_dept') && (
                  <button 
                     onClick={() => setIsRecycleBin(!isRecycleBin)}
-                    className={`col-span-2 md:col-span-1 w-full md:w-auto flex items-center justify-center gap-2 py-2 px-4 text-[14px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'}`}
+                     className={`col-span-2 md:col-span-1 w-full md:w-auto flex items-center justify-center gap-2 py-2 px-4 text-[14px] font-medium rounded-sm transition-colors ${isRecycleBin ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20'}`}
                  >
                     <Trash2 size={16} /> {isRecycleBin ? 'Kembali' : 'Sampah'}
                  </button>
@@ -4563,10 +4563,10 @@ export default function Dashboard() {
                                                 e.stopPropagation();
                                                 handleHardDeleteArchive(archive.no || archive.id);
                                              }}
-                                             className="p-1 text-ink-mute hover:text-rose-600 hover:bg-rose-50 rounded-sm transition-colors"
+                                             className="p-1 text-ink-mute hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-sm transition-colors"
                                              title="Hapus Permanen"
                                           >
-                                             <Trash2 size={14} className="text-rose-600 hover:text-rose-700" />
+                                             <Trash2 size={14} className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300" />
                                           </button>
                                        </>
                                     ) : (
