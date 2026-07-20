@@ -1,30 +1,32 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   /* Brand Primary: Red */
-  --color-primary: #e31837;
-  --color-primary-deep: #b91029;
-  --color-primary-soft: #ff4d6a;
+  --color-primary: var(--primary);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-soft: var(--primary-soft);
   
   /* Ink (Text) */
-  --color-ink: #171717;
-  --color-ink-secondary: #212121;
-  --color-ink-mute: #707070;
-  --color-ink-faint: #b2b2b2;
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-mute: var(--ink-mute);
+  --color-ink-faint: var(--ink-faint);
   
   /* Canvas (Background) */
-  --color-canvas: #ffffff;
-  --color-canvas-soft: #fafafa;
-  --color-canvas-night: #1c1c1c;
+  --color-canvas: var(--canvas);
+  --color-canvas-soft: var(--canvas-soft);
+  --color-canvas-night: var(--canvas-night);
   
   /* Hairline (Borders) */
-  --color-hairline: #dfdfdf;
-  --color-hairline-strong: #c7c7c7;
-  --color-hairline-cool: #ededed;
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-hairline-cool: var(--hairline-cool);
   
   /* On-Surfaces */
-  --color-on-primary: #ffffff; /* White text on red CTA */
-  --color-on-dark: #ffffff;
+  --color-on-primary: var(--on-primary);
+  --color-on-dark: var(--on-dark);
 
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -32,7 +34,7 @@
 
   /* Border Radius */
   --radius-xs: 4px;
-  --radius-sm: 6px; /* Signature button radius */
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
@@ -41,6 +43,51 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  --primary: #e31837;
+  --primary-deep: #b91029;
+  --primary-soft: #ff4d6a;
+  
+  --ink: #171717;
+  --ink-secondary: #212121;
+  --ink-mute: #707070;
+  --ink-faint: #b2b2b2;
+  
+  --canvas: #ffffff;
+  --canvas-soft: #fafafa;
+  --canvas-night: #1c1c1c;
+  
+  --hairline: #dfdfdf;
+  --hairline-strong: #c7c7c7;
+  --hairline-cool: #ededed;
+  
+  --on-primary: #ffffff;
+  --on-dark: #ffffff;
+}
+
+.dark {
+  --background: #171717;
+  --foreground: #ffffff;
+  
+  --primary: #ff4d6a;
+  --primary-deep: #e31837;
+  --primary-soft: #ff7a91;
+  
+  --ink: #ffffff;
+  --ink-secondary: #e5e5e5;
+  --ink-mute: #a3a3a3;
+  --ink-faint: #737373;
+  
+  --canvas: #171717;
+  --canvas-soft: #262626;
+  --canvas-night: #0a0a0a;
+  
+  --hairline: #404040;
+  --hairline-strong: #525252;
+  --hairline-cool: #262626;
+  
+  --on-primary: #ffffff;
+  --on-dark: #000000;
 }
 
 body {

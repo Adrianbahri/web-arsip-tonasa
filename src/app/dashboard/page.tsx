@@ -1703,7 +1703,7 @@ export default function Dashboard() {
               link_berkas: row['Link PDF (Opsional)'] || '',
               gedung: row['Gedung'] || null,
               lorong: row['Lorong'] || null,
-              rak: row['Rak'] ? String(row['Rak']).replace(/^(?i:rak\s+)/i, '').trim() : null,
+              rak: row['Rak'] ? String(row['Rak']).replace(/^rak\s+/i, '').trim() : null,
               baris: row['Baris'] || null
            }));
 
@@ -1743,13 +1743,16 @@ export default function Dashboard() {
               if (error) throw error;
               logActivity('IMPORT_EXCEL', `Mengimpor ${newRecordsToInsert.length} arsip dari Excel`);
               setSuccessMessage(`Berhasil mengimpor ${newRecordsToInsert.length} arsip dari Excel!`);
+              setTimeout(() => setSuccessMessage(""), 5000);
               fetchArchives();
            } else {
               setSuccessMessage("Tidak ada data baru untuk diimpor.");
+              setTimeout(() => setSuccessMessage(""), 5000);
            }
         } catch (error) {
            console.error("Gagal import excel:", error);
            setSuccessMessage("Gagal mengimpor Excel. Pastikan format tabel sesuai.");
+           setTimeout(() => setSuccessMessage(""), 5000);
         }
      };
      reader.readAsBinaryString(file);
@@ -1809,11 +1812,13 @@ export default function Dashboard() {
         
         logActivity('IMPORT_EXCEL', msg);
         setSuccessMessage(msg);
+        setTimeout(() => setSuccessMessage(""), 5000);
         fetchArchives();
 
      } catch (err) {
         console.error("Gagal import excel:", err);
         setSuccessMessage("Terjadi kesalahan saat memproses data Excel.");
+        setTimeout(() => setSuccessMessage(""), 5000);
      }
 
      setBulkDuplicates([]);
@@ -4416,6 +4421,15 @@ export default function Dashboard() {
               </div>
         </div>
       </div>
+
+      {successMessage && (
+         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3 mb-4">
+            <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center shrink-0">
+               <Check size={14} strokeWidth={3} />
+            </div>
+            <span className="text-[14px] font-medium leading-relaxed">{successMessage}</span>
+         </div>
+      )}
 
       {isRecycleBin && (
          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[14px] flex items-center gap-2">

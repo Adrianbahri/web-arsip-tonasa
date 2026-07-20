@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { RoleProvider } from "@/components/RoleContext";
 import MainLayout from "@/components/MainLayout";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,13 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${inter.variable} antialiased h-full`}>
+    <html lang="id" className={`${inter.variable} antialiased h-full`} suppressHydrationWarning>
       <body className="h-full">
-        <RoleProvider>
-          <MainLayout>
-            {children}
-          </MainLayout>
-        </RoleProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <RoleProvider>
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </RoleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

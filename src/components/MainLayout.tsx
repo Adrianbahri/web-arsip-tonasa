@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useRole } from "./RoleContext";
 import { usePathname } from "next/navigation";
 import { 
@@ -104,8 +105,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                  </p>
               </div>
            )}
-           {/* Profile Actions: Ganti Password (Key) & Keluar (LogOut) */}
+           {/* Profile Actions: ThemeSwitcher, Ganti Password (Key) & Keluar (LogOut) */}
            <div className={`flex items-center gap-1 flex-shrink-0 ${isSidebarCollapsed ? 'flex-col mt-2' : ''}`}>
+              <ThemeSwitcher />
               <button 
                  onClick={() => setActiveMenu("Ganti Password")}
                  className={`p-1.5 transition-colors rounded-xs ${
@@ -138,7 +140,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
              <h1 className="text-lg font-bold text-ink tracking-tight">Arsip<span className="text-primary ml-1">Tonasa</span></h1>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+             <ThemeSwitcher />
              {/* Quick Role Toggle on Mobile Header Removed */}
              {/* Ganti Password on Mobile Header */}
              <button 
