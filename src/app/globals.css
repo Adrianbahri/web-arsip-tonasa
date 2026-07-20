@@ -80,14 +80,14 @@
   
   --canvas: #121212;
   --canvas-soft: #1e1e1e;
-  --canvas-night: #0a0a0a;
+  --canvas-night: #262626;
   
   --hairline: #374151;
   --hairline-strong: #4b5563;
   --hairline-cool: #1f2937;
   
   --on-primary: #ffffff;
-  --on-dark: #000000;
+  --on-dark: #ffffff;
 }
 
 body {

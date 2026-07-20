@@ -2197,7 +2197,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-4">
                            <div className="w-14 h-14 rounded-full border border-hairline overflow-hidden">
                               <img 
-                                 src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedDetailItem.name}`} 
+                                 src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedDetailItem.name}`} 
                                  alt="Avatar" 
                                  className="w-full h-full object-cover"
                               />
@@ -3694,7 +3694,7 @@ export default function Dashboard() {
                        >
                           <div className="flex items-center gap-3">
                              <div className="w-10 h-10 rounded-full border border-hairline overflow-hidden">
-                                <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
+                                <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
                              </div>
                              <div className="flex-1 min-w-0">
                                 <h4 className="font-semibold text-[14px] text-ink truncate">{item.name}</h4>
@@ -3830,7 +3830,7 @@ export default function Dashboard() {
                     >
                        <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full border border-hairline overflow-hidden">
-                             <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
+                             <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.name}`} alt="Avatar" className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
                              <h4 className="font-semibold text-[14px] text-ink truncate">{item.name}</h4>
@@ -4121,12 +4121,14 @@ export default function Dashboard() {
                   <div className="h-[300px] w-full">
                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={deptStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                           <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
-                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--hairline)" />
+                           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--ink-mute)' }} tickLine={false} axisLine={false} />
+                           <YAxis tick={{ fontSize: 10, fill: 'var(--ink-mute)' }} tickLine={false} axisLine={false} />
                            <Tooltip 
-                              cursor={{ fill: '#F3F4F6' }} 
-                              contentStyle={{ borderRadius: '4px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: 'bold' }} 
+                              cursor={{ fill: 'var(--canvas-soft)' }} 
+                              contentStyle={{ backgroundColor: 'var(--canvas)', borderRadius: '4px', border: '1px solid var(--hairline)', color: 'var(--ink)', fontSize: '12px', fontWeight: 'bold' }} 
+                              itemStyle={{ color: 'var(--primary)' }}
+                              labelStyle={{ color: 'var(--ink-mute)' }}
                            />
                            <Bar dataKey="count" fill="#E11D48" radius={[4, 4, 0, 0]} barSize={32} />
                         </BarChart>
@@ -4149,11 +4151,13 @@ export default function Dashboard() {
                                  <stop offset="95%" stopColor="#E11D48" stopOpacity={0}/>
                               </linearGradient>
                            </defs>
-                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                           <XAxis dataKey="year" tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
-                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false} />
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--hairline)" />
+                           <XAxis dataKey="year" tick={{ fontSize: 10, fill: 'var(--ink-mute)' }} tickLine={false} axisLine={false} />
+                           <YAxis tick={{ fontSize: 10, fill: 'var(--ink-mute)' }} tickLine={false} axisLine={false} />
                            <Tooltip 
-                              contentStyle={{ borderRadius: '4px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: 'bold' }} 
+                              contentStyle={{ backgroundColor: 'var(--canvas)', borderRadius: '4px', border: '1px solid var(--hairline)', color: 'var(--ink)', fontSize: '12px', fontWeight: 'bold' }} 
+                              itemStyle={{ color: 'var(--primary)' }}
+                              labelStyle={{ color: 'var(--ink-mute)' }}
                            />
                            <Area type="monotone" dataKey="count" stroke="#E11D48" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
                         </AreaChart>

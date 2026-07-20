@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MessageSquare, Mail, MapPin, FileText, CheckCircle2, ChevronRight, Menu, X, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function LandingPage() {
             <a href="#prosedur" className="text-ink-mute hover:text-ink text-[13px] font-medium transition-colors">
                Prosedur
             </a>
-
+            <ThemeSwitcher />
             <Link href="/login" className="flex items-center gap-2 bg-primary hover:bg-primary-deep text-white text-[13px] font-semibold transition-colors px-4 py-1.5 rounded-full shadow-sm">
                <User size={16} />
                <span>Login</span>
@@ -56,6 +57,7 @@ export default function LandingPage() {
 
          {/* Mobile Header Actions */}
          <div className="flex items-center gap-3 md:hidden">
+            <ThemeSwitcher />
             <Link href="/login" className="flex items-center justify-center bg-primary text-white p-2 rounded-full shadow-sm">
                <User size={18} />
             </Link>
@@ -187,7 +189,7 @@ export default function LandingPage() {
                         href={config.pic_whatsapp} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="flex items-center justify-center gap-3 w-full bg-white text-ink hover:bg-gray-100 py-3 rounded-xs font-semibold text-[14px] transition-colors border border-transparent shadow-sm"
+                        className="flex items-center justify-center gap-3 w-full bg-white text-gray-900 hover:bg-gray-100 py-3 rounded-xs font-semibold text-[14px] transition-colors border border-transparent shadow-sm"
                      >
                         <MessageSquare size={18} className="text-emerald-600 fill-emerald-600" />
                         Hubungi via Whatsapp

@@ -165,7 +165,7 @@ export default function SettingsView() {
                      {departments.map((d) => (
                         <li key={d.id} className="flex justify-between items-center bg-canvas-soft border border-hairline p-2 rounded-xs text-[13px]">
                            <span className="font-medium text-ink">{d.name}</span>
-                           <button onClick={() => deleteDepartment(d.id)} className="text-red-500 hover:text-red-700 p-1 bg-white border border-hairline rounded-xs">
+                           <button onClick={() => deleteDepartment(d.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors">
                               <Trash2 size={14} />
                            </button>
                         </li>
@@ -218,7 +218,7 @@ export default function SettingsView() {
                      {locations.map((l) => (
                         <li key={l.id} className="flex justify-between items-center bg-canvas-soft border border-hairline p-2 rounded-xs text-[13px]">
                            <span className="font-medium text-ink">Gedung {l.gedung} - {l.lorong} - {l.rak}</span>
-                           <button onClick={() => deleteLocation(l.id)} className="text-red-500 hover:text-red-700 p-1 bg-white border border-hairline rounded-xs">
+                           <button onClick={() => deleteLocation(l.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors">
                               <Trash2 size={14} />
                            </button>
                         </li>
@@ -311,7 +311,7 @@ export default function SettingsView() {
                                        newItems[idx].title = e.target.value;
                                        setLandingConfig({ ...landingConfig, sop_items: newItems });
                                     }}
-                                    className="w-full bg-white border border-hairline text-[12px] font-semibold rounded-xs px-2 py-1.5 focus:border-ink" 
+                                    className="w-full bg-canvas border border-hairline text-[12px] font-semibold rounded-xs px-2 py-1.5 focus:border-ink text-ink" 
                                  />
                                  <textarea 
                                     placeholder="Deskripsi..." 
@@ -322,7 +322,7 @@ export default function SettingsView() {
                                        setLandingConfig({ ...landingConfig, sop_items: newItems });
                                     }}
                                     rows={2} 
-                                    className="w-full bg-white border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:border-ink"
+                                    className="w-full bg-canvas border border-hairline text-[12px] rounded-xs px-2 py-1.5 focus:border-ink text-ink"
                                  ></textarea>
                               </div>
                               <button 
@@ -332,7 +332,7 @@ export default function SettingsView() {
                                     newItems.splice(idx, 1);
                                     setLandingConfig({ ...landingConfig, sop_items: newItems });
                                  }}
-                                 className="text-red-500 hover:bg-red-50 p-1.5 rounded-sm transition-colors border border-transparent hover:border-red-200"
+                                 className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 p-1.5 rounded-sm transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
                               >
                                  <Trash2 size={14} />
                               </button>

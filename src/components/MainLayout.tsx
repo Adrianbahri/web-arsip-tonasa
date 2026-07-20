@@ -92,7 +92,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <div className={`p-4 border-t border-hairline flex items-center ${isSidebarCollapsed ? 'flex-col justify-center' : ''} gap-3`}>
            <div className="w-10 h-10 rounded-full border border-hairline overflow-hidden flex-shrink-0">
               <img 
-                 src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.name || "Syukur"}`} 
+                 src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "Syukur"}`} 
                  alt="Avatar" 
                  className="w-full h-full object-cover"
               />
