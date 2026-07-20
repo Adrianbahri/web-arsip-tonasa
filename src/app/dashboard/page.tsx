@@ -431,6 +431,8 @@ export default function Dashboard() {
      } catch (e) {
         console.warn("Supabase fetch failed, using mock data fallback:", e);
      }
+  };
+
   // Fetch Users for PIC Gedung
   const fetchUsers = async () => {
      try {
