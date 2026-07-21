@@ -385,34 +385,54 @@ export default function Dashboard() {
             }
             
             if (!fetchError) {
-               const formatted = allData.map(item => ({
-                  id: item.id,
-                  no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
-                  kodeKlasifikasi: item.kode_klasifikasi,
-                  jenisBerkas: item.jenis_berkas,
-                  judulBerkas: item.judul_berkas,
-                  departemen: (() => {
-                     const d = (item.departemen || "").trim().toUpperCase();
-                     if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(d) || d.includes('KEUANG')) return 'KEUANGAN';
-                     return d;
-                  })(),
-                  tahun: item.tahun,
-                  tanggalTerima: item.tanggal_terima,
-                  jangkaWaktu: item.jangka_waktu,
-                  gedung: item.gedung || "",
-                  lorong: item.lorong || "",
-                  rak: item.rak || "",
-                  baris: item.baris || "",
-                  keterangan: item.keterangan || "",
-                  isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
-                  status: item.status,
-                  linkBerkas: item.link_berkas,
-                  alasanPenolakan: item.alasan_penolakan || ""
-               }));
+               const currentYear = new Date().getFullYear();
+               const formatted = allData.map(item => {
+                  let currentStatus = item.status;
+                  
+                  if (currentStatus === 'Aktif' || currentStatus === 'Nonaktif' || currentStatus === 'Inaktif') {
+                     const rule = retensiRules.find(r => r.kategori.toLowerCase() === (item.jenis_berkas || '').toLowerCase());
+                     if (rule) {
+                        const arcYear = parseInt(item.tahun);
+                        if (!isNaN(arcYear)) {
+                           const age = currentYear - arcYear;
+                           if (age >= (rule.masa_aktif_tahun + rule.masa_inaktif_tahun)) {
+                              currentStatus = 'Usul Musnah';
+                           } else if (age >= rule.masa_aktif_tahun) {
+                              currentStatus = 'Nonaktif';
+                           }
+                        }
+                     }
+                  }
+
+                  return {
+                     id: item.id,
+                     no: item.no ? String(item.no).padStart(2, '0') : String(item.id).substring(0, 4),
+                     kodeKlasifikasi: item.kode_klasifikasi,
+                     jenisBerkas: item.jenis_berkas,
+                     judulBerkas: item.judul_berkas,
+                     departemen: (() => {
+                        const d = (item.departemen || "").trim().toUpperCase();
+                        if (/^KEUANGA|KEUNGAN|KUANGAN|KEUANGAN\s*$/.test(d) || d.includes('KEUANG')) return 'KEUANGAN';
+                        return d;
+                     })(),
+                     tahun: item.tahun,
+                     tanggalTerima: item.tanggal_terima,
+                     jangkaWaktu: item.jangka_waktu,
+                     gedung: item.gedung || "",
+                     lorong: item.lorong || "",
+                     rak: item.rak || "",
+                     baris: item.baris || "",
+                     keterangan: item.keterangan || "",
+                     isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
+                     status: currentStatus,
+                     linkBerkas: item.link_berkas,
+                     alasanPenolakan: item.alasan_penolakan || ""
+                  };
+               });
                setArchives(formatted);
                
+               
                // Calculate Retensi Alerts
-               const currentYear = new Date().getFullYear();
                const alerts: any[] = [];
                
                formatted.forEach(arc => {
