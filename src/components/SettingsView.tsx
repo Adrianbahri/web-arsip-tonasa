@@ -10,6 +10,7 @@ export default function SettingsView() {
    const [departments, setDepartments] = useState<any[]>([]);
    const [locations, setLocations] = useState<any[]>([]);
    const [retensiRules, setRetensiRules] = useState<any[]>([]);
+   const [jenisBerkasList, setJenisBerkasList] = useState<string[]>([]);
    const [newDept, setNewDept] = useState("");
    const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "" });
    const [newRetensi, setNewRetensi] = useState({ kategori: "", masa_aktif_tahun: 5, masa_inaktif_tahun: 5 });
@@ -27,16 +28,21 @@ export default function SettingsView() {
 
    const fetchMasterData = async () => {
       setLoading(true);
-      const [deptRes, locRes, retensiRes, landingRes] = await Promise.all([
+      const [deptRes, locRes, retensiRes, landingRes, archivesRes] = await Promise.all([
          supabase.from('master_departments').select('*').order('name'),
          supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
          supabase.from('master_retensi').select('*').order('kategori'),
-         supabase.from('landing_page_config').select('*').eq('id', 'homepage').single()
+         supabase.from('landing_page_config').select('*').eq('id', 'homepage').single(),
+         supabase.from('archives').select('jenis_berkas')
       ]);
       
       if (deptRes.data) setDepartments(deptRes.data);
       if (locRes.data) setLocations(locRes.data);
       if (retensiRes.data) setRetensiRules(retensiRes.data);
+      if (archivesRes.data) {
+         const unique = Array.from(new Set(archivesRes.data.map((a: any) => a.jenis_berkas).filter(Boolean))) as string[];
+         setJenisBerkasList(unique.sort());
+      }
       if (landingRes.data) {
          setLandingConfig(landingRes.data);
          if (!landingRes.data.sop_items) {
@@ -57,6 +63,14 @@ export default function SettingsView() {
    const addRetensi = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!newRetensi.kategori.trim()) return;
+
+      const isDuplicate = retensiRules.some(r => r.kategori.toLowerCase() === newRetensi.kategori.trim().toLowerCase());
+      if (isDuplicate) {
+         setMessage("Gagal menambah: Jenis berkas ini sudah ada di Jadwal Retensi!");
+         setTimeout(() => setMessage(""), 3000);
+         return;
+      }
+
       const { error } = await supabase.from('master_retensi').insert([newRetensi]);
       if (error) setMessage("Gagal menambah jadwal retensi: " + error.message);
       else { setMessage("Berhasil menambah jadwal retensi!"); setNewRetensi({ kategori: "", masa_aktif_tahun: 5, masa_inaktif_tahun: 5 }); fetchMasterData(); }
@@ -271,13 +285,16 @@ export default function SettingsView() {
                <form onSubmit={addRetensi} className="flex flex-col md:flex-row gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
                   <div className="flex-1 space-y-1">
                      <label className="text-[12px] font-medium text-ink-mute">Kategori Arsip (Jenis Berkas)</label>
-                     <input 
-                        type="text" 
-                        placeholder="Contoh: Surat Keputusan" 
+                     <select 
                         value={newRetensi.kategori}
                         onChange={(e) => setNewRetensi({...newRetensi, kategori: e.target.value})}
                         className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
-                     />
+                     >
+                        <option value="">-- Pilih Jenis Berkas --</option>
+                        {jenisBerkasList.map((jb, idx) => (
+                           <option key={idx} value={jb}>{jb}</option>
+                        ))}
+                     </select>
                   </div>
                   <div className="w-full md:w-32 space-y-1">
                      <label className="text-[12px] font-medium text-ink-mute">Masa Aktif</label>

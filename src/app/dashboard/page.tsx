@@ -52,8 +52,14 @@ const StatusBadge = ({ status, alasanPenolakan, isSmall = false }: { status: str
       case 'Disetujui':
          colorClasses = 'bg-[#def7ec] dark:bg-emerald-500/10 text-[#03543f] dark:text-emerald-400 border-[#bdf5db] dark:border-emerald-500/20';
          break;
-      case 'Inaktif':
+      case 'Nonaktif':
          colorClasses = 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20';
+         break;
+      case 'Usul Musnah':
+         colorClasses = 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20';
+         break;
+      case 'Dimusnahkan':
+         colorClasses = 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-600';
          break;
       case 'Permanen':
          colorClasses = 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
@@ -410,7 +416,7 @@ export default function Dashboard() {
                const alerts: any[] = [];
                
                formatted.forEach(arc => {
-                  if (arc.status === 'Aktif' || arc.status === 'Inaktif') {
+                  if (arc.status === 'Aktif' || arc.status === 'Nonaktif') {
                      const rule = retensiRules.find(r => r.kategori.toLowerCase() === (arc.jenisBerkas || '').toLowerCase());
                      if (rule) {
                         const arcYear = parseInt(arc.tahun);
@@ -419,7 +425,7 @@ export default function Dashboard() {
                            if (age >= (rule.masa_aktif_tahun + rule.masa_inaktif_tahun) && arc.status !== 'Dimusnahkan') {
                               alerts.push({ id: arc.id, judulBerkas: arc.judulBerkas, kategori: rule.kategori, umur: age, tipeAlert: 'Musnah' });
                            } else if (age >= rule.masa_aktif_tahun && arc.status === 'Aktif') {
-                              alerts.push({ id: arc.id, judulBerkas: arc.judulBerkas, kategori: rule.kategori, umur: age, tipeAlert: 'Inaktif' });
+                              alerts.push({ id: arc.id, judulBerkas: arc.judulBerkas, kategori: rule.kategori, umur: age, tipeAlert: 'Nonaktif' });
                            }
                         }
                      }
@@ -1611,11 +1617,11 @@ export default function Dashboard() {
   // Helper stats calculation
   const getStats = () => {
      const active = archives.filter(item => item.status === 'Aktif').length;
-     const inactive = archives.filter(item => item.status === 'Inaktif').length;
+     const inactive = archives.filter(item => item.status === 'Nonaktif').length;
      return {
         superadmin: { total: archives.length, active, inactive },
         pic_gedung: { total: archives.length, active, inactive },
-        admin_dept: { total: archives.filter(i => i.departemen === 'KEUANGAN').length, active: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Aktif').length, inactive: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Inaktif').length },
+        admin_dept: { total: archives.filter(i => i.departemen === 'KEUANGAN').length, active: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Aktif').length, inactive: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Nonaktif').length },
         user: { total: archives.length, active, inactive }
      };
   };
@@ -2149,7 +2155,7 @@ export default function Dashboard() {
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
                                  selectedDetailItem.status === 'Aktif' 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : selectedDetailItem.status === 'Inaktif'
+                                 : selectedDetailItem.status === 'Nonaktif'
                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
                                  : 'bg-red-50 text-red-700 border border-red-200'
                               }`}>
@@ -4025,11 +4031,11 @@ export default function Dashboard() {
            <div className="space-y-3">
               {(role === 'superadmin' || role === 'pic_gedung') && retensiAlerts.length > 0 && (
                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-sm p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                       <ShieldAlert className="text-red-600 dark:text-red-400 shrink-0" />
+                    <div className="flex items-start gap-3">
+                       <AlertTriangle className="text-red-600 dark:text-red-400 mt-1 shrink-0" size={24} />
                        <div>
-                          <h3 className="font-semibold text-sm">Peringatan Jadwal Retensi Arsip (JRA)</h3>
-                          <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">Terdapat {retensiAlerts.length} arsip yang memasuki masa Inaktif atau harus Dimusnahkan berdasarkan aturan retensi.</p>
+                          <h4 className="font-bold text-red-800 dark:text-red-300 text-[15px]">Peringatan Retensi Arsip</h4>
+                          <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">Terdapat {retensiAlerts.length} arsip yang memasuki masa Nonaktif atau harus Dimusnahkan berdasarkan aturan retensi.</p>
                        </div>
                     </div>
                     <button 
@@ -4121,7 +4127,7 @@ export default function Dashboard() {
               <div className="col-span-2 md:col-span-1 bg-canvas-night text-on-dark rounded-sm p-6 border border-transparent flex flex-col justify-between relative overflow-hidden">
                  <div className="flex items-center gap-2 mb-4 text-ink-mute-2 relative z-10">
                     <Archive size={16} className="text-on-dark" />
-                    <p className="text-[13px] font-medium">Inaktif (Gudang)</p>
+                    <p className="text-[13px] font-medium">Nonaktif (Gudang)</p>
                  </div>
                  <h3 className="text-display-md text-on-dark relative z-10">{stats[role].inactive}</h3>
                  <div className="absolute -right-4 -bottom-4 text-[#333333]">
