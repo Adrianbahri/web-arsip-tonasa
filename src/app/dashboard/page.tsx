@@ -519,7 +519,15 @@ export default function Dashboard() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
      const { name, value } = e.target;
-     setFormData(prev => ({ ...prev, [name]: value }));
+     
+     let finalValue = value;
+     if (name === 'rak') {
+        finalValue = finalValue.replace(/^rak\s*/i, '');
+     } else if (name === 'baris') {
+        finalValue = finalValue.replace(/^baris\s*/i, '');
+     }
+     
+     setFormData(prev => ({ ...prev, [name]: finalValue }));
   };
 
   const handleServiceInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -529,7 +537,15 @@ export default function Dashboard() {
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
      const { name, value } = e.target;
-     setApprovalLocation(prev => ({ ...prev, [name]: value }));
+     
+     let finalValue = value;
+     if (name === 'rak') {
+        finalValue = finalValue.replace(/^rak\s*/i, '');
+     } else if (name === 'baris') {
+        finalValue = finalValue.replace(/^baris\s*/i, '');
+     }
+     
+     setApprovalLocation(prev => ({ ...prev, [name]: finalValue }));
   };
 
     const handleSubmit = async (e?: React.FormEvent, bypassDuplicateCheck: boolean = false) => {
