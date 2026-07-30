@@ -171,10 +171,10 @@ export default function LandingPage() {
       </section>
 
       {/* PIC GEDUNG ARSIP SECTION (Dark Mode Apple) */}
-      <section className="bg-[#1d1d1f] text-[#f5f5f7] py-24 px-6">
+      <section className="bg-[#1d1d1f] dark:bg-[#f5f5f7] text-[#f5f5f7] dark:text-[#1d1d1f] py-24 px-6 transition-colors">
          <div className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-4 flex flex-col items-center space-y-5">
-               <div className="w-[200px] md:w-full max-w-[260px] aspect-[4/5] bg-black border border-white/10 rounded-[16px] flex items-center justify-center text-white/20 relative overflow-hidden">
+               <div className="w-[200px] md:w-full max-w-[260px] aspect-[4/5] bg-black dark:bg-white border border-white/10 dark:border-black/5 rounded-[16px] flex items-center justify-center text-white/20 dark:text-black/10 relative overflow-hidden">
                   {config.pic_photo_url ? (
                      <img src={getDirectImageUrl(config.pic_photo_url)} alt="PIC" className="w-full h-full object-cover" />
                   ) : (
@@ -184,15 +184,15 @@ export default function LandingPage() {
                      </svg>
                   )}
                </div>
-               <p className="font-semibold text-white/60 text-[14px] uppercase tracking-widest">
+               <p className="font-semibold text-white/60 dark:text-[#1d1d1f]/60 text-[14px] uppercase tracking-widest">
                   {config.pic_title.split('-')[1]?.trim() || "PIC Gedung"}
                </p>
             </div>
             <div className="md:col-span-8 space-y-8">
-               <h3 className="text-[40px] md:text-[48px] font-semibold tracking-[-1px] leading-tight text-white">
+               <h3 className="text-[40px] md:text-[48px] font-semibold tracking-[-1px] leading-tight text-white dark:text-[#1d1d1f]">
                   {config.pic_title}
                </h3>
-               <p className="text-white/70 text-[17px] leading-[1.47] max-w-2xl whitespace-pre-wrap">
+               <p className="text-white/70 dark:text-[#1d1d1f]/70 text-[17px] leading-[1.47] max-w-2xl whitespace-pre-wrap">
                   {config.pic_text}
                </p>
                <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -201,7 +201,7 @@ export default function LandingPage() {
                         href={config.pic_whatsapp} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="flex items-center justify-center gap-2 bg-[#f5f5f7] hover:bg-white text-[#1d1d1f] px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95"
+                        className="flex items-center justify-center gap-2 bg-[#f5f5f7] dark:bg-white hover:bg-white dark:hover:bg-white/80 text-[#1d1d1f] dark:text-[#1d1d1f] px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 shadow-sm"
                      >
                         <MessageSquare size={18} className="text-[#34c759] fill-[#34c759]" />
                         Hubungi Whatsapp
@@ -210,7 +210,7 @@ export default function LandingPage() {
                   {config.pic_email && (
                      <a 
                         href={config.pic_email} 
-                        className="flex items-center justify-center gap-2 bg-[#333336] hover:bg-[#424245] text-white px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95"
+                        className="flex items-center justify-center gap-2 bg-[#333336] dark:bg-white hover:bg-[#424245] dark:hover:bg-white/80 text-white dark:text-[#1d1d1f] px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 border dark:border-black/5 shadow-sm"
                      >
                         <Mail size={18} className="text-[#e31837]" />
                         Kirim Email

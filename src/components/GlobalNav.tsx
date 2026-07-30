@@ -24,12 +24,12 @@ export default function GlobalNav() {
 
   return (
     <>
-      <header className="bg-[#1d1d1f] text-white h-[60px] flex items-center sticky top-0 z-50">
+      <header className="bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] h-[60px] flex items-center sticky top-0 z-50 transition-colors">
         <div className="w-full max-w-[1024px] mx-auto px-4 flex items-center justify-between">
           
           {/* Mobile Menu Toggle */}
           <button 
-             className="md:hidden text-white/80 hover:text-white transition-colors"
+             className="md:hidden opacity-80 hover:opacity-100 transition-opacity"
              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
              aria-label="Menu"
           >
@@ -53,7 +53,7 @@ export default function GlobalNav() {
              {mounted && (
                <button 
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="text-white/80 hover:text-white transition-colors flex items-center justify-center p-1 rounded-full"
+                  className="opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center p-1 rounded-full"
                   aria-label="Toggle Theme"
                >
                   {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
@@ -62,7 +62,7 @@ export default function GlobalNav() {
 
              <Link 
                href="/login" 
-               className="flex items-center gap-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors"
+               className="flex items-center gap-1.5 text-xs font-medium opacity-80 hover:opacity-100 transition-opacity"
              >
                <User size={14} />
                <span className="hidden sm:inline">Login</span>
@@ -73,25 +73,25 @@ export default function GlobalNav() {
 
       {/* Mobile Nav Drawer */}
       {isMobileMenuOpen && (
-         <div className="md:hidden fixed top-[60px] left-0 right-0 bg-[#1d1d1f] border-t border-white/10 z-40 px-6 py-6 flex flex-col gap-6 shadow-2xl h-[calc(100vh-60px)] animate-in slide-in-from-top-2 duration-300">
+         <div className="md:hidden fixed top-[60px] left-0 right-0 bg-[#1d1d1f] dark:bg-white border-t border-white/10 dark:border-black/10 z-40 px-6 py-6 flex flex-col gap-6 shadow-2xl h-[calc(100vh-60px)] animate-in slide-in-from-top-2 duration-300">
             <Link 
                href="/" 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 text-2xl font-semibold border-b border-white/10 pb-4"
+               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4"
             >
                Beranda
             </Link>
             <Link 
                href={getProsedurHref()} 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 text-2xl font-semibold border-b border-white/10 pb-4"
+               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4"
             >
                Prosedur
             </Link>
             <Link 
                href="/login" 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 text-2xl font-semibold border-b border-white/10 pb-4 flex items-center gap-2"
+               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4 flex items-center gap-2"
             >
                <User size={24} />
                Login
