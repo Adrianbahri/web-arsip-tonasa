@@ -35,14 +35,10 @@ export default function GlobalNav() {
             <span className="font-bold text-[16px] tracking-wide">Arsip Tonasa</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-xs font-medium text-white/80 hover:text-white transition-colors tracking-wide">
-               Beranda
-            </Link>
-            <Link href={getProsedurHref()} className="text-xs font-medium text-white/80 hover:text-white transition-colors tracking-wide">
-               Prosedur
-            </Link>
+          {/* Desktop Nav (Perfectly Centered) */}
+          <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+             <Link href="/" className="text-[12px] opacity-80 hover:opacity-100 transition-opacity tracking-wide">Beranda</Link>
+             <Link href={getProsedurHref()} className="text-[12px] opacity-80 hover:opacity-100 transition-opacity tracking-wide">Prosedur</Link>
           </nav>
 
           {/* Login Button */}
