@@ -20,8 +20,8 @@ export default function LandingPage() {
   const [config, setConfig] = useState<any>({
     hero_title: 'Sistem Informasi Manajemen Arsip',
     hero_subtitle: 'Platform digitalisasi dan pengelolaan arsip terpadu PT Semen Tonasa.',
-    sop_title: 'SOP Penyerahan & Pengelolaan Arsip',
-    sop_text: 'Ikuti langkah-langkah berikut untuk menyerahkan arsip fisik ke Unit Kearsipan Tonasa.',
+    sop_title: 'Prosedur Penyerahan & Pengelolaan Arsip Inaktif',
+    sop_text: 'Tahapan standar tata kelola pemindahan berkas dari unit kerja departemen ke unit kearsipan gedung.',
     sop_items: [
        { title: 'Persiapan Berkas', desc: 'Pastikan berkas telah diberkaskan berdasarkan masa kurun waktu dan jenisnya.' },
        { title: 'Pengisian Form', desc: 'Isi form serah terima arsip dari unit asal (Departemen Anda).' },
@@ -108,8 +108,8 @@ export default function LandingPage() {
       </section>
 
       {/* SAMBUTAN SECTION */}
-      <section className="py-24 px-6 max-w-[1024px] mx-auto w-full z-20 -mt-16">
-         <div className="bg-white rounded-[24px] shadow-[0_8px_40px_rgba(0,0,0,0.06)] p-8 md:p-12">
+      <section className="px-6 max-w-[1024px] mx-auto w-full relative z-20 -mt-24 md:-mt-32 mb-12">
+         <div className="bg-white rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-black/5 p-8 md:p-12">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
                   <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-[#f5f5f7] rounded-[16px] flex items-center justify-center text-[#1d1d1f]/20 relative overflow-hidden shadow-sm">
@@ -138,7 +138,7 @@ export default function LandingPage() {
       </section>
 
       {/* PROSEDUR PENYERAHAN & PENGELOLAAN ARSIP */}
-      <section id="prosedur" className="py-24 px-6 bg-[#f5f5f7]">
+      <section id="prosedur" className="py-12 px-6 bg-[#f5f5f7]">
          <div className="max-w-[1024px] mx-auto space-y-12">
             <div className="text-center max-w-[700px] mx-auto space-y-4">
                <span className="font-semibold text-[#bf4800] text-[12px] tracking-widest uppercase">SOP Resmi</span>
