@@ -171,10 +171,11 @@ export default function LandingPage() {
       </section>
 
       {/* PIC GEDUNG ARSIP SECTION (Dark Mode Apple) */}
-      <section className="bg-primary text-white py-24 px-6 transition-colors">
-         <div className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-            <div className="md:col-span-4 flex flex-col items-center space-y-5">
-               <div className="w-[200px] md:w-full max-w-[260px] aspect-[4/5] bg-black/10 border border-white/20 rounded-[16px] flex items-center justify-center text-white/40 relative overflow-hidden">
+      <section className="px-6 max-w-[1024px] mx-auto w-full mb-24 transition-colors">
+         <div className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-8 md:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
+               <div className="md:col-span-4 flex flex-col items-center space-y-4">
+                  <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
                   {config.pic_photo_url ? (
                      <img src={getDirectImageUrl(config.pic_photo_url)} alt="PIC" className="w-full h-full object-cover" />
                   ) : (
@@ -183,46 +184,48 @@ export default function LandingPage() {
                         <circle cx="12" cy="7" r="4" />
                      </svg>
                   )}
+                  </div>
+                  <p className="font-semibold text-ink text-[14px] uppercase tracking-wider">
+                     {config.pic_title.split('-')[1]?.trim() || "PIC Gedung"}
+                  </p>
                </div>
-               <p className="font-semibold text-white/80 text-[14px] uppercase tracking-widest">
-                  {config.pic_title.split('-')[1]?.trim() || "PIC Gedung"}
-               </p>
-            </div>
-            <div className="md:col-span-8 space-y-8">
-               <h3 className="text-[40px] md:text-[48px] font-semibold tracking-[-1px] leading-tight text-white">
-                  {config.pic_title}
-               </h3>
-               <p className="text-white/90 text-[17px] leading-[1.47] max-w-2xl whitespace-pre-wrap">
-                  {config.pic_text}
-               </p>
-               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  {config.pic_whatsapp && (
-                     <a 
-                        href={config.pic_whatsapp} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center justify-center gap-2 bg-white hover:bg-white/90 text-primary px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 shadow-sm"
-                     >
-                        <MessageSquare size={18} className="text-[#34c759] fill-[#34c759]" />
-                        Hubungi Whatsapp
-                     </a>
-                  )}
-                  {config.pic_email && (
-                     <a 
-                        href={config.pic_email} 
-                        className="flex items-center justify-center gap-2 bg-black/10 hover:bg-black/20 text-white px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 border border-white/20 shadow-sm"
-                     >
-                        <Mail size={18} className="text-white" />
-                        Kirim Email
-                     </a>
-                  )}
+               <div className="md:col-span-8 space-y-6">
+                  <h3 className="text-[34px] md:text-[40px] font-semibold text-ink tracking-[-0.022em] leading-tight">
+                     {config.pic_title}
+                  </h3>
+                  <div className="w-12 h-1 bg-ink rounded-full"></div>
+                  <p className="text-ink-mute text-[17px] leading-[1.47] text-justify whitespace-pre-wrap">
+                     {config.pic_text}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                     {config.pic_whatsapp && (
+                        <a 
+                           href={config.pic_whatsapp} 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           className="flex items-center justify-center gap-2 bg-[#f5f5f7] dark:bg-primary/10 hover:bg-white dark:hover:bg-primary/20 text-[#1d1d1f] dark:text-primary px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 border border-hairline"
+                        >
+                           <MessageSquare size={18} className="text-[#34c759] dark:text-primary fill-[#34c759] dark:fill-primary" />
+                           Hubungi Whatsapp
+                        </a>
+                     )}
+                     {config.pic_email && (
+                        <a 
+                           href={config.pic_email} 
+                           className="flex items-center justify-center gap-2 bg-canvas-soft hover:bg-hairline text-ink px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95 border border-hairline"
+                        >
+                           <Mail size={18} className="text-primary" />
+                           Kirim Email
+                        </a>
+                     )}
+                  </div>
                </div>
             </div>
          </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-canvas-soft text-ink-mute py-12 px-6 text-center text-[12px] border-t border-hairline mt-auto">
+      <footer className="bg-primary text-white/90 py-12 px-6 text-center text-[13px] mt-auto relative z-10 shadow-[0_-10px_40px_rgba(227,24,55,0.15)]">
          <p>PT Semen Tonasa &copy; {new Date().getFullYear()}. Seluruh hak cipta dilindungi.</p>
       </footer>
 
