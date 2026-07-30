@@ -1630,7 +1630,7 @@ export default function Dashboard() {
         const matchesDept = departemenFilter.length === 0 || departemenFilter.includes(item.departemen);
         
         const matchesYear = yearFilter === "" || (item.kurunWaktu && item.kurunWaktu.toString().includes(yearFilter));
-        const matchesGedung = gedungFilter === "" || item.gedung === gedungFilter;
+        const matchesGedung = gedungFilter === "" || (item.gedung && item.gedung.trim().toUpperCase() === gedungFilter.trim().toUpperCase());
         const matchesLorong = lorongFilter === "" || item.lorong === lorongFilter;
 
         return matchesStatus && matchesSearch && matchesDept && matchesYear && matchesGedung && matchesLorong;
