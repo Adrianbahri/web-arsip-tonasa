@@ -16,7 +16,22 @@ const getDirectImageUrl = (url: string) => {
 };
 
 export default function LandingPage() {
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<any>({
+    hero_title: 'Sistem Informasi Manajemen Arsip',
+    hero_subtitle: 'Platform digitalisasi dan pengelolaan arsip terpadu PT Semen Tonasa.',
+    sop_title: 'SOP Penyerahan & Pengelolaan Arsip',
+    sop_text: 'Ikuti langkah-langkah berikut untuk menyerahkan arsip fisik ke Unit Kearsipan Tonasa.',
+    sop_items: [
+       { title: 'Persiapan Berkas', desc: 'Pastikan berkas telah diberkaskan berdasarkan masa kurun waktu dan jenisnya.' },
+       { title: 'Pengisian Form', desc: 'Isi form serah terima arsip dari unit asal (Departemen Anda).' },
+       { title: 'Verifikasi', desc: 'Tim Kearsipan akan melakukan verifikasi fisik dan kesesuaian data.' },
+       { title: 'Digitalisasi & Simpan', desc: 'Arsip fisik disimpan di rak, dan versi digital diunggah ke sistem.' }
+    ],
+    pic_title: 'PIC Gedung Kearsipan',
+    pic_text: 'Untuk kebutuhan penelusuran fisik atau peminjaman, silakan hubungi PIC Gedung Kearsipan pada jam kerja operasional (Senin-Jumat, 08:00 - 16:00 WITA).',
+    pic_whatsapp: 'https://wa.me/628114156156',
+    pic_email: 'mailto:arsip@sementonasa.co.id'
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,9 +43,7 @@ export default function LandingPage() {
       const { data, error } = await supabase
         .from("landing_page_config")
         .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
+        .eq("id", "homepage")
         .single();
       
       if (data && !error) {
