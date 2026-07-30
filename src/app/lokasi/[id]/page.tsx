@@ -13,6 +13,7 @@ import {
   VolumeX,
   X
 } from "lucide-react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRole } from "@/components/RoleContext";
 import GlobalNav from "@/components/GlobalNav";
@@ -135,12 +136,21 @@ export default function LokasiDetailPage() {
          />
          <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-canvas-soft/50 to-canvas-soft" />
          
-         <div className="relative z-10">
+         <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-10"
+         >
            <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4 shadow-sm inline-block px-3 py-1 bg-canvas/50 backdrop-blur-sm rounded-full border border-hairline">Lokasi Anda Saat Ini</p>
            <h1 className="text-[56px] md:text-[64px] font-semibold tracking-[-1px] leading-[1.05] text-ink mb-4 drop-shadow-sm">
-             {mappingData.gedung}
+              {mappingData.gedung}
            </h1>
-         </div>
+           <div className="flex items-center justify-center gap-2 text-ink-mute text-[17px] font-medium tracking-[-0.022em]">
+              <Box size={20} className="text-primary" />
+              <span>{mappingData.ruang}</span>
+           </div>
+         </motion.div>
       </section>
 
       <main className="max-w-[1200px] mx-auto px-4 pb-12">
@@ -148,7 +158,12 @@ export default function LokasiDetailPage() {
         
         {/* Map Card */}
         {mappingData.map_url && (
-          <div className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 md:p-10 overflow-hidden border border-hairline">
+          <motion.div 
+             initial={{ opacity: 0, x: -30 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ duration: 0.6, delay: 0.2 }}
+             className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 md:p-10 overflow-hidden border border-hairline"
+          >
              <h3 className="text-[20px] sm:text-[24px] font-semibold tracking-[-0.37px] mb-4 sm:mb-6">Peta Lokasi</h3>
              <div className="rounded-[16px] overflow-hidden bg-canvas border border-hairline aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
                 <img 
@@ -165,11 +180,16 @@ export default function LokasiDetailPage() {
                    </div>
                 </div>
              </div>
-          </div>
+          </motion.div>
         )}
         
         {/* Info Card */}
-        <div className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-6 sm:gap-8`}>
+        <motion.div 
+           initial={{ opacity: 0, x: 30 }}
+           animate={{ opacity: 1, x: 0 }}
+           transition={{ duration: 0.6, delay: 0.3 }}
+           className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-6 sm:gap-8`}
+        >
            <div className="space-y-4">
               <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[13px] sm:text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
                  <Info size={16} className="text-primary" />
@@ -179,7 +199,7 @@ export default function LokasiDetailPage() {
                  {mappingData.deskripsi}
               </p>
            </div>
-        </div>
+        </motion.div>
         
         </div>
       </main>

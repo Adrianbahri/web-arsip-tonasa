@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { MessageSquare, Mail, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import GlobalNav from "@/components/GlobalNav";
 
@@ -92,7 +93,12 @@ export default function LandingPage() {
          {/* Subtle dark gradient overlay to ensure text legibility and fade smoothly to page background */}
          <div className="absolute inset-0 z-10 bg-gradient-to-t from-canvas-soft via-black/40 to-black/40" />
          
-         <div className="relative z-20 max-w-[800px] space-y-5 md:space-y-6 px-4 mt-[-10vh]">
+         <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative z-20 max-w-[800px] space-y-5 md:space-y-6 px-4 mt-[-10vh]"
+         >
             <h2 className="text-[42px] sm:text-[48px] md:text-[72px] font-semibold text-white leading-[1.05] tracking-[-1.5px]">
                {config.hero_title}
             </h2>
@@ -100,16 +106,22 @@ export default function LandingPage() {
                {config.hero_subtitle}
             </p>
             <div className="pt-6 md:pt-8">
-               <Link href="/login" className="bg-primary hover:bg-primary-deep text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-full font-medium transition-all active:scale-95 text-[16px] sm:text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)]">
+               <Link href="/login" className="bg-primary hover:bg-primary-deep text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-full font-medium transition-all active:scale-95 text-[16px] sm:text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)] inline-block">
                   Telusuri Arsip
                </Link>
             </div>
-         </div>
+         </motion.div>
       </section>
 
       {/* SAMBUTAN SECTION */}
       <section className="px-4 sm:px-6 max-w-[1024px] mx-auto w-full relative z-20 -mt-24 md:-mt-32 mb-12">
-         <div className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-6 sm:p-8 md:p-12">
+         <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-6 sm:p-8 md:p-12"
+         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
                   <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
@@ -140,7 +152,13 @@ export default function LandingPage() {
       {/* PROSEDUR PENYERAHAN & PENGELOLAAN ARSIP */}
       <section id="prosedur" className="py-12 px-4 sm:px-6 bg-canvas-soft">
          <div className="max-w-[1024px] mx-auto space-y-10 md:space-y-12">
-            <div className="text-center max-w-[700px] mx-auto space-y-3 md:space-y-4">
+            <motion.div 
+               initial={{ opacity: 0, y: 30 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               viewport={{ once: true, margin: "-100px" }}
+               transition={{ duration: 0.6 }}
+               className="text-center max-w-[700px] mx-auto space-y-3 md:space-y-4"
+            >
                <span className="font-semibold text-[#bf4800] text-[12px] tracking-widest uppercase">SOP Resmi</span>
                <h3 className="text-[32px] sm:text-[40px] md:text-[48px] font-semibold text-ink tracking-[-1px] leading-tight">
                   {config.sop_title}
@@ -148,18 +166,25 @@ export default function LandingPage() {
                <p className="text-ink-mute text-[15px] sm:text-[17px] leading-[1.47] max-w-[500px] mx-auto">
                   {config.sop_text}
                </p>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 md:pt-8">
                {config.sop_items && config.sop_items.length > 0 ? (
                   config.sop_items.map((item: any, idx: number) => (
-                     <div key={idx} className="bg-canvas border border-hairline p-6 sm:p-8 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-3 sm:space-y-4 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-shadow">
+                     <motion.div 
+                        key={idx} 
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.5, delay: idx * 0.1 }}
+                        className="bg-canvas border border-hairline p-6 sm:p-8 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-3 sm:space-y-4 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-shadow"
+                     >
                         <div className="text-primary font-bold text-[24px] tracking-tight">{String(idx + 1).padStart(2, '0')}</div>
                         <h4 className="font-semibold text-[17px] sm:text-[19px] text-ink tracking-[-0.022em] leading-snug">{item.title}</h4>
                         <p className="text-ink-mute text-[14px] sm:text-[15px] leading-[1.47]">
                            {item.desc}
                         </p>
-                     </div>
+                     </motion.div>
                   ))
                ) : (
                   <div className="col-span-full text-center py-12 text-ink-mute text-[17px]">
@@ -171,8 +196,14 @@ export default function LandingPage() {
       </section>
 
       {/* PIC GEDUNG ARSIP SECTION */}
-      <section className="bg-canvas border-t border-hairline py-16 md:py-24 px-4 sm:px-6 transition-colors">
-         <div className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
+      <section className="bg-canvas border-t border-hairline py-16 md:py-24 px-4 sm:px-6 transition-colors overflow-hidden">
+         <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center"
+         >
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
                   <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
                   {config.pic_photo_url ? (
@@ -219,7 +250,7 @@ export default function LandingPage() {
                      )}
                   </div>
                </div>
-         </div>
+         </motion.div>
       </section>
 
       {/* FOOTER */}
