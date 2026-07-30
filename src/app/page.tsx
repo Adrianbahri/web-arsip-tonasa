@@ -146,7 +146,7 @@ export default function LandingPage() {
                   </p>
                </div>
             </div>
-         </div>
+         </motion.div>
       </section>
 
       {/* PROSEDUR PENYERAHAN & PENGELOLAAN ARSIP */}
