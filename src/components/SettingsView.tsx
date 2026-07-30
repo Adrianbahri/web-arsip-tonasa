@@ -14,6 +14,9 @@ export default function SettingsView() {
    const [jenisBerkasList, setJenisBerkasList] = useState<string[]>([]);
    const [newDept, setNewDept] = useState("");
    const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "" });
+   
+   // State for unique gedung from archives
+   const [archiveGedungList, setArchiveGedungList] = useState<string[]>([]);
    const [newRetensi, setNewRetensi] = useState({ kategori: "", masa_aktif_tahun: 5, masa_inaktif_tahun: 5 });
    
    // Landing Page State
@@ -39,7 +42,7 @@ export default function SettingsView() {
          supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
          supabase.from('master_retensi').select('*').order('kategori'),
          supabase.from('landing_page_config').select('*').eq('id', 'homepage').single(),
-         supabase.from('archives').select('jenis_berkas'),
+         supabase.from('archives').select('jenis_berkas, gedung'),
          supabase.from('master_digital_mapping').select('*').order('created_at', { ascending: false })
       ]);
       
@@ -48,8 +51,11 @@ export default function SettingsView() {
       if (retensiRes.data) setRetensiRules(retensiRes.data);
       if (mappingRes.data) setDigitalMappings(mappingRes.data);
       if (archivesRes.data) {
-         const unique = Array.from(new Set(archivesRes.data.map((a: any) => a.jenis_berkas).filter(Boolean))) as string[];
-         setJenisBerkasList(unique.sort());
+         const uniqueJenis = Array.from(new Set(archivesRes.data.map((a: any) => a.jenis_berkas).filter(Boolean))) as string[];
+         setJenisBerkasList(uniqueJenis.sort());
+         
+         const uniqueGedung = Array.from(new Set(archivesRes.data.map((a: any) => a.gedung).filter(Boolean))) as string[];
+         setArchiveGedungList(uniqueGedung);
       }
       if (landingRes.data) {
          setLandingConfig(landingRes.data);
@@ -330,7 +336,7 @@ export default function SettingsView() {
                         className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
                      >
                         <option value="">-- Pilih Gedung --</option>
-                        {Array.from(new Set(locations.map(l => l.gedung))).sort().map(gedung => (
+                        {Array.from(new Set([...locations.map(l => l.gedung), ...archiveGedungList])).filter(Boolean).sort().map(gedung => (
                            <option key={gedung as string} value={`Gedung ${gedung}`}>Gedung {gedung}</option>
                         ))}
                      </select>
