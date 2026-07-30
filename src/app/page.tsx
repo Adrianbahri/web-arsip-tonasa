@@ -89,8 +89,8 @@ export default function LandingPage() {
                backgroundImage: `url('${getDirectImageUrl(config.hero_image_url || '/hero-image.jpg')}')` 
             }}
          />
-         {/* Subtle dark gradient overlay to ensure text legibility */}
-         <div className="absolute inset-0 z-10 bg-black/40" />
+         {/* Subtle dark gradient overlay to ensure text legibility and fade smoothly to page background */}
+         <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#f5f5f7] via-black/40 to-black/40" />
          
          <div className="relative z-20 max-w-[800px] space-y-6 px-4 mt-[-10vh]">
             <h2 className="text-[48px] md:text-[72px] font-semibold text-white leading-[1.05] tracking-[-1.5px]">
