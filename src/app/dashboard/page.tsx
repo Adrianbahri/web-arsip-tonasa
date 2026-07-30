@@ -1678,7 +1678,8 @@ export default function Dashboard() {
         superadmin: { total: archives.length, active, inactive },
         pic_gedung: { total: archives.length, active, inactive },
         admin_dept: { total: archives.filter(i => i.departemen === 'KEUANGAN').length, active: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Aktif').length, inactive: archives.filter(i => i.departemen === 'KEUANGAN' && i.status === 'Nonaktif').length },
-        user: { total: archives.length, active, inactive }
+        user: { total: archives.length, active, inactive },
+        guest: { total: archives.length, active, inactive }
      };
   };
   const stats = getStats();
