@@ -322,14 +322,18 @@ export default function SettingsView() {
                
                <form onSubmit={addMapping} className="flex flex-col gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
                   <div className="space-y-1">
-                     <label className="text-[12px] font-medium text-ink-mute">Nama Lokasi / Gedung (contoh: Gedung A / Ruang 1)</label>
-                     <input 
-                        type="text" 
+                     <label className="text-[12px] font-medium text-ink-mute">Gedung / Lokasi</label>
+                     <select 
                         required
                         value={newMapping.gedung}
                         onChange={(e) => setNewMapping({...newMapping, gedung: e.target.value})}
                         className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
-                     />
+                     >
+                        <option value="">-- Pilih Gedung --</option>
+                        {Array.from(new Set(locations.map(l => l.gedung))).sort().map(gedung => (
+                           <option key={gedung as string} value={`Gedung ${gedung}`}>Gedung {gedung}</option>
+                        ))}
+                     </select>
                   </div>
                   <div className="space-y-1">
                      <label className="text-[12px] font-medium text-ink-mute">Deskripsi Ruangan (Untuk dibacakan TTS)</label>
