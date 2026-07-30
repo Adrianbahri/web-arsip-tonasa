@@ -23,8 +23,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const pathname = usePathname();
 
-  // Exclude login page, register page, and landing page (/) from sidebar & dashboard layout wrapper
-  if (pathname === "/login" || pathname === "/" || pathname === "/register") {
+  // Exclude login page, register page, landing page (/), and public pages (/lokasi, /cari) from sidebar & dashboard layout wrapper
+  if (
+     pathname === "/login" || 
+     pathname === "/" || 
+     pathname === "/register" ||
+     pathname.startsWith("/lokasi") ||
+     pathname.startsWith("/cari")
+  ) {
      return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 
