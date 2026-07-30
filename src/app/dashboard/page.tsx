@@ -1305,7 +1305,7 @@ export default function Dashboard() {
      e.preventDefault();
      
      if (role === 'guest' && (!guestName || !guestDept)) {
-        setServiceError("Tamu diwajibkan mengisi Nama Lengkap dan Departemen.");
+        alert("Tamu diwajibkan mengisi Nama Lengkap dan Departemen.");
         return;
      }
      
