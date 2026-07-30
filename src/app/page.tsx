@@ -10,7 +10,8 @@ const getDirectImageUrl = (url: string) => {
   if (!url) return '';
   const fileIdMatch = url.match(/[-\w]{25,}/);
   if (fileIdMatch && fileIdMatch[0]) {
-    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
+    // Gunakan endpoint lh3.googleusercontent.com yang lebih stabil untuk embed gambar
+    return `https://lh3.googleusercontent.com/d/${fileIdMatch[0]}`;
   }
   return url;
 };
@@ -100,7 +101,7 @@ export default function LandingPage() {
             </p>
             <div className="pt-8">
                <Link href="/login" className="bg-[#e31837] hover:bg-[#b91029] text-white px-8 py-4 rounded-full font-medium transition-all active:scale-95 text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)]">
-                  Mulai Gunakan Arsip
+                  Telusuri Arsip
                </Link>
             </div>
          </div>

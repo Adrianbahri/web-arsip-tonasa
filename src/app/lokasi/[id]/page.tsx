@@ -22,7 +22,8 @@ const getDirectImageUrl = (url: string) => {
   if (!url) return '';
   const fileIdMatch = url.match(/[-\w]{25,}/);
   if (fileIdMatch && fileIdMatch[0]) {
-    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
+    // Gunakan endpoint lh3.googleusercontent.com yang lebih stabil untuk embed gambar
+    return `https://lh3.googleusercontent.com/d/${fileIdMatch[0]}`;
   }
   return url;
 };
