@@ -143,11 +143,12 @@ export default function LokasiDetailPage() {
          </div>
       </section>
 
-      <main className="max-w-3xl mx-auto px-4 space-y-8">
+      <main className="max-w-[1200px] mx-auto px-4 pb-12">
+        <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
         
         {/* Map Card */}
         {mappingData.map_url && (
-          <div className="bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden border border-hairline">
+          <div className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden border border-hairline">
              <h3 className="text-[24px] font-semibold tracking-[-0.37px] mb-6">Peta Lokasi</h3>
              <div className="rounded-[16px] overflow-hidden bg-canvas border border-hairline aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
                 <img 
@@ -168,30 +169,30 @@ export default function LokasiDetailPage() {
         )}
         
         {/* Info Card */}
-        <div className="bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline">
-          <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-             <div className="flex-1 space-y-4">
-                <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
-                   <Info size={16} className="text-primary" />
-                   Informasi Gedung
-                </div>
-                <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-ink font-normal">
-                   {mappingData.deskripsi}
-                </p>
-             </div>
-             <div className="md:w-auto flex flex-col justify-center items-center gap-3">
-                <button 
-                   onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
-                   className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
-                   aria-label="Toggle Narasi"
-                >
-                   {isPlaying ? <VolumeX size={28} /> : <Volume2 size={28} />}
-                </button>
-                <span className="text-[12px] font-medium text-ink/60">{isPlaying ? "Berhenti" : "Dengarkan"}</span>
-             </div>
-          </div>
+        <div className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-8`}>
+           <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
+                 <Info size={16} className="text-primary" />
+                 Informasi Gedung
+              </div>
+              <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-ink font-normal">
+                 {mappingData.deskripsi}
+              </p>
+           </div>
+           
+           <div className="bg-canvas-soft p-6 rounded-[16px] flex flex-col items-center justify-center gap-3 border border-hairline mt-auto">
+              <button 
+                 onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
+                 className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                 aria-label="Toggle Narasi"
+              >
+                 {isPlaying ? <VolumeX size={28} /> : <Volume2 size={28} />}
+              </button>
+              <span className="text-[13px] font-medium text-ink-mute">{isPlaying ? "Berhenti" : "Dengarkan Narasi"}</span>
+           </div>
         </div>
-
+        
+        </div>
       </main>
 
       {/* Floating Sticky CTA Bar */}
