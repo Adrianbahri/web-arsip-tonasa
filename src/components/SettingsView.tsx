@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock } from "lucide-react";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X } from "lucide-react";
+import QRCode from "react-qr-code";
 
 export default function SettingsView() {
-   const [activeTab, setActiveTab] = useState<"master" | "landing" | "retensi">("master");
+   const [activeTab, setActiveTab] = useState<"master" | "landing" | "retensi" | "digital_mapping">("master");
    
    // Master Data State
    const [departments, setDepartments] = useState<any[]>([]);
@@ -19,6 +20,11 @@ export default function SettingsView() {
    const [landingConfig, setLandingConfig] = useState<any>(null);
    const [savingLanding, setSavingLanding] = useState(false);
 
+   // Digital Mapping State
+   const [digitalMappings, setDigitalMappings] = useState<any[]>([]);
+   const [newMapping, setNewMapping] = useState({ gedung: "", deskripsi: "", map_url: "" });
+   const [qrModal, setQrModal] = useState<any>(null);
+
    const [loading, setLoading] = useState(true);
    const [message, setMessage] = useState("");
 
@@ -28,17 +34,19 @@ export default function SettingsView() {
 
    const fetchMasterData = async () => {
       setLoading(true);
-      const [deptRes, locRes, retensiRes, landingRes, archivesRes] = await Promise.all([
+      const [deptRes, locRes, retensiRes, landingRes, archivesRes, mappingRes] = await Promise.all([
          supabase.from('master_departments').select('*').order('name'),
          supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
          supabase.from('master_retensi').select('*').order('kategori'),
          supabase.from('landing_page_config').select('*').eq('id', 'homepage').single(),
-         supabase.from('archives').select('jenis_berkas')
+         supabase.from('archives').select('jenis_berkas'),
+         supabase.from('master_digital_mapping').select('*').order('created_at', { ascending: false })
       ]);
       
       if (deptRes.data) setDepartments(deptRes.data);
       if (locRes.data) setLocations(locRes.data);
       if (retensiRes.data) setRetensiRules(retensiRes.data);
+      if (mappingRes.data) setDigitalMappings(mappingRes.data);
       if (archivesRes.data) {
          const unique = Array.from(new Set(archivesRes.data.map((a: any) => a.jenis_berkas).filter(Boolean))) as string[];
          setJenisBerkasList(unique.sort());
@@ -119,6 +127,28 @@ export default function SettingsView() {
       setTimeout(() => setMessage(""), 3000);
    };
 
+   // ================== DIGITAL MAPPING LOGIC ==================
+   const addMapping = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newMapping.gedung.trim() || !newMapping.deskripsi.trim()) return;
+      const { error } = await supabase.from('master_digital_mapping').insert([{ 
+         gedung: newMapping.gedung, 
+         deskripsi: newMapping.deskripsi,
+         map_url: newMapping.map_url
+      }]);
+      if (error) setMessage("Gagal menambah mapping: " + error.message);
+      else { setMessage("Berhasil menambah mapping!"); setNewMapping({ gedung: "", deskripsi: "", map_url: "" }); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
+   const deleteMapping = async (id: string) => {
+      if (!confirm("Hapus mapping ini?")) return;
+      const { error } = await supabase.from('master_digital_mapping').delete().eq('id', id);
+      if (error) setMessage("Gagal menghapus: " + error.message);
+      else { setMessage("Mapping dihapus."); fetchMasterData(); }
+      setTimeout(() => setMessage(""), 3000);
+   };
+
    // ================== LANDING PAGE LOGIC ==================
    const saveLandingConfig = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -171,6 +201,14 @@ export default function SettingsView() {
                }`}
             >
                <LayoutTemplate size={16} /> Tampilan Website
+            </button>
+            <button 
+               onClick={() => setActiveTab("digital_mapping")}
+               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === "digital_mapping" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
+               }`}
+            >
+               <MapPin size={16} /> Digital Mapping
             </button>
          </div>
 
@@ -268,6 +306,105 @@ export default function SettingsView() {
                      ))}
                      {locations.length === 0 && <div className="text-[12px] text-ink-mute text-center">Belum ada data</div>}
                   </ul>
+               </div>
+            </div>
+         )}
+
+         {!loading && activeTab === "digital_mapping" && (
+            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs max-w-4xl">
+               <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-5">
+                  <MapPin size={18} className="text-primary" />
+                  <div>
+                     <h3 className="font-semibold text-[15px] text-ink">Digital Mapping Gedung</h3>
+                     <p className="text-[12px] text-ink-mute mt-0.5">Atur peta denah interaktif, deskripsi ruangan, dan generate QR Code lokasi.</p>
+                  </div>
+               </div>
+               
+               <form onSubmit={addMapping} className="flex flex-col gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
+                  <div className="space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">Nama Lokasi / Gedung (contoh: Gedung A / Ruang 1)</label>
+                     <input 
+                        type="text" 
+                        required
+                        value={newMapping.gedung}
+                        onChange={(e) => setNewMapping({...newMapping, gedung: e.target.value})}
+                        className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
+                     />
+                  </div>
+                  <div className="space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">Deskripsi Ruangan (Untuk dibacakan TTS)</label>
+                     <textarea 
+                        required
+                        value={newMapping.deskripsi}
+                        onChange={(e) => setNewMapping({...newMapping, deskripsi: e.target.value})}
+                        rows={3}
+                        className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
+                        placeholder="Contoh: Anda berada di Gedung A yang menyimpan berkas arsip operasional tahun 2010 sampai 2018."
+                     ></textarea>
+                  </div>
+                  <div className="space-y-1">
+                     <label className="text-[12px] font-medium text-ink-mute">URL Gambar Denah (Opsional, Link GDrive/Imgur/dsb)</label>
+                     <input 
+                        type="text" 
+                        value={newMapping.map_url}
+                        onChange={(e) => setNewMapping({...newMapping, map_url: e.target.value})}
+                        className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:outline-none focus:border-ink"
+                        placeholder="https://..."
+                     />
+                  </div>
+                  <div className="flex justify-end pt-2">
+                     <button type="submit" className="bg-primary text-white px-4 py-2 rounded-sm hover:bg-primary-deep flex items-center justify-center gap-2 text-[13px] font-semibold shadow-sm">
+                        <Plus size={16} /> Tambah Digital Mapping
+                     </button>
+                  </div>
+               </form>
+
+               <div className="border border-hairline bg-canvas rounded-xs overflow-x-auto">
+                  <table className="w-full text-left text-[12px] border-collapse min-w-[700px]">
+                     <thead>
+                        <tr className="bg-canvas-soft border-b border-hairline text-ink font-semibold">
+                           <th className="p-3">Gedung / Lokasi</th>
+                           <th className="p-3">Deskripsi / TTS Text</th>
+                           <th className="p-3">Gambar Denah</th>
+                           <th className="p-3 text-center">Tindakan</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {digitalMappings.length > 0 ? digitalMappings.map((m) => (
+                           <tr key={m.id} className="border-b border-hairline hover:bg-canvas-soft/50 transition-colors">
+                              <td className="p-3 font-medium text-ink align-top">{m.gedung}</td>
+                              <td className="p-3 text-ink-mute max-w-sm truncate align-top">{m.deskripsi}</td>
+                              <td className="p-3 text-ink-mute max-w-[150px] truncate align-top">
+                                 {m.map_url ? (
+                                    <a href={m.map_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Lihat Gambar</a>
+                                 ) : "-"}
+                              </td>
+                              <td className="p-3 text-center align-top">
+                                 <div className="flex items-center justify-center gap-2">
+                                    <button 
+                                       onClick={() => setQrModal(m)}
+                                       className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800 px-3 py-1.5 rounded-sm transition-colors border border-indigo-200 flex items-center gap-1 font-semibold text-[11px]"
+                                    >
+                                       <QrCode size={14} /> Lihat QR
+                                    </button>
+                                    <button 
+                                       onClick={() => deleteMapping(m.id)}
+                                       className="text-red-500 hover:bg-red-50 p-1.5 rounded-sm transition-colors border border-transparent hover:border-red-200"
+                                    >
+                                       <Trash2 size={16} />
+                                    </button>
+                                 </div>
+                              </td>
+                           </tr>
+                        )) : (
+                           <tr>
+                              <td colSpan={4} className="text-center p-6 text-ink-mute">
+                                 Belum ada data digital mapping.
+                              </td>
+                           </tr>
+                        )}
+                     </tbody>
+                  </table>
                </div>
             </div>
          )}
@@ -519,6 +656,43 @@ export default function SettingsView() {
                   </button>
                </div>
             </form>
+         )}
+
+         {/* QR Code Modal */}
+         {qrModal && (
+            <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+               <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                     <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                        <QrCode size={18} className="text-indigo-600" /> QR Lokasi
+                     </h3>
+                     <button onClick={() => setQrModal(null)} className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 p-1.5 rounded-md transition-colors">
+                        <X size={18} />
+                     </button>
+                  </div>
+                  <div className="p-8 flex flex-col items-center justify-center">
+                     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-4">
+                        <QRCode
+                           value={`${typeof window !== 'undefined' ? window.location.origin : ''}/lokasi/${qrModal.id}`}
+                           size={200}
+                           level="H"
+                        />
+                     </div>
+                     <p className="text-center font-bold text-gray-800 text-lg mb-1">{qrModal.gedung}</p>
+                     <p className="text-center text-gray-500 text-sm mb-6">Scan untuk melihat peta dan mencari arsip</p>
+                     
+                     <div className="flex gap-3 w-full">
+                        <a 
+                           href={`/lokasi/${qrModal.id}`} 
+                           target="_blank"
+                           className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                        >
+                           Buka Link
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </div>
          )}
       </div>
    );
