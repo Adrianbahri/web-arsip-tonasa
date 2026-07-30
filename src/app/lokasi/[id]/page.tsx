@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRole } from "@/components/RoleContext";
+import GlobalNav from "@/components/GlobalNav";
 
 // Utility for formatting google drive links
 const getDirectImageUrl = (url: string) => {
@@ -113,18 +114,8 @@ export default function LokasiDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#0066cc] selection:text-white pb-32">
-      {/* Global Nav (Apple style: Black surface) */}
-      <header className="bg-black text-white h-[44px] flex items-center sticky top-0 z-50">
-        <div className="w-full max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity">
-            <Box size={18} />
-            <span className="font-semibold text-sm tracking-wide">Tonasa</span>
-          </Link>
-          <Link href="/dashboard" className="text-xs font-medium text-white/80 hover:text-white transition-colors">
-             Login
-          </Link>
-        </div>
-      </header>
+      {/* Global Nav */}
+      <GlobalNav />
 
       {/* Hero Section */}
       <section className="pt-20 pb-12 px-4 text-center">
