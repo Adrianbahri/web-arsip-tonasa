@@ -11,7 +11,8 @@ const getDirectImageUrl = (url: string) => {
   // Match standard share link format: https://drive.google.com/file/d/FILE_ID/view...
   const match = url.match(/drive\.google\.com\/file\/d\/([^\/?]+)/);
   if (match && match[1]) {
-    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    // lh3.googleusercontent.com is much more reliable for hotlinking Drive images
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
   }
   return url;
 };
