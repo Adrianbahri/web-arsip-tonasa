@@ -197,13 +197,13 @@ export default function LokasiDetailPage() {
 
       {/* Floating Sticky CTA Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-8 pt-4 bg-gradient-to-t from-canvas-soft via-canvas-soft/90 to-transparent pointer-events-none flex justify-center">
-         <div className="bg-canvas/80 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-hairline p-2 pr-6 pl-2 rounded-[32px] flex items-center gap-4 pointer-events-auto transform transition-transform hover:-translate-y-1">
-            <div className="bg-canvas-soft w-12 h-12 rounded-full flex items-center justify-center text-ink flex-shrink-0">
-               <MapPin size={24} />
+         <div className="bg-canvas/80 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-hairline p-1.5 pr-2 pl-1.5 sm:p-2 sm:pr-6 sm:pl-2 rounded-[32px] flex items-center gap-3 sm:gap-4 pointer-events-auto transform transition-transform hover:-translate-y-1 w-full max-w-max">
+            <div className="bg-canvas-soft w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-ink flex-shrink-0">
+               <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="flex flex-col mr-4 flex-1">
-               <span className="text-[12px] font-medium text-ink/60 uppercase tracking-wider">Akses Publik</span>
-               <span className="text-[17px] font-semibold text-ink leading-tight truncate max-w-[120px] sm:max-w-[200px]">{mappingData.gedung}</span>
+            <div className="flex flex-col mr-1 sm:mr-4 flex-1 min-w-0">
+               <span className="text-[10px] sm:text-[12px] font-medium text-ink/60 uppercase tracking-wider hidden sm:block">Akses Publik</span>
+               <span className="text-[14px] sm:text-[17px] font-semibold text-ink leading-tight truncate">{mappingData.gedung}</span>
             </div>
             <button 
                onClick={() => {
@@ -212,9 +212,9 @@ export default function LokasiDetailPage() {
                      router.push('/dashboard');
                   }
                }}
-               className="bg-primary hover:bg-primary-deep text-white px-5 sm:px-6 py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-2 text-[15px] whitespace-nowrap flex-shrink-0 shadow-[0_4px_12px_rgba(227,24,55,0.2)]"
+               className="bg-primary hover:bg-primary-deep text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-[15px] whitespace-nowrap flex-shrink-0 shadow-[0_4px_12px_rgba(227,24,55,0.2)]"
             >
-               Telusuri Arsip <ArrowRight size={18} />
+               Telusuri <span className="hidden sm:inline">Arsip</span> <ArrowRight className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
             </button>
          </div>
       </div>
