@@ -24,6 +24,7 @@ export default function LokasiPage() {
   const [mappingData, setMappingData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   
   useEffect(() => {
     if (params && params.id) {
@@ -62,7 +63,7 @@ export default function LokasiPage() {
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "id-ID"; // Indonesian
-    utterance.rate = 0.9; // Slightly slower for clarity
+    utterance.rate = 1.1; // Increased pace slightly based on feedback
     
     utterance.onstart = () => setIsPlaying(true);
     utterance.onend = () => setIsPlaying(false);
@@ -159,12 +160,11 @@ export default function LokasiPage() {
             {mappingData.map_url && (
               <div className="rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 flex flex-col items-center justify-center p-2 mt-4">
                  <p className="w-full text-left text-xs font-semibold text-gray-500 mb-2 pl-2">Peta Lokasi:</p>
-                 {/* Using next/img or regular img for simplicity since url could be external */}
                  <img 
                     src={getDirectImageUrl(mappingData.map_url)} 
                     alt={`Peta ${mappingData.gedung}`} 
-                    className="max-w-full rounded-lg object-contain"
-                    style={{ maxHeight: '300px' }}
+                    className="w-full rounded-lg object-contain cursor-zoom-in hover:opacity-90 transition-opacity bg-white"
+                    onClick={() => setIsZoomed(true)}
                     onError={(e) => {
                        (e.target as HTMLImageElement).style.display = 'none';
                     }}
@@ -173,6 +173,30 @@ export default function LokasiPage() {
             )}
           </div>
         </div>
+
+        {/* Fullscreen Zoom Modal */}
+        {isZoomed && mappingData.map_url && (
+           <div 
+              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out backdrop-blur-sm"
+              onClick={() => setIsZoomed(false)}
+           >
+              <div className="relative max-w-5xl w-full h-full flex flex-col items-center justify-center">
+                 <button 
+                    className="absolute top-4 right-4 bg-white/20 text-white rounded-full p-2 hover:bg-white/40 transition-colors"
+                    onClick={() => setIsZoomed(false)}
+                 >
+                    <VolumeX size={24} className="hidden" /> {/* Just to maintain import if needed, actually we'll use a standard X or text */}
+                    <span className="font-bold text-xl px-2">&times;</span>
+                 </button>
+                 <img 
+                    src={getDirectImageUrl(mappingData.map_url)} 
+                    alt={`Zoomed Peta ${mappingData.gedung}`} 
+                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                    onClick={(e) => e.stopPropagation()} 
+                 />
+              </div>
+           </div>
+        )}
 
         {/* Search Box */}
         <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-5">
