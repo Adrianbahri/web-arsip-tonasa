@@ -1344,7 +1344,7 @@ export default function Dashboard() {
      } else {
         const newReq = {
            id: "req-" + (requestsList.length + 1),
-           user_name: user?.name || "Staf Tonasa",
+           user_name: submitName,
            type: serviceFormData.type,
            archive_title: serviceFormData.type === "peminjaman" ? serviceFormData.archive_title : "-",
            date: serviceFormData.date,
