@@ -180,15 +180,15 @@ export default function LokasiDetailPage() {
               </p>
            </div>
            
-           <div className="bg-canvas-soft p-6 rounded-[16px] flex flex-col items-center justify-center gap-3 border border-hairline mt-auto">
+           <div className="bg-canvas-soft p-4 rounded-[16px] flex flex-col items-center justify-center gap-2 border border-hairline mt-auto">
               <button 
                  onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
-                 className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                 className={`w-12 h-12 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
                  aria-label="Toggle Narasi"
               >
-                 {isPlaying ? <VolumeX size={28} /> : <Volume2 size={28} />}
+                 {isPlaying ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
-              <span className="text-[13px] font-medium text-ink-mute">{isPlaying ? "Berhenti" : "Dengarkan Narasi"}</span>
+              <span className="text-[12px] font-medium text-ink-mute">{isPlaying ? "Berhenti" : "Dengarkan Narasi"}</span>
            </div>
         </div>
         
