@@ -128,6 +128,28 @@ export default function LokasiDetailPage() {
 
       <main className="max-w-3xl mx-auto px-4 space-y-8">
         
+        {/* Map Card */}
+        {mappingData.map_url && (
+          <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden">
+             <h3 className="text-[24px] font-semibold tracking-[-0.37px] mb-6">Peta Lokasi</h3>
+             <div className="rounded-[16px] overflow-hidden bg-white border border-black/5 aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
+                <img 
+                   src={getDirectImageUrl(mappingData.map_url)} 
+                   alt={`Peta ${mappingData.gedung}`} 
+                   className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                   onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                   }}
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center pointer-events-none">
+                   <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm text-[14px] font-medium text-[#1d1d1f] opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                      Klik untuk memperbesar
+                   </div>
+                </div>
+             </div>
+          </div>
+        )}
+        
         {/* Info Card */}
         <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
@@ -152,28 +174,6 @@ export default function LokasiDetailPage() {
              </div>
           </div>
         </div>
-
-        {/* Map Card */}
-        {mappingData.map_url && (
-          <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden">
-             <h3 className="text-[24px] font-semibold tracking-[-0.37px] mb-6">Peta Lokasi</h3>
-             <div className="rounded-[16px] overflow-hidden bg-[#f5f5f7] border border-black/5 aspect-video md:aspect-[21/9] relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
-                <img 
-                   src={getDirectImageUrl(mappingData.map_url)} 
-                   alt={`Peta ${mappingData.gedung}`} 
-                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                   onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                   }}
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                   <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm text-[14px] font-medium text-[#1d1d1f] opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                      Klik untuk memperbesar
-                   </div>
-                </div>
-             </div>
-          </div>
-        )}
 
       </main>
 
