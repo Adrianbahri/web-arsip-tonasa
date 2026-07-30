@@ -119,6 +119,12 @@ export default function Dashboard() {
      setCurrentPage(1);
   }, [searchQuery, statusFilter, departemenFilter, yearFilter, gedungFilter, lorongFilter, sortConfig, isRecycleBin]);
 
+  useEffect(() => {
+     if (role === 'guest' && user?.guestGedung) {
+        setGedungFilter(user.guestGedung);
+     }
+  }, [role, user]);
+
   const handleSort = (key: string) => {
      let direction: 'ascending' | 'descending' = 'ascending';
      if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -170,13 +176,17 @@ export default function Dashboard() {
   const [serviceRejectReason, setServiceRejectReason] = useState("");
 
   const [serviceFormData, setServiceFormData] = useState({
-     type: "peminjaman",
-     archive_title: "",
-     date: "",
-     time_or_return: "",
-     purpose: "",
-     link_surat: ""
+     type: 'peminjaman',
+     archive_title: '',
+     date: '',
+     time_or_return: '',
+     purpose: '',
+     link_surat: ''
   });
+  
+  // Guest inputs
+  const [guestName, setGuestName] = useState("");
+  const [guestDept, setGuestDept] = useState("");
 
   // Self password change states
   const [newPassword, setNewPassword] = useState("");
@@ -1294,8 +1304,18 @@ export default function Dashboard() {
   const handleCreateServiceRequest = async (e: React.FormEvent) => {
      e.preventDefault();
      
+     if (role === 'guest' && (!guestName || !guestDept)) {
+        setServiceError("Tamu diwajibkan mengisi Nama Lengkap dan Departemen.");
+        return;
+     }
+     
+     let submitName = user?.name || "Staf Tonasa";
+     if (role === 'guest') {
+        submitName = `${guestName} (${guestDept}) - Tamu`;
+     }
+     
      const payload = {
-        user_name: user?.name || "Staf Tonasa",
+        user_name: submitName,
         type: serviceFormData.type,
         archive_title: serviceFormData.type === "peminjaman" ? serviceFormData.archive_title : null,
         date: serviceFormData.date,
@@ -2086,7 +2106,7 @@ export default function Dashboard() {
 
         
          if (detailType === 'archive' && selectedDetailItem.status !== 'Menunggu ACC') {
-            if (role === 'user') {
+            if (role === 'user' || role === 'guest') {
                if (selectedDetailItem.status !== 'Ditolak') {
                   return (
                      <button
@@ -3031,6 +3051,34 @@ export default function Dashboard() {
            </div>
 
            <form onSubmit={handleCreateServiceRequest} className="bg-canvas border border-hairline rounded-sm p-6 md:p-8 space-y-5">
+              
+              {role === 'guest' && (
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                       <label className="block text-[13px] font-medium text-ink">Nama Lengkap Pemohon</label>
+                       <input 
+                          type="text" 
+                          required
+                          value={guestName}
+                          onChange={(e) => setGuestName(e.target.value)}
+                          placeholder="Masukkan nama lengkap Anda"
+                          className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2.5 focus:outline-none focus:border-ink text-ink"
+                       />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="block text-[13px] font-medium text-ink">Departemen / Divisi / Unit Kerja</label>
+                       <input 
+                          type="text" 
+                          required
+                          value={guestDept}
+                          onChange={(e) => setGuestDept(e.target.value)}
+                          placeholder="Masukkan nama departemen/unit Anda"
+                          className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2.5 focus:outline-none focus:border-ink text-ink"
+                       />
+                    </div>
+                 </div>
+              )}
+
               <div className="space-y-1.5">
                  <label className="block text-[13px] font-medium text-ink">Jenis Layanan</label>
                  <select 
@@ -4403,7 +4451,7 @@ export default function Dashboard() {
            </h2>
            
            <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full md:w-auto">
-              {role !== 'user' && (
+              {role !== 'user' && role !== 'guest' && (
                  <>
                     <button 
                        onClick={handleExportExcel}
@@ -4428,7 +4476,7 @@ export default function Dashboard() {
                  </button>
               )}
 
-              {role !== 'user' && (
+              {role !== 'user' && role !== 'guest' && (
                 <button 
                    onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
                    className="col-span-2 md:col-span-1 w-full md:w-auto bg-primary hover:bg-primary-deep text-on-primary text-[14px] font-medium flex items-center justify-center gap-2 py-2 px-4 rounded-sm transition-colors"
@@ -4466,8 +4514,9 @@ export default function Dashboard() {
                  type="text" 
                  placeholder="Gedung" 
                  value={gedungFilter}
+                 disabled={role === 'guest'}
                  onChange={(e) => setGedungFilter(e.target.value.toUpperCase())}
-                 className="w-1/2 md:w-20 bg-canvas border border-hairline text-[14px] rounded-sm px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink" 
+                 className={`w-1/2 md:w-20 border border-hairline text-[14px] rounded-sm px-3 py-2 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink ${role === 'guest' ? 'bg-canvas-soft cursor-not-allowed opacity-70' : 'bg-canvas'}`} 
               />
               <span className="text-ink-faint text-[14px] font-medium">-</span>
               <input 
@@ -4627,7 +4676,7 @@ export default function Dashboard() {
                         </td>
                         <td className="p-3">
                            <div className="flex items-center justify-center gap-2">
-                              {role === 'user' ? (
+                              {(role === 'user' || role === 'guest') ? (
                                  (archive.status !== 'Menunggu ACC' && archive.status !== 'Ditolak') ? (
                                     <button 
                                        onClick={(e) => {

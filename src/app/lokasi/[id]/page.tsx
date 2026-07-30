@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { MapPin, Search, Box, Info, Navigation, ArrowRight, LayoutDashboard, Volume2, VolumeX, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useRole } from "@/components/RoleContext";
 
 // Helper to convert standard Google Drive links to direct image links
 const getDirectImageUrl = (url: string) => {
@@ -19,6 +20,7 @@ const getDirectImageUrl = (url: string) => {
 export default function LokasiPage() {
   const params = useParams();
   const router = useRouter();
+  const { loginAsGuest } = useRole();
   
   const [id, setId] = useState<string>("");
   const [mappingData, setMappingData] = useState<any>(null);
@@ -222,15 +224,20 @@ export default function LokasiPage() {
           </form>
           
           <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col items-center">
-             <Link 
-                href={`/cari?gedung=${encodeURIComponent(mappingData.gedung)}`}
-                className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
+             <button 
+                onClick={() => {
+                   if (mappingData?.gedung) {
+                      loginAsGuest(mappingData.gedung);
+                      router.push('/dashboard');
+                   }
+                }}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1 bg-blue-50 px-4 py-2 rounded-full transition-colors"
              >
-                Lihat Seluruh Arsip di {mappingData.gedung} <ArrowRight size={16} />
-             </Link>
+                Telusuri Arsip Gedung {mappingData.gedung} <ArrowRight size={16} />
+             </button>
           </div>
           
-          <p className="text-xs text-gray-400 mt-4 text-center">Anda dapat mencari arsip tanpa perlu login.</p>
+          <p className="text-xs text-gray-400 mt-4 text-center">Anda akan masuk sebagai Tamu Publik.</p>
         </div>
 
       </main>

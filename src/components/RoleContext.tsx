@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type Role = 'superadmin' | 'pic_gedung' | 'admin_dept' | 'user';
+type Role = 'superadmin' | 'pic_gedung' | 'admin_dept' | 'user' | 'guest';
 
 interface UserProfile {
   id?: string;
@@ -11,6 +11,7 @@ interface UserProfile {
   role: Role;
   name: string;
   approved: boolean;
+  guestGedung?: string;
 }
 
 interface RoleContextType {
@@ -18,8 +19,9 @@ interface RoleContextType {
   role: Role;
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
-  login: (email: string, selectedRole: Role, password?: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, name: string, selectedRole: Role) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, role: Role, password?: string) => Promise<{ success: boolean; error?: string }>;
+  loginAsGuest: (gedung: string) => void;
+  signUp: (email: string, password: string, name: string, role: Role) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setRole: (role: Role) => void;
 }
@@ -159,6 +161,22 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      return { success: true };
   };
 
+  const loginAsGuest = (gedung: string) => {
+     const guestUser: UserProfile = {
+        id: 'guest-' + Math.random().toString(36).substring(7),
+        email: 'tamu@public',
+        role: 'guest',
+        name: 'Tamu Gedung ' + gedung,
+        approved: true,
+        guestGedung: gedung
+     };
+     
+     localStorage.setItem("arsip_session", JSON.stringify(guestUser));
+     setUser(guestUser);
+     setRoleState('guest');
+     setActiveMenu("Daftar Arsip");
+  };
+
   const signUp = async (email: string, password: string, name: string, selectedRole: Role): Promise<{ success: boolean; error?: string }> => {
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -223,7 +241,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <RoleContext.Provider value={{ user, role, activeMenu, setActiveMenu, login, signUp, logout, setRole }}>
+    <RoleContext.Provider value={{ user, role, activeMenu, setActiveMenu, login, loginAsGuest, signUp, logout, setRole }}>
       {children}
     </RoleContext.Provider>
   );

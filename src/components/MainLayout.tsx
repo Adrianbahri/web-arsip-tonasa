@@ -32,7 +32,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
     { name: "Persetujuan (ACC)", icon: ClipboardCheck, roles: ["superadmin", "pic_gedung"] },
-    { name: "Daftar Arsip", icon: FolderOpen, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
+    { name: "Daftar Arsip", icon: FolderOpen, roles: ["superadmin", "pic_gedung", "admin_dept", "user", "guest"] },
     { name: "Layanan Arsip", icon: Calendar, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["superadmin"] },
     { name: "Pengaturan", icon: Settings, roles: ["superadmin"] },
