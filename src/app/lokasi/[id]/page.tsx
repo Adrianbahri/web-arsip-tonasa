@@ -179,17 +179,6 @@ export default function LokasiDetailPage() {
                  {mappingData.deskripsi}
               </p>
            </div>
-           
-           <div className="bg-canvas-soft p-4 rounded-[16px] flex flex-col items-center justify-center gap-2 border border-hairline mt-auto">
-              <button 
-                 onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
-                 className={`w-12 h-12 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
-                 aria-label="Toggle Narasi"
-              >
-                 {isPlaying ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
-              <span className="text-[12px] font-medium text-ink-mute">{isPlaying ? "Berhenti" : "Dengarkan Narasi"}</span>
-           </div>
         </div>
         
         </div>
@@ -218,6 +207,18 @@ export default function LokasiDetailPage() {
             </button>
          </div>
       </div>
+
+      {/* Floating Sound Button */}
+      {mappingData.deskripsi && (
+         <button 
+            onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
+            className={`fixed bottom-28 md:bottom-32 right-4 md:right-8 z-50 w-14 h-14 flex items-center justify-center rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-105 active:scale-95 border border-hairline backdrop-blur-md ${isPlaying ? 'bg-[#ff3b30] text-white shadow-[#ff3b30]/30 animate-pulse' : 'bg-canvas/90 text-primary hover:bg-canvas'}`}
+            aria-label="Toggle Narasi"
+            title={isPlaying ? "Berhenti" : "Dengarkan Narasi"}
+         >
+            {isPlaying ? <VolumeX size={24} /> : <Volume2 size={24} />}
+         </button>
+      )}
 
       {/* Fullscreen Zoom Modal */}
       {isZoomed && mappingData.map_url && (
