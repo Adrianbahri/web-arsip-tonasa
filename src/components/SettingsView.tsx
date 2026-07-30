@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X } from "lucide-react";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download } from "lucide-react";
 import QRCode from "react-qr-code";
 
 export default function SettingsView() {
@@ -31,6 +31,30 @@ export default function SettingsView() {
 
    const [loading, setLoading] = useState(true);
    const [message, setMessage] = useState("");
+
+   const downloadQRCode = () => {
+      const svg = document.getElementById("qr-code-svg");
+      if (!svg) return;
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      img.onload = () => {
+         canvas.width = img.width;
+         canvas.height = img.height;
+         if (ctx) {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            const pngFile = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.download = `QR_${qrModal?.gedung || 'Lokasi'}.png`;
+            downloadLink.href = `${pngFile}`;
+            downloadLink.click();
+         }
+      };
+      img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+   };
 
    useEffect(() => {
       fetchMasterData();
@@ -729,6 +753,7 @@ export default function SettingsView() {
                   <div className="p-8 flex flex-col items-center justify-center">
                      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-4">
                         <QRCode
+                           id="qr-code-svg"
                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/lokasi/${qrModal.id}`}
                            size={200}
                            level="H"
@@ -738,10 +763,16 @@ export default function SettingsView() {
                      <p className="text-center text-gray-500 text-sm mb-6">Scan untuk melihat peta dan mencari arsip</p>
                      
                      <div className="flex gap-3 w-full">
+                        <button 
+                           onClick={downloadQRCode}
+                           className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                        >
+                           <Download size={16} /> Download
+                        </button>
                         <a 
                            href={`/lokasi/${qrModal.id}`} 
                            target="_blank"
-                           className="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                           className="flex-1 flex items-center justify-center text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
                         >
                            Buka Link
                         </a>
