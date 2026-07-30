@@ -35,6 +35,7 @@ export default function LokasiDetailPage() {
   
   const [id, setId] = useState<string>("");
   const [mappingData, setMappingData] = useState<any>(null);
+  const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -48,8 +49,14 @@ export default function LokasiDetailPage() {
   useEffect(() => {
     if (id) {
       fetchMapping();
+      fetchConfig();
     }
   }, [id]);
+
+  const fetchConfig = async () => {
+    const { data } = await supabase.from("landing_page_config").select("hero_image_url").eq("id", "homepage").single();
+    if (data) setConfig(data);
+  };
 
   const fetchMapping = async () => {
     setLoading(true);
@@ -118,12 +125,22 @@ export default function LokasiDetailPage() {
       {/* Global Nav */}
       <GlobalNav />
 
-      {/* Hero Section */}
-      <section className="pt-20 pb-12 px-4 text-center">
-        <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4">Lokasi Anda Saat Ini</p>
-        <h1 className="text-[56px] md:text-[64px] font-semibold tracking-[-1px] leading-[1.05] text-[#1d1d1f] mb-4">
-          {mappingData.gedung}
-        </h1>
+      {/* Hero Section with Faded Background */}
+      <section className="relative pt-24 pb-16 px-4 text-center overflow-hidden">
+         <div 
+            className="absolute inset-0 z-0 bg-cover bg-center opacity-[0.15]"
+            style={{ 
+               backgroundImage: `url('${getDirectImageUrl(config?.hero_image_url || '/hero-image.jpg')}')` 
+            }}
+         />
+         <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#f5f5f7]/50 to-[#f5f5f7]" />
+         
+         <div className="relative z-10">
+           <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4 shadow-sm inline-block px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full">Lokasi Anda Saat Ini</p>
+           <h1 className="text-[56px] md:text-[64px] font-semibold tracking-[-1px] leading-[1.05] text-[#1d1d1f] mb-4 drop-shadow-sm">
+             {mappingData.gedung}
+           </h1>
+         </div>
       </section>
 
       <main className="max-w-3xl mx-auto px-4 space-y-8">
