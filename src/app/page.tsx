@@ -170,10 +170,9 @@ export default function LandingPage() {
          </div>
       </section>
 
-      {/* PIC GEDUNG ARSIP SECTION (Dark Mode Apple) */}
-      <section className="px-4 sm:px-6 max-w-[1024px] mx-auto w-full mb-16 md:mb-24 transition-colors">
-         <div className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-6 sm:p-8 md:p-12">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
+      {/* PIC GEDUNG ARSIP SECTION */}
+      <section className="bg-canvas border-t border-hairline py-16 md:py-24 px-4 sm:px-6 transition-colors">
+         <div className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
                   <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
                   {config.pic_photo_url ? (
@@ -220,7 +219,6 @@ export default function LandingPage() {
                      )}
                   </div>
                </div>
-            </div>
          </div>
       </section>
 
