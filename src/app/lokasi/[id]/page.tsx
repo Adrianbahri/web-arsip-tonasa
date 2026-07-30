@@ -93,7 +93,7 @@ export default function LokasiDetailPage() {
   if (loading) {
      return (
         <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center text-[#1d1d1f]">
-           <Loader2 className="animate-spin mb-4 text-[#0066cc]" size={40} />
+           <Loader2 className="animate-spin mb-4 text-[#e31837]" size={40} />
            <p className="font-medium animate-pulse text-[17px] tracking-[-0.37px]">Memuat data lokasi...</p>
         </div>
      );
@@ -105,7 +105,7 @@ export default function LokasiDetailPage() {
            <MapPin size={48} className="text-gray-400 mb-4" />
            <h2 className="text-[34px] font-semibold text-[#1d1d1f] mb-2 tracking-[-0.37px] leading-tight">Lokasi Tidak Ditemukan</h2>
            <p className="text-[17px] text-[#1d1d1f]/70 mb-8 max-w-md mx-auto leading-relaxed">QR Code mungkin tidak valid atau lokasi telah dihapus dari sistem kami.</p>
-           <Link href="/dashboard" className="bg-[#0066cc] hover:bg-[#0055b3] text-white px-6 py-3 rounded-full font-medium transition-all active:scale-95 text-[17px]">
+           <Link href="/dashboard" className="bg-[#e31837] hover:bg-[#b91029] text-white px-6 py-3 rounded-full font-medium transition-all active:scale-95 text-[17px]">
               Kembali ke Beranda
            </Link>
         </div>
@@ -113,7 +113,7 @@ export default function LokasiDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#0066cc] selection:text-white pb-32">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#e31837] selection:text-white pb-32">
       {/* Global Nav */}
       <GlobalNav />
 
@@ -132,7 +132,7 @@ export default function LokasiDetailPage() {
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
              <div className="flex-1 space-y-4">
                 <div className="inline-flex items-center gap-2 bg-[#f5f5f7] px-4 py-1.5 rounded-full text-[14px] font-medium text-[#1d1d1f]/80 mb-2">
-                   <Info size={16} className="text-[#0066cc]" />
+                   <Info size={16} className="text-[#e31837]" />
                    Informasi Gedung
                 </div>
                 <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-[#1d1d1f] font-normal">
@@ -142,7 +142,7 @@ export default function LokasiDetailPage() {
              <div className="md:w-auto flex flex-col justify-center items-center gap-3">
                 <button 
                    onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
-                   className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-[#0066cc]/10 text-[#0066cc] hover:bg-[#0066cc]/20'}`}
+                   className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-[#e31837]/10 text-[#e31837] hover:bg-[#e31837]/20'}`}
                    aria-label="Toggle Narasi"
                 >
                    {isPlaying ? <VolumeX size={28} /> : <Volume2 size={28} />}
@@ -193,7 +193,7 @@ export default function LokasiDetailPage() {
                      router.push('/dashboard');
                   }
                }}
-               className="bg-[#0066cc] hover:bg-[#0055b3] text-white px-5 sm:px-6 py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-2 text-[15px] whitespace-nowrap flex-shrink-0"
+               className="bg-[#e31837] hover:bg-[#b91029] text-white px-5 sm:px-6 py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-2 text-[15px] whitespace-nowrap flex-shrink-0"
             >
                Telusuri Arsip <ArrowRight size={18} />
             </button>

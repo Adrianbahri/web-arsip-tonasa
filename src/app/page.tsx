@@ -59,7 +59,7 @@ export default function LandingPage() {
   if (loading) {
      return (
         <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center text-[#1d1d1f]">
-           <Loader2 className="animate-spin mb-4 text-[#0066cc]" size={40} />
+           <Loader2 className="animate-spin mb-4 text-[#e31837]" size={40} />
            <p className="font-medium animate-pulse text-[17px] tracking-[-0.37px]">Memuat halaman...</p>
         </div>
      );
@@ -74,7 +74,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="bg-[#f5f5f7] min-h-screen flex flex-col font-sans selection:bg-[#0066cc] selection:text-white">
+    <div className="bg-[#f5f5f7] min-h-screen flex flex-col font-sans selection:bg-[#e31837] selection:text-white">
       
       <GlobalNav />
 
@@ -99,7 +99,7 @@ export default function LandingPage() {
                {config.hero_subtitle}
             </p>
             <div className="pt-8">
-               <Link href="/login" className="bg-[#0066cc] hover:bg-[#0055b3] text-white px-8 py-4 rounded-full font-medium transition-all active:scale-95 text-[17px] shadow-[0_8px_24px_rgba(0,102,204,0.3)]">
+               <Link href="/login" className="bg-[#e31837] hover:bg-[#b91029] text-white px-8 py-4 rounded-full font-medium transition-all active:scale-95 text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)]">
                   Mulai Gunakan Arsip
                </Link>
             </div>
@@ -153,7 +153,7 @@ export default function LandingPage() {
                {config.sop_items && config.sop_items.length > 0 ? (
                   config.sop_items.map((item: any, idx: number) => (
                      <div key={idx} className="bg-white p-8 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-4 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-shadow">
-                        <div className="text-[#0066cc] font-bold text-[24px] tracking-tight">{String(idx + 1).padStart(2, '0')}</div>
+                        <div className="text-[#e31837] font-bold text-[24px] tracking-tight">{String(idx + 1).padStart(2, '0')}</div>
                         <h4 className="font-semibold text-[19px] text-[#1d1d1f] tracking-[-0.022em] leading-snug">{item.title}</h4>
                         <p className="text-[#1d1d1f]/70 text-[15px] leading-[1.47]">
                            {item.desc}
@@ -211,7 +211,7 @@ export default function LandingPage() {
                         href={config.pic_email} 
                         className="flex items-center justify-center gap-2 bg-[#333336] hover:bg-[#424245] text-white px-6 py-4 rounded-full font-medium text-[17px] transition-all active:scale-95"
                      >
-                        <Mail size={18} className="text-[#0066cc]" />
+                        <Mail size={18} className="text-[#e31837]" />
                         Kirim Email
                      </a>
                   )}
