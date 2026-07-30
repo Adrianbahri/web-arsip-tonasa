@@ -148,8 +148,8 @@ export default function LokasiDetailPage() {
         
         {/* Map Card */}
         {mappingData.map_url && (
-          <div className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden border border-hairline">
-             <h3 className="text-[24px] font-semibold tracking-[-0.37px] mb-6">Peta Lokasi</h3>
+          <div className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 md:p-10 overflow-hidden border border-hairline">
+             <h3 className="text-[20px] sm:text-[24px] font-semibold tracking-[-0.37px] mb-4 sm:mb-6">Peta Lokasi</h3>
              <div className="rounded-[16px] overflow-hidden bg-canvas border border-hairline aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
                 <img 
                    src={getDirectImageUrl(mappingData.map_url)} 
@@ -169,13 +169,13 @@ export default function LokasiDetailPage() {
         )}
         
         {/* Info Card */}
-        <div className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-8`}>
+        <div className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-6 sm:gap-8`}>
            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
+              <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[13px] sm:text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
                  <Info size={16} className="text-primary" />
                  Informasi Gedung
               </div>
-              <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-ink font-normal">
+              <p className="text-[15px] sm:text-[17px] leading-[1.47] tracking-[-0.022em] text-ink font-normal">
                  {mappingData.deskripsi}
               </p>
            </div>
