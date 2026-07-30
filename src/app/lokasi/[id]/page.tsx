@@ -100,8 +100,8 @@ export default function LokasiDetailPage() {
 
   if (loading) {
      return (
-        <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center text-[#1d1d1f]">
-           <Loader2 className="animate-spin mb-4 text-[#e31837]" size={40} />
+        <div className="min-h-screen bg-canvas-soft flex flex-col items-center justify-center text-ink">
+           <Loader2 className="animate-spin mb-4 text-primary" size={40} />
            <p className="font-medium animate-pulse text-[17px] tracking-[-0.37px]">Memuat data lokasi...</p>
         </div>
      );
@@ -109,11 +109,11 @@ export default function LokasiDetailPage() {
 
   if (!mappingData) {
      return (
-        <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center p-6 text-center">
-           <MapPin size={48} className="text-gray-400 mb-4" />
-           <h2 className="text-[34px] font-semibold text-[#1d1d1f] mb-2 tracking-[-0.37px] leading-tight">Lokasi Tidak Ditemukan</h2>
-           <p className="text-[17px] text-[#1d1d1f]/70 mb-8 max-w-md mx-auto leading-relaxed">QR Code mungkin tidak valid atau lokasi telah dihapus dari sistem kami.</p>
-           <Link href="/dashboard" className="bg-[#e31837] hover:bg-[#b91029] text-white px-6 py-3 rounded-full font-medium transition-all active:scale-95 text-[17px]">
+        <div className="min-h-screen bg-canvas-soft flex flex-col items-center justify-center p-6 text-center">
+           <MapPin size={48} className="text-ink-mute mb-4" />
+           <h2 className="text-[34px] font-semibold text-ink mb-2 tracking-[-0.37px] leading-tight">Lokasi Tidak Ditemukan</h2>
+           <p className="text-[17px] text-ink/70 mb-8 max-w-md mx-auto leading-relaxed">QR Code mungkin tidak valid atau lokasi telah dihapus dari sistem kami.</p>
+           <Link href="/dashboard" className="bg-primary hover:bg-primary-deep text-white px-6 py-3 rounded-full font-medium transition-all active:scale-95 text-[17px]">
               Kembali ke Beranda
            </Link>
         </div>
@@ -121,7 +121,7 @@ export default function LokasiDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#e31837] selection:text-white pb-32">
+    <div className="min-h-screen bg-canvas-soft text-ink font-sans selection:bg-primary selection:text-white pb-32">
       {/* Global Nav */}
       <GlobalNav />
 
@@ -133,11 +133,11 @@ export default function LokasiDetailPage() {
                backgroundImage: `url('${getDirectImageUrl(config?.hero_image_url || '/hero-image.jpg')}')` 
             }}
          />
-         <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#f5f5f7]/50 to-[#f5f5f7]" />
+         <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-canvas-soft/50 to-canvas-soft" />
          
          <div className="relative z-10">
-           <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4 shadow-sm inline-block px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full">Lokasi Anda Saat Ini</p>
-           <h1 className="text-[56px] md:text-[64px] font-semibold tracking-[-1px] leading-[1.05] text-[#1d1d1f] mb-4 drop-shadow-sm">
+           <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4 shadow-sm inline-block px-3 py-1 bg-canvas/50 backdrop-blur-sm rounded-full border border-hairline">Lokasi Anda Saat Ini</p>
+           <h1 className="text-[56px] md:text-[64px] font-semibold tracking-[-1px] leading-[1.05] text-ink mb-4 drop-shadow-sm">
              {mappingData.gedung}
            </h1>
          </div>
@@ -147,9 +147,9 @@ export default function LokasiDetailPage() {
         
         {/* Map Card */}
         {mappingData.map_url && (
-          <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden">
+          <div className="bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 overflow-hidden border border-hairline">
              <h3 className="text-[24px] font-semibold tracking-[-0.37px] mb-6">Peta Lokasi</h3>
-             <div className="rounded-[16px] overflow-hidden bg-white border border-black/5 aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
+             <div className="rounded-[16px] overflow-hidden bg-canvas border border-hairline aspect-square md:aspect-video relative cursor-zoom-in group" onClick={() => setIsZoomed(true)}>
                 <img 
                    src={getDirectImageUrl(mappingData.map_url)} 
                    alt={`Peta ${mappingData.gedung}`} 
@@ -159,7 +159,7 @@ export default function LokasiDetailPage() {
                    }}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center pointer-events-none">
-                   <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm text-[14px] font-medium text-[#1d1d1f] opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                   <div className="bg-canvas/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm text-[14px] font-medium text-ink opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 border border-hairline">
                       Klik untuk memperbesar
                    </div>
                 </div>
@@ -168,26 +168,26 @@ export default function LokasiDetailPage() {
         )}
         
         {/* Info Card */}
-        <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+        <div className="bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-8 md:p-10 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline">
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
              <div className="flex-1 space-y-4">
-                <div className="inline-flex items-center gap-2 bg-[#f5f5f7] px-4 py-1.5 rounded-full text-[14px] font-medium text-[#1d1d1f]/80 mb-2">
-                   <Info size={16} className="text-[#e31837]" />
+                <div className="inline-flex items-center gap-2 bg-canvas-soft px-4 py-1.5 rounded-full text-[14px] font-medium text-ink/80 mb-2 border border-hairline">
+                   <Info size={16} className="text-primary" />
                    Informasi Gedung
                 </div>
-                <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-[#1d1d1f] font-normal">
+                <p className="text-[17px] leading-[1.47] tracking-[-0.022em] text-ink font-normal">
                    {mappingData.deskripsi}
                 </p>
              </div>
              <div className="md:w-auto flex flex-col justify-center items-center gap-3">
                 <button 
                    onClick={() => isPlaying ? stopTTS() : playTTS(mappingData.deskripsi)}
-                   className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-[#e31837]/10 text-[#e31837] hover:bg-[#e31837]/20'}`}
+                   className={`w-16 h-16 flex items-center justify-center rounded-full transition-all active:scale-95 ${isPlaying ? 'bg-[#ff3b30]/10 text-[#ff3b30]' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
                    aria-label="Toggle Narasi"
                 >
                    {isPlaying ? <VolumeX size={28} /> : <Volume2 size={28} />}
                 </button>
-                <span className="text-[12px] font-medium text-[#1d1d1f]/60">{isPlaying ? "Berhenti" : "Dengarkan"}</span>
+                <span className="text-[12px] font-medium text-ink/60">{isPlaying ? "Berhenti" : "Dengarkan"}</span>
              </div>
           </div>
         </div>
@@ -195,14 +195,14 @@ export default function LokasiDetailPage() {
       </main>
 
       {/* Floating Sticky CTA Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-8 pt-4 bg-gradient-to-t from-[#f5f5f7] via-[#f5f5f7]/90 to-transparent pointer-events-none flex justify-center">
-         <div className="bg-white/80 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/5 p-2 pr-6 pl-2 rounded-[32px] flex items-center gap-4 pointer-events-auto transform transition-transform hover:-translate-y-1">
-            <div className="bg-[#f5f5f7] w-12 h-12 rounded-full flex items-center justify-center text-[#1d1d1f] flex-shrink-0">
+      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-8 pt-4 bg-gradient-to-t from-canvas-soft via-canvas-soft/90 to-transparent pointer-events-none flex justify-center">
+         <div className="bg-canvas/80 backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-hairline p-2 pr-6 pl-2 rounded-[32px] flex items-center gap-4 pointer-events-auto transform transition-transform hover:-translate-y-1">
+            <div className="bg-canvas-soft w-12 h-12 rounded-full flex items-center justify-center text-ink flex-shrink-0">
                <MapPin size={24} />
             </div>
             <div className="flex flex-col mr-4 flex-1">
-               <span className="text-[12px] font-medium text-[#1d1d1f]/60 uppercase tracking-wider">Akses Publik</span>
-               <span className="text-[17px] font-semibold text-[#1d1d1f] leading-tight truncate max-w-[120px] sm:max-w-[200px]">{mappingData.gedung}</span>
+               <span className="text-[12px] font-medium text-ink/60 uppercase tracking-wider">Akses Publik</span>
+               <span className="text-[17px] font-semibold text-ink leading-tight truncate max-w-[120px] sm:max-w-[200px]">{mappingData.gedung}</span>
             </div>
             <button 
                onClick={() => {
@@ -211,7 +211,7 @@ export default function LokasiDetailPage() {
                      router.push('/dashboard');
                   }
                }}
-               className="bg-[#e31837] hover:bg-[#b91029] text-white px-5 sm:px-6 py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-2 text-[15px] whitespace-nowrap flex-shrink-0"
+               className="bg-primary hover:bg-primary-deep text-white px-5 sm:px-6 py-3 rounded-full font-medium transition-all active:scale-95 flex items-center gap-2 text-[15px] whitespace-nowrap flex-shrink-0 shadow-[0_4px_12px_rgba(227,24,55,0.2)]"
             >
                Telusuri Arsip <ArrowRight size={18} />
             </button>
@@ -221,12 +221,12 @@ export default function LokasiDetailPage() {
       {/* Fullscreen Zoom Modal */}
       {isZoomed && mappingData.map_url && (
          <div 
-            className="fixed inset-0 z-[100] bg-[#f5f5f7]/95 backdrop-blur-xl flex flex-col cursor-zoom-out animate-in fade-in duration-300"
+            className="fixed inset-0 z-[100] bg-canvas-soft/95 backdrop-blur-xl flex flex-col cursor-zoom-out animate-in fade-in duration-300"
             onClick={() => setIsZoomed(false)}
          >
             <div className="w-full flex justify-end p-6">
                <button 
-                  className="bg-black/5 hover:bg-black/10 text-[#1d1d1f] rounded-full p-3 transition-colors active:scale-95"
+                  className="bg-hairline hover:bg-hairline-strong text-ink rounded-full p-3 transition-colors active:scale-95"
                   onClick={() => setIsZoomed(false)}
                >
                   <X size={24} />

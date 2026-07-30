@@ -2,12 +2,19 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { User, Menu, X } from "lucide-react";
+import { User, Menu, X, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 export default function GlobalNav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // If we are on the landing page and click a hash link, it should scroll.
   // Otherwise, if we are on /lokasi/[id], clicking Prosedur should go to /#prosedur
@@ -41,8 +48,18 @@ export default function GlobalNav() {
              <Link href={getProsedurHref()} className="text-[12px] opacity-80 hover:opacity-100 transition-opacity tracking-wide">Prosedur</Link>
           </nav>
 
-          {/* Login Button */}
-          <div className="flex items-center">
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+             {mounted && (
+               <button 
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="text-white/80 hover:text-white transition-colors flex items-center justify-center p-1 rounded-full"
+                  aria-label="Toggle Theme"
+               >
+                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+               </button>
+             )}
+
              <Link 
                href="/login" 
                className="flex items-center gap-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors"

@@ -26,6 +26,7 @@ export default function SettingsView() {
    // Digital Mapping State
    const [digitalMappings, setDigitalMappings] = useState<any[]>([]);
    const [newMapping, setNewMapping] = useState({ gedung: "", deskripsi: "", map_url: "" });
+   const [editingMappingId, setEditingMappingId] = useState<string | null>(null);
    const [qrModal, setQrModal] = useState<any>(null);
 
    const [loading, setLoading] = useState(true);
@@ -134,17 +135,49 @@ export default function SettingsView() {
    };
 
    // ================== DIGITAL MAPPING LOGIC ==================
-   const addMapping = async (e: React.FormEvent) => {
+   const addOrUpdateMapping = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!newMapping.gedung.trim() || !newMapping.deskripsi.trim()) return;
-      const { error } = await supabase.from('master_digital_mapping').insert([{ 
-         gedung: newMapping.gedung, 
-         deskripsi: newMapping.deskripsi,
-         map_url: newMapping.map_url
-      }]);
-      if (error) setMessage("Gagal menambah mapping: " + error.message);
-      else { setMessage("Berhasil menambah mapping!"); setNewMapping({ gedung: "", deskripsi: "", map_url: "" }); fetchMasterData(); }
+      
+      let error;
+      if (editingMappingId) {
+         const { error: updateError } = await supabase.from('master_digital_mapping')
+            .update({ 
+               gedung: newMapping.gedung, 
+               deskripsi: newMapping.deskripsi,
+               map_url: newMapping.map_url
+            })
+            .eq('id', editingMappingId);
+         error = updateError;
+      } else {
+         const { error: insertError } = await supabase.from('master_digital_mapping').insert([{ 
+            gedung: newMapping.gedung, 
+            deskripsi: newMapping.deskripsi,
+            map_url: newMapping.map_url
+         }]);
+         error = insertError;
+      }
+      
+      if (error) {
+         setMessage(`Gagal ${editingMappingId ? 'mengubah' : 'menambah'} mapping: ` + error.message);
+      } else { 
+         setMessage(`Berhasil ${editingMappingId ? 'mengubah' : 'menambah'} mapping!`); 
+         setNewMapping({ gedung: "", deskripsi: "", map_url: "" }); 
+         setEditingMappingId(null);
+         fetchMasterData(); 
+      }
       setTimeout(() => setMessage(""), 3000);
+   };
+
+   const startEditMapping = (m: any) => {
+      setNewMapping({ gedung: m.gedung, deskripsi: m.deskripsi, map_url: m.map_url || "" });
+      setEditingMappingId(m.id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+   };
+
+   const cancelEditMapping = () => {
+      setNewMapping({ gedung: "", deskripsi: "", map_url: "" });
+      setEditingMappingId(null);
    };
 
    const deleteMapping = async (id: string) => {
@@ -317,7 +350,7 @@ export default function SettingsView() {
          )}
 
          {!loading && activeTab === "digital_mapping" && (
-            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs max-w-4xl">
+            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs w-full">
                <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-5">
                   <MapPin size={18} className="text-primary" />
                   <div>
@@ -326,7 +359,7 @@ export default function SettingsView() {
                   </div>
                </div>
                
-               <form onSubmit={addMapping} className="flex flex-col gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
+               <form onSubmit={addOrUpdateMapping} className="flex flex-col gap-3 mb-6 bg-canvas-soft p-4 rounded-sm border border-hairline">
                   <div className="space-y-1">
                      <label className="text-[12px] font-medium text-ink-mute">Gedung / Lokasi</label>
                      <select 
@@ -362,9 +395,14 @@ export default function SettingsView() {
                         placeholder="https://..."
                      />
                   </div>
-                  <div className="flex justify-end pt-2">
+                  <div className="flex justify-end gap-2 pt-2">
+                     {editingMappingId && (
+                        <button type="button" onClick={cancelEditMapping} className="bg-canvas border border-hairline text-ink px-4 py-2 rounded-sm hover:bg-canvas-soft flex items-center justify-center gap-2 text-[13px] font-semibold shadow-sm">
+                           Batal
+                        </button>
+                     )}
                      <button type="submit" className="bg-primary text-white px-4 py-2 rounded-sm hover:bg-primary-deep flex items-center justify-center gap-2 text-[13px] font-semibold shadow-sm">
-                        <Plus size={16} /> Tambah Digital Mapping
+                        {editingMappingId ? <><Save size={16} /> Simpan Perubahan</> : <><Plus size={16} /> Tambah Digital Mapping</>}
                      </button>
                   </div>
                </form>
@@ -398,8 +436,16 @@ export default function SettingsView() {
                                        <QrCode size={14} /> Lihat QR
                                     </button>
                                     <button 
+                                       onClick={() => startEditMapping(m)}
+                                       className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-sm transition-colors border border-transparent hover:border-blue-200"
+                                       title="Edit Mapping"
+                                    >
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                    </button>
+                                    <button 
                                        onClick={() => deleteMapping(m.id)}
                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-sm transition-colors border border-transparent hover:border-red-200"
+                                       title="Hapus Mapping"
                                     >
                                        <Trash2 size={16} />
                                     </button>
@@ -420,7 +466,7 @@ export default function SettingsView() {
          )}
 
          {!loading && activeTab === "retensi" && (
-            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs max-w-3xl">
+            <div className="bg-canvas border border-hairline rounded-sm p-6 shadow-xs w-full">
                <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-5">
                   <Clock size={18} className="text-primary" />
                   <div>

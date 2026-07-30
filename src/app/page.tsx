@@ -59,8 +59,8 @@ export default function LandingPage() {
 
   if (loading) {
      return (
-        <div className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center text-[#1d1d1f]">
-           <Loader2 className="animate-spin mb-4 text-[#e31837]" size={40} />
+        <div className="min-h-screen bg-canvas-soft flex flex-col items-center justify-center text-ink">
+           <Loader2 className="animate-spin mb-4 text-primary" size={40} />
            <p className="font-medium animate-pulse text-[17px] tracking-[-0.37px]">Memuat halaman...</p>
         </div>
      );
@@ -68,14 +68,14 @@ export default function LandingPage() {
 
   if (!config) {
      return (
-        <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center text-[#1d1d1f]">
+        <div className="min-h-screen bg-canvas-soft flex items-center justify-center text-ink">
            <p className="font-medium text-[17px]">Konfigurasi landing page tidak ditemukan.</p>
         </div>
      );
   }
 
   return (
-    <div className="bg-[#f5f5f7] min-h-screen flex flex-col font-sans selection:bg-[#e31837] selection:text-white">
+    <div className="bg-canvas-soft min-h-screen flex flex-col font-sans selection:bg-primary selection:text-white">
       
       <GlobalNav />
 
@@ -90,7 +90,7 @@ export default function LandingPage() {
             }}
          />
          {/* Subtle dark gradient overlay to ensure text legibility and fade smoothly to page background */}
-         <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#f5f5f7] via-black/40 to-black/40" />
+         <div className="absolute inset-0 z-10 bg-gradient-to-t from-canvas-soft via-black/40 to-black/40" />
          
          <div className="relative z-20 max-w-[800px] space-y-6 px-4 mt-[-10vh]">
             <h2 className="text-[48px] md:text-[72px] font-semibold text-white leading-[1.05] tracking-[-1.5px]">
@@ -100,7 +100,7 @@ export default function LandingPage() {
                {config.hero_subtitle}
             </p>
             <div className="pt-8">
-               <Link href="/login" className="bg-[#e31837] hover:bg-[#b91029] text-white px-8 py-4 rounded-full font-medium transition-all active:scale-95 text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)]">
+               <Link href="/login" className="bg-primary hover:bg-primary-deep text-white px-8 py-4 rounded-full font-medium transition-all active:scale-95 text-[17px] shadow-[0_8px_24px_rgba(227,24,55,0.3)]">
                   Telusuri Arsip
                </Link>
             </div>
@@ -109,10 +109,10 @@ export default function LandingPage() {
 
       {/* SAMBUTAN SECTION */}
       <section className="px-6 max-w-[1024px] mx-auto w-full relative z-20 -mt-24 md:-mt-32 mb-12">
-         <div className="bg-white rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-black/5 p-8 md:p-12">
+         <div className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-8 md:p-12">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
-                  <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-[#f5f5f7] rounded-[16px] flex items-center justify-center text-[#1d1d1f]/20 relative overflow-hidden shadow-sm">
+                  <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
                      {config.sambutan_photo_url ? (
                         <img src={getDirectImageUrl(config.sambutan_photo_url)} alt="Sambutan" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                      ) : (
@@ -122,14 +122,14 @@ export default function LandingPage() {
                         </svg>
                      )}
                   </div>
-                  <p className="font-semibold text-[#1d1d1f] text-[14px] uppercase tracking-wider">Kepala Unit Kearsipan</p>
+                  <p className="font-semibold text-ink text-[14px] uppercase tracking-wider">Kepala Unit Kearsipan</p>
                </div>
                <div className="md:col-span-8 space-y-6">
-                  <h3 className="text-[34px] md:text-[40px] font-semibold text-[#1d1d1f] tracking-[-0.022em] leading-tight">
+                  <h3 className="text-[34px] md:text-[40px] font-semibold text-ink tracking-[-0.022em] leading-tight">
                      {config.sambutan_title}
                   </h3>
-                  <div className="w-12 h-1 bg-[#1d1d1f] rounded-full"></div>
-                  <p className="text-[#1d1d1f]/80 text-[17px] leading-[1.47] text-justify whitespace-pre-wrap">
+                  <div className="w-12 h-1 bg-ink rounded-full"></div>
+                  <p className="text-ink-mute text-[17px] leading-[1.47] text-justify whitespace-pre-wrap">
                      {config.sambutan_text}
                   </p>
                </div>
@@ -138,14 +138,14 @@ export default function LandingPage() {
       </section>
 
       {/* PROSEDUR PENYERAHAN & PENGELOLAAN ARSIP */}
-      <section id="prosedur" className="py-12 px-6 bg-[#f5f5f7]">
+      <section id="prosedur" className="py-12 px-6 bg-canvas-soft">
          <div className="max-w-[1024px] mx-auto space-y-12">
             <div className="text-center max-w-[700px] mx-auto space-y-4">
                <span className="font-semibold text-[#bf4800] text-[12px] tracking-widest uppercase">SOP Resmi</span>
-               <h3 className="text-[40px] md:text-[48px] font-semibold text-[#1d1d1f] tracking-[-1px] leading-tight">
+               <h3 className="text-[40px] md:text-[48px] font-semibold text-ink tracking-[-1px] leading-tight">
                   {config.sop_title}
                </h3>
-               <p className="text-[#1d1d1f]/70 text-[17px] leading-[1.47] max-w-[500px] mx-auto">
+               <p className="text-ink-mute text-[17px] leading-[1.47] max-w-[500px] mx-auto">
                   {config.sop_text}
                </p>
             </div>
@@ -153,16 +153,16 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
                {config.sop_items && config.sop_items.length > 0 ? (
                   config.sop_items.map((item: any, idx: number) => (
-                     <div key={idx} className="bg-white p-8 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-4 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-shadow">
-                        <div className="text-[#e31837] font-bold text-[24px] tracking-tight">{String(idx + 1).padStart(2, '0')}</div>
-                        <h4 className="font-semibold text-[19px] text-[#1d1d1f] tracking-[-0.022em] leading-snug">{item.title}</h4>
-                        <p className="text-[#1d1d1f]/70 text-[15px] leading-[1.47]">
+                     <div key={idx} className="bg-canvas border border-hairline p-8 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-4 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-shadow">
+                        <div className="text-primary font-bold text-[24px] tracking-tight">{String(idx + 1).padStart(2, '0')}</div>
+                        <h4 className="font-semibold text-[19px] text-ink tracking-[-0.022em] leading-snug">{item.title}</h4>
+                        <p className="text-ink-mute text-[15px] leading-[1.47]">
                            {item.desc}
                         </p>
                      </div>
                   ))
                ) : (
-                  <div className="col-span-full text-center py-12 text-[#1d1d1f]/50 text-[17px]">
+                  <div className="col-span-full text-center py-12 text-ink-mute text-[17px]">
                      Belum ada tahapan prosedur yang ditambahkan.
                   </div>
                )}
@@ -222,7 +222,7 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#f5f5f7] text-[#1d1d1f]/60 py-12 px-6 text-center text-[12px] border-t border-black/5 mt-auto">
+      <footer className="bg-canvas-soft text-ink-mute py-12 px-6 text-center text-[12px] border-t border-hairline mt-auto">
          <p>PT Semen Tonasa &copy; {new Date().getFullYear()}. Seluruh hak cipta dilindungi.</p>
       </footer>
 
