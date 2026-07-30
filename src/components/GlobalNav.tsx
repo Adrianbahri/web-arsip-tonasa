@@ -24,7 +24,7 @@ export default function GlobalNav() {
 
   return (
     <>
-      <header className="bg-[#1d1d1f] dark:bg-white text-white dark:text-[#1d1d1f] h-[60px] flex items-center sticky top-0 z-50 transition-colors">
+      <header className="bg-canvas/90 backdrop-blur-md border-b border-hairline text-ink h-[60px] flex items-center sticky top-0 z-50 transition-colors">
         <div className="w-full max-w-[1024px] mx-auto px-4 flex items-center justify-between">
           
           {/* Mobile Menu Toggle */}
@@ -73,25 +73,25 @@ export default function GlobalNav() {
 
       {/* Mobile Nav Drawer */}
       {isMobileMenuOpen && (
-         <div className="md:hidden fixed top-[60px] left-0 right-0 bg-[#1d1d1f] dark:bg-white border-t border-white/10 dark:border-black/10 z-40 px-6 py-6 flex flex-col gap-6 shadow-2xl h-[calc(100vh-60px)] animate-in slide-in-from-top-2 duration-300">
+         <div className="md:hidden fixed top-[60px] left-0 right-0 bg-canvas border-t border-hairline z-40 px-6 py-6 flex flex-col gap-6 shadow-2xl h-[calc(100vh-60px)] animate-in slide-in-from-top-2 duration-300">
             <Link 
                href="/" 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4"
+               className="text-ink/90 text-2xl font-semibold border-b border-hairline pb-4"
             >
                Beranda
             </Link>
             <Link 
                href={getProsedurHref()} 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4"
+               className="text-ink/90 text-2xl font-semibold border-b border-hairline pb-4"
             >
                Prosedur
             </Link>
             <Link 
                href="/login" 
                onClick={() => setIsMobileMenuOpen(false)} 
-               className="text-white/90 dark:text-[#1d1d1f]/90 text-2xl font-semibold border-b border-white/10 dark:border-black/10 pb-4 flex items-center gap-2"
+               className="text-ink/90 text-2xl font-semibold border-b border-hairline pb-4 flex items-center gap-2"
             >
                <User size={24} />
                Login
