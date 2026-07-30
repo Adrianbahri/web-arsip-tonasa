@@ -81,16 +81,6 @@ export default function LokasiPage() {
     }
   };
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Redirect to public search page
-      router.push(`/cari?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
-
   if (loading) {
      return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-gray-500">
@@ -200,30 +190,8 @@ export default function LokasiPage() {
            </div>
         )}
 
-        {/* Search Box */}
         <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-5">
-          <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-             <Search size={18} className="text-gray-500" /> Cari Arsip Publik
-          </h3>
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Masukkan nomor atau nama arsip..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block pl-4 pr-12 py-3.5 transition-all outline-none"
-              />
-              <button 
-                type="submit" 
-                className="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-3 transition-colors flex items-center justify-center shadow-sm"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </form>
-          
-          <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col items-center">
+          <div className="flex flex-col items-center">
              <button 
                 onClick={() => {
                    if (mappingData?.gedung) {

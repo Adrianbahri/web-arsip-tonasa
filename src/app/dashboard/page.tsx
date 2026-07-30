@@ -121,7 +121,7 @@ export default function Dashboard() {
 
   useEffect(() => {
      if (role === 'guest' && user?.guestGedung) {
-        setGedungFilter(user.guestGedung);
+        setGedungFilter(user.guestGedung.toUpperCase());
      }
   }, [role, user]);
 
