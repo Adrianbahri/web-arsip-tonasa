@@ -5,6 +5,17 @@ import { MessageSquare, Mail, MapPin, FileText, CheckCircle2, ChevronRight, Menu
 import { supabase } from "@/lib/supabase";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
+// Helper to convert standard Google Drive links to direct image links
+const getDirectImageUrl = (url: string) => {
+  if (!url) return url;
+  // Match standard share link format: https://drive.google.com/file/d/FILE_ID/view...
+  const match = url.match(/drive\.google\.com\/file\/d\/([^\/?]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+  return url;
+};
+
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [config, setConfig] = useState<any>({
@@ -91,7 +102,7 @@ export default function LandingPage() {
       <section 
          className="relative bg-cover bg-center w-full aspect-video max-h-[600px] flex items-center justify-center text-center px-4"
          style={{ 
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${config.hero_image_url || '/hero-image.jpg'}')` 
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${getDirectImageUrl(config.hero_image_url || '/hero-image.jpg')}')` 
          }}
       >
          <div className="max-w-[800px] space-y-4">
@@ -109,7 +120,7 @@ export default function LandingPage() {
          <div className="md:col-span-4 flex flex-col items-center space-y-3">
             <div className="w-[200px] md:w-full aspect-[4/5] bg-canvas-soft border border-hairline rounded-sm flex items-center justify-center text-ink-mute-2 relative overflow-hidden">
                {config.sambutan_photo_url ? (
-                  <img src={config.sambutan_photo_url} alt="Sambutan" className="w-full h-full object-cover" />
+                  <img src={getDirectImageUrl(config.sambutan_photo_url)} alt="Sambutan" className="w-full h-full object-cover" />
                ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24 text-ink-faint">
                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -166,7 +177,7 @@ export default function LandingPage() {
             <div className="md:col-span-4 flex flex-col items-center space-y-3">
                <div className="w-[200px] md:w-full aspect-[4/5] bg-[#3e3e42] border border-[#4a4a4d] rounded-sm flex items-center justify-center text-gray-400 relative overflow-hidden">
                   {config.pic_photo_url ? (
-                     <img src={config.pic_photo_url} alt="PIC" className="w-full h-full object-cover" />
+                     <img src={getDirectImageUrl(config.pic_photo_url)} alt="PIC" className="w-full h-full object-cover" />
                   ) : (
                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-24 h-24 text-gray-500">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

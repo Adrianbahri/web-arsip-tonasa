@@ -6,6 +6,16 @@ import { MapPin, Search, Box, Info, Navigation, ArrowRight, LayoutDashboard, Vol
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+// Helper to convert standard Google Drive links to direct image links
+const getDirectImageUrl = (url: string) => {
+  if (!url) return url;
+  const match = url.match(/drive\.google\.com\/file\/d\/([^\/?]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+  return url;
+};
+
 export default function LokasiPage() {
   const params = useParams();
   const router = useRouter();
@@ -151,7 +161,7 @@ export default function LokasiPage() {
                  <p className="w-full text-left text-xs font-semibold text-gray-500 mb-2 pl-2">Peta Lokasi:</p>
                  {/* Using next/img or regular img for simplicity since url could be external */}
                  <img 
-                    src={mappingData.map_url} 
+                    src={getDirectImageUrl(mappingData.map_url)} 
                     alt={`Peta ${mappingData.gedung}`} 
                     className="max-w-full rounded-lg object-contain"
                     style={{ maxHeight: '300px' }}
