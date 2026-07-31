@@ -2263,6 +2263,22 @@ export default function Dashboard() {
                                     <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
                                  </div>
                               </div>
+                              {/* Map Image rendering */}
+                              {(() => {
+                                 const loc = masterLocations.find(l => 
+                                    l.gedung === selectedDetailItem.gedung && 
+                                    l.lorong === selectedDetailItem.lorong && 
+                                    l.rak === selectedDetailItem.rak
+                                 );
+                                 return loc?.map_url ? (
+                                    <div className="mt-3">
+                                       <p className="text-ink-mute text-[10px] uppercase font-semibold mb-1">Denah Lokasi Rak</p>
+                                       <div className="rounded-xs overflow-hidden border border-hairline bg-canvas-soft">
+                                          <img src={loc.map_url} alt="Denah Rak" className="w-full h-auto object-contain max-h-[200px]" />
+                                       </div>
+                                    </div>
+                                 ) : null;
+                              })()}
                            </div>
                         )}
 

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download } from "lucide-react";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download, Upload, Image as ImageIcon } from "lucide-react";
 import QRCode from "react-qr-code";
 
 export default function SettingsView() {
@@ -28,6 +28,7 @@ export default function SettingsView() {
    const [newMapping, setNewMapping] = useState({ gedung: "", deskripsi: "", map_url: "" });
    const [editingMappingId, setEditingMappingId] = useState<string | null>(null);
    const [qrModal, setQrModal] = useState<any>(null);
+   const [uploadingMapId, setUploadingMapId] = useState<string | null>(null);
 
    const [loading, setLoading] = useState(true);
    const [message, setMessage] = useState("");
@@ -156,6 +157,41 @@ export default function SettingsView() {
       if (error) setMessage("Gagal menghapus: " + error.message);
       else { setMessage("Lokasi dihapus."); fetchMasterData(); }
       setTimeout(() => setMessage(""), 3000);
+   };
+
+   const handleUploadMapRak = async (id: string, file: File) => {
+      if (!file) return;
+      setUploadingMapId(id);
+      try {
+         const fileExt = file.name.split('.').pop();
+         const fileName = `rak_${id}_${Date.now()}.${fileExt}`;
+         const filePath = `${fileName}`;
+
+         const { error: uploadError } = await supabase.storage
+            .from('maps')
+            .upload(filePath, file);
+
+         if (uploadError) throw uploadError;
+
+         const { data: publicUrlData } = supabase.storage
+            .from('maps')
+            .getPublicUrl(filePath);
+
+         const { error: updateError } = await supabase
+            .from('master_locations')
+            .update({ map_url: publicUrlData.publicUrl })
+            .eq('id', id);
+
+         if (updateError) throw updateError;
+         
+         setMessage("Berhasil mengupload denah rak!");
+         fetchMasterData();
+      } catch (err: any) {
+         setMessage("Gagal upload denah: " + err.message);
+      } finally {
+         setUploadingMapId(null);
+         setTimeout(() => setMessage(""), 3000);
+      }
    };
 
    // ================== DIGITAL MAPPING LOGIC ==================
@@ -360,11 +396,35 @@ export default function SettingsView() {
 
                   <ul className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                      {locations.map((l) => (
-                        <li key={l.id} className="flex justify-between items-center bg-canvas-soft border border-hairline p-2 rounded-xs text-[13px]">
-                           <span className="font-medium text-ink">Gedung {l.gedung} - {l.lorong} - {l.rak}</span>
-                           <button onClick={() => deleteLocation(l.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors">
-                              <Trash2 size={14} />
-                           </button>
+                        <li key={l.id} className="flex flex-col gap-2 bg-canvas-soft border border-hairline p-3 rounded-xs text-[13px]">
+                           <div className="flex justify-between items-center">
+                              <span className="font-medium text-ink">Gedung {l.gedung} - {l.lorong} - {l.rak}</span>
+                              <div className="flex items-center gap-2">
+                                 <label className={`cursor-pointer text-primary hover:text-primary-deep p-1 bg-canvas hover:bg-primary-light/10 border border-hairline rounded-xs transition-colors flex items-center gap-1 ${uploadingMapId === l.id ? 'opacity-50 pointer-events-none' : ''}`}>
+                                    <Upload size={14} />
+                                    <span className="text-[10px] font-semibold uppercase">{uploadingMapId === l.id ? 'Uploading...' : 'Upload Map'}</span>
+                                    <input 
+                                       type="file" 
+                                       accept="image/*" 
+                                       className="hidden" 
+                                       onChange={(e) => {
+                                          if (e.target.files && e.target.files[0]) {
+                                             handleUploadMapRak(l.id, e.target.files[0]);
+                                          }
+                                       }}
+                                    />
+                                 </label>
+                                 <button onClick={() => deleteLocation(l.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors">
+                                    <Trash2 size={14} />
+                                 </button>
+                              </div>
+                           </div>
+                           {l.map_url && (
+                              <div className="flex items-center gap-2 text-[11px] text-primary bg-primary-light/10 px-2 py-1 rounded-xs border border-primary-light/20 self-start">
+                                 <ImageIcon size={12} />
+                                 <a href={l.map_url} target="_blank" rel="noreferrer" className="hover:underline">Lihat Denah Rak</a>
+                              </div>
+                           )}
                         </li>
                      ))}
                      {locations.length === 0 && <div className="text-[12px] text-ink-mute text-center">Belum ada data</div>}
