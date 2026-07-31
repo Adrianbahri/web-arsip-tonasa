@@ -82,7 +82,7 @@ export default function LandingPage() {
 
       {/* HERO SECTION */}
       <section 
-         className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden"
+         className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden pb-16 md:pb-32"
       >
          <div 
             className="absolute inset-0 z-0 bg-cover bg-center"
@@ -97,7 +97,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative z-20 max-w-[800px] space-y-5 md:space-y-6 px-4 mt-[-10vh]"
+            className="relative z-20 max-w-[800px] space-y-5 md:space-y-6 px-4"
          >
             <h2 className="text-[42px] sm:text-[48px] md:text-[72px] font-semibold text-white leading-[1.05] tracking-[-1.5px]">
                {config.hero_title}
@@ -114,7 +114,7 @@ export default function LandingPage() {
       </section>
 
       {/* SAMBUTAN SECTION */}
-      <section className="px-4 sm:px-6 max-w-[1024px] mx-auto w-full relative z-20 -mt-24 md:-mt-32 mb-12">
+      <section className="px-4 sm:px-6 max-w-[1024px] mx-auto w-full relative z-20 -mt-12 md:-mt-20 mb-12">
          <motion.div 
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function LandingPage() {
             transition={{ duration: 0.7, ease: "easeOut" }}
             className="bg-canvas rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-hairline p-6 sm:p-8 md:p-12"
          >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-start">
                <div className="md:col-span-4 flex flex-col items-center space-y-4">
                   <div className="w-[180px] md:w-full max-w-[240px] aspect-[4/5] bg-canvas-soft rounded-[16px] flex items-center justify-center text-ink/20 relative overflow-hidden shadow-sm">
                      {config.sambutan_photo_url ? (
