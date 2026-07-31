@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download, Upload, Image as ImageIcon } from "lucide-react";
+import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download, Upload, Image as ImageIcon, RefreshCw } from "lucide-react";
 import QRCode from "react-qr-code";
 
 export default function SettingsView() {
@@ -22,6 +22,7 @@ export default function SettingsView() {
    // Landing Page State
    const [landingConfig, setLandingConfig] = useState<any>(null);
    const [savingLanding, setSavingLanding] = useState(false);
+   const [isSyncingLocs, setIsSyncingLocs] = useState(false);
 
    // Digital Mapping State
    const [digitalMappings, setDigitalMappings] = useState<any[]>([]);
@@ -68,7 +69,7 @@ export default function SettingsView() {
          supabase.from('master_locations').select('*').order('gedung').order('lorong').order('rak'),
          supabase.from('master_retensi').select('*').order('kategori'),
          supabase.from('landing_page_config').select('*').eq('id', 'homepage').single(),
-         supabase.from('archives').select('jenis_berkas, gedung'),
+         supabase.from('archives').select('jenis_berkas, gedung, lorong, rak'),
          supabase.from('master_digital_mapping').select('*').order('created_at', { ascending: false })
       ]);
       
@@ -190,6 +191,47 @@ export default function SettingsView() {
          setMessage("Gagal upload denah: " + err.message);
       } finally {
          setUploadingMapId(null);
+         setTimeout(() => setMessage(""), 3000);
+      }
+   };
+
+   const syncLocationsFromArchives = async () => {
+      setIsSyncingLocs(true);
+      try {
+         const { data: archiveData, error: archiveError } = await supabase.from('archives').select('gedung, lorong, rak');
+         if (archiveError) throw archiveError;
+
+         const uniqueLocs = new Map();
+         archiveData.forEach((a: any) => {
+            if (a.gedung && a.lorong && a.rak) {
+               const key = `${a.gedung}-${a.lorong}-${a.rak}`;
+               if (!uniqueLocs.has(key)) {
+                  uniqueLocs.set(key, { gedung: a.gedung, lorong: a.lorong, rak: a.rak });
+               }
+            }
+         });
+
+         const existingLocs = new Set(locations.map(l => `${l.gedung}-${l.lorong}-${l.rak}`));
+         
+         const toInsert: any[] = [];
+         uniqueLocs.forEach((loc, key) => {
+            if (!existingLocs.has(key)) {
+               toInsert.push(loc);
+            }
+         });
+
+         if (toInsert.length > 0) {
+            const { error: insertError } = await supabase.from('master_locations').insert(toInsert);
+            if (insertError) throw insertError;
+            setMessage(`Berhasil menyinkronkan ${toInsert.length} lokasi baru dari data arsip!`);
+            fetchMasterData();
+         } else {
+            setMessage("Semua lokasi dari data arsip sudah ada di master data.");
+         }
+      } catch (err: any) {
+         setMessage("Gagal sinkronisasi: " + err.message);
+      } finally {
+         setIsSyncingLocs(false);
          setTimeout(() => setMessage(""), 3000);
       }
    };
@@ -356,9 +398,19 @@ export default function SettingsView() {
 
                {/* MASTER LOKASI */}
                <div className="bg-canvas border border-hairline rounded-sm p-5 shadow-xs">
-                  <div className="flex items-center gap-2 border-b border-hairline pb-3 mb-4">
-                     <MapPin size={16} className="text-ink" />
-                     <h3 className="font-semibold text-[14px]">Struktur Lokasi Rak</h3>
+                  <div className="flex items-center justify-between border-b border-hairline pb-3 mb-4">
+                     <div className="flex items-center gap-2">
+                        <MapPin size={16} className="text-ink" />
+                        <h3 className="font-semibold text-[14px]">Struktur Lokasi Rak</h3>
+                     </div>
+                     <button 
+                        onClick={syncLocationsFromArchives}
+                        disabled={isSyncingLocs}
+                        className="text-[11px] font-semibold text-primary hover:text-primary-deep flex items-center gap-1.5 px-2 py-1 bg-primary-light/10 border border-primary-light/20 rounded-xs transition-colors"
+                     >
+                        <RefreshCw size={12} className={isSyncingLocs ? "animate-spin" : ""} />
+                        {isSyncingLocs ? "Menyinkronkan..." : "Sinkronisasi dari Arsip"}
+                     </button>
                   </div>
                   
                   <form onSubmit={addLocation} className="flex flex-col gap-2 mb-5">
