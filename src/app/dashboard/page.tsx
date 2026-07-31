@@ -2191,13 +2191,13 @@ export default function Dashboard() {
                                        </div>
                                     </>
                                  )}
-                                 <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-ink-mute bg-canvas-soft px-2.5 py-1.5 rounded-xs border border-hairline w-fit">
-                                    <span className="font-semibold uppercase text-ink">Lokasi Fisik:</span>
-                                    <span>Gedung {selectedDetailItem.gedung || "-"}</span>
-                                    <span className="text-hairline-cool mx-0.5">•</span>
-                                    <span>Lorong {selectedDetailItem.lorong || "-"}</span>
-                                    <span className="text-hairline-cool mx-0.5">•</span>
-                                    <span>Rak {selectedDetailItem.rak || "-"}</span>
+                                 <div className="text-[11px] text-ink-mute bg-canvas-soft px-2.5 py-1.5 rounded-xs border border-hairline w-full sm:w-fit leading-relaxed">
+                                    <span className="font-semibold uppercase text-ink mr-1.5">Lokasi Fisik:</span>
+                                    Gedung {selectedDetailItem.gedung || "-"}
+                                    <span className="text-hairline-cool mx-1.5">•</span>
+                                    Lorong {selectedDetailItem.lorong || "-"}
+                                    <span className="text-hairline-cool mx-1.5">•</span>
+                                    Rak {selectedDetailItem.rak || "-"}
                                  </div>
                               </div>
                            );
