@@ -13,7 +13,7 @@ export default function SettingsView() {
    const [retensiRules, setRetensiRules] = useState<any[]>([]);
    const [jenisBerkasList, setJenisBerkasList] = useState<string[]>([]);
    const [newDept, setNewDept] = useState("");
-   const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "" });
+   const [newLoc, setNewLoc] = useState({ gedung: "A", lorong: "", rak: "", baris: "" });
    
    // State for unique gedung from archives
    const [archiveGedungList, setArchiveGedungList] = useState<string[]>([]);
@@ -148,7 +148,7 @@ export default function SettingsView() {
       if (!newLoc.gedung || !newLoc.lorong || !newLoc.rak) return;
       const { error } = await supabase.from('master_locations').insert([newLoc]);
       if (error) setMessage("Gagal menambah lokasi: " + error.message);
-      else { setMessage("Berhasil menambah lokasi rak!"); setNewLoc({ gedung: "A", lorong: "", rak: "" }); fetchMasterData(); }
+      else { setMessage("Berhasil menambah lokasi rak!"); setNewLoc({ gedung: "A", lorong: "", rak: "", baris: "" }); fetchMasterData(); }
       setTimeout(() => setMessage(""), 3000);
    };
 
@@ -414,11 +414,11 @@ export default function SettingsView() {
                   </div>
                   
                   <form onSubmit={addLocation} className="flex flex-col gap-2 mb-5">
-                     <div className="flex gap-2">
+                     <div className="grid grid-cols-2 md:flex gap-2">
                         <select 
                            value={newLoc.gedung}
                            onChange={(e) => setNewLoc({...newLoc, gedung: e.target.value})}
-                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                           className="w-full md:w-1/4 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
                         >
                            <option value="A">Gedung A</option>
                            <option value="B">Gedung B</option>
@@ -431,14 +431,21 @@ export default function SettingsView() {
                            placeholder="Lorong (Contoh: L1)" 
                            value={newLoc.lorong}
                            onChange={(e) => setNewLoc({...newLoc, lorong: e.target.value})}
-                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                           className="w-full md:w-1/4 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
                         />
                         <input 
                            type="text" 
                            placeholder="Rak (Contoh: R1)" 
                            value={newLoc.rak}
                            onChange={(e) => setNewLoc({...newLoc, rak: e.target.value})}
-                           className="w-1/3 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                           className="w-full md:w-1/4 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
+                        />
+                        <input 
+                           type="text" 
+                           placeholder="Baris (Opsional)" 
+                           value={newLoc.baris}
+                           onChange={(e) => setNewLoc({...newLoc, baris: e.target.value})}
+                           className="w-full md:w-1/4 bg-canvas border border-hairline text-[13px] rounded-xs px-2 py-1.5 focus:outline-none focus:border-ink"
                         />
                      </div>
                      <button type="submit" className="w-full bg-primary text-white px-3 py-1.5 rounded-sm hover:bg-primary-deep flex items-center justify-center gap-2 text-[13px]">
@@ -450,7 +457,9 @@ export default function SettingsView() {
                      {locations.map((l) => (
                         <li key={l.id} className="flex flex-col gap-2 bg-canvas-soft border border-hairline p-3 rounded-xs text-[13px]">
                            <div className="flex justify-between items-center">
-                              <span className="font-medium text-ink">Gedung {l.gedung} - {l.lorong} - {l.rak}</span>
+                              <span className="font-medium text-ink">
+                                 Gedung {l.gedung} {l.lorong ? `- Lorong ${l.lorong} ` : ''}- Rak {l.rak} {l.baris ? `- Baris ${l.baris}` : ''}
+                              </span>
                               <div className="flex items-center gap-2">
                                  <label className={`cursor-pointer text-primary hover:text-primary-deep p-1 bg-canvas hover:bg-primary-light/10 border border-hairline rounded-xs transition-colors flex items-center gap-1 ${uploadingMapId === l.id ? 'opacity-50 pointer-events-none' : ''}`}>
                                     <Upload size={14} />
