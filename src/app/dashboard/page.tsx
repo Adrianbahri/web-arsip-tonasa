@@ -23,6 +23,7 @@ import {
   Trash2,
   ExternalLink,
   Download,
+  ZoomIn,
   ShieldAlert,
   UserCheck,
   UserX,
@@ -157,6 +158,7 @@ export default function Dashboard() {
   // Modal Detail States
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
   const [detailType, setDetailType] = useState<"archive" | "user" | "request" | null>(null);
+  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
 
   // Users List State for Manajemen User (PIC Gedung ONLY)
   const [usersList, setUsersList] = useState<any[]>([]);
@@ -2166,6 +2168,28 @@ export default function Dashboard() {
                   {/* ARCHIVE DETAIL VIEW */}
                   {detailType === 'archive' && (
                      <div className="space-y-4">
+                        {(() => {
+                           const loc = masterLocations.find(l => 
+                              l.gedung === selectedDetailItem.gedung && 
+                              l.lorong === selectedDetailItem.lorong && 
+                              l.rak === selectedDetailItem.rak
+                           );
+                           return loc?.map_url ? (
+                              <div className="mb-4">
+                                 <p className="text-ink-mute text-[10px] uppercase font-semibold mb-1">Denah Lokasi Rak (Gedung {loc.gedung} - L{loc.lorong} - R{loc.rak})</p>
+                                 <div 
+                                    className="rounded-xs overflow-hidden border border-hairline bg-canvas-soft relative group cursor-zoom-in"
+                                    onClick={() => setZoomedImageUrl(loc.map_url)}
+                                 >
+                                    <img src={loc.map_url} alt="Denah Rak" className="w-full h-auto object-contain max-h-[200px]" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                       <ZoomIn size={32} className="text-white" />
+                                    </div>
+                                 </div>
+                              </div>
+                           ) : null;
+                        })()}
+                        
                         <div>
                            <span className="text-[11px] font-mono bg-hairline-cool px-2 py-0.5 rounded-xs text-ink">{selectedDetailItem.kodeKlasifikasi}</span>
                            <h4 className="text-[17px] font-bold text-ink mt-2">{selectedDetailItem.judulBerkas}</h4>
@@ -2263,22 +2287,6 @@ export default function Dashboard() {
                                     <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
                                  </div>
                               </div>
-                              {/* Map Image rendering */}
-                              {(() => {
-                                 const loc = masterLocations.find(l => 
-                                    l.gedung === selectedDetailItem.gedung && 
-                                    l.lorong === selectedDetailItem.lorong && 
-                                    l.rak === selectedDetailItem.rak
-                                 );
-                                 return loc?.map_url ? (
-                                    <div className="mt-3">
-                                       <p className="text-ink-mute text-[10px] uppercase font-semibold mb-1">Denah Lokasi Rak</p>
-                                       <div className="rounded-xs overflow-hidden border border-hairline bg-canvas-soft">
-                                          <img src={loc.map_url} alt="Denah Rak" className="w-full h-auto object-contain max-h-[200px]" />
-                                       </div>
-                                    </div>
-                                 ) : null;
-                              })()}
                            </div>
                         )}
 
@@ -4927,6 +4935,28 @@ export default function Dashboard() {
       {renderDeleteModal()}
       {renderRejectModal()}
       {renderAddUserModal()}
+      
+      {/* ZOOMED IMAGE OVERLAY */}
+      {zoomedImageUrl && (
+         <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
+            onClick={() => setZoomedImageUrl(null)}
+         >
+            <div className="relative max-w-full max-h-full flex flex-col items-center">
+               <button 
+                  className="absolute -top-10 right-0 text-white hover:text-gray-300"
+                  onClick={() => setZoomedImageUrl(null)}
+               >
+                  <X size={24} />
+               </button>
+               <img 
+                  src={zoomedImageUrl} 
+                  alt="Zoomed Map" 
+                  className="max-w-full max-h-[90vh] object-contain rounded-sm shadow-2xl"
+               />
+            </div>
+         </div>
+      )}
     </div>
   );
 }
