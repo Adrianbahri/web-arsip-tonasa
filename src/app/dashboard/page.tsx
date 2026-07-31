@@ -2169,25 +2169,38 @@ export default function Dashboard() {
                   {detailType === 'archive' && (
                      <div className="space-y-4">
                         {(() => {
+                           if (!selectedDetailItem.gedung) return null;
                            const loc = masterLocations.find(l => 
                               l.gedung === selectedDetailItem.gedung && 
                               l.lorong === selectedDetailItem.lorong && 
                               l.rak === selectedDetailItem.rak
                            );
-                           return loc?.map_url ? (
+                           return (
                               <div className="mb-4">
-                                 <p className="text-ink-mute text-[10px] uppercase font-semibold mb-1">Denah Lokasi Rak (Gedung {loc.gedung} - L{loc.lorong} - R{loc.rak})</p>
-                                 <div 
-                                    className="rounded-xs overflow-hidden border border-hairline bg-canvas-soft relative group cursor-zoom-in"
-                                    onClick={() => setZoomedImageUrl(loc.map_url)}
-                                 >
-                                    <img src={loc.map_url} alt="Denah Rak" className="w-full h-auto object-contain max-h-[200px]" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                       <ZoomIn size={32} className="text-white" />
-                                    </div>
+                                 {loc?.map_url && (
+                                    <>
+                                       <p className="text-ink-mute text-[10px] uppercase font-semibold mb-1">Denah Lokasi Rak</p>
+                                       <div 
+                                          className="rounded-xs overflow-hidden border border-hairline bg-canvas-soft relative group cursor-zoom-in mb-2"
+                                          onClick={() => setZoomedImageUrl(loc.map_url)}
+                                       >
+                                          <img src={loc.map_url} alt="Denah Rak" className="w-full h-auto object-contain max-h-[200px]" />
+                                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                             <ZoomIn size={32} className="text-white" />
+                                          </div>
+                                       </div>
+                                    </>
+                                 )}
+                                 <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-ink-mute bg-canvas-soft px-2.5 py-1.5 rounded-xs border border-hairline w-fit">
+                                    <span className="font-semibold uppercase text-ink">Lokasi Fisik:</span>
+                                    <span>Gedung {selectedDetailItem.gedung || "-"}</span>
+                                    <span className="text-hairline-cool mx-0.5">•</span>
+                                    <span>Lorong {selectedDetailItem.lorong || "-"}</span>
+                                    <span className="text-hairline-cool mx-0.5">•</span>
+                                    <span>Rak {selectedDetailItem.rak || "-"}</span>
                                  </div>
                               </div>
-                           ) : null;
+                           );
                         })()}
                         
                         <div>
@@ -2246,7 +2259,7 @@ export default function Dashboard() {
                            </div>
                         </div>
 
-                        {selectedDetailItem.status === 'Menunggu ACC' && (role === 'superadmin' || role === 'pic_gedung') ? (
+                        {selectedDetailItem.status === 'Menunggu ACC' && (role === 'superadmin' || role === 'pic_gedung') && (
                            <div className="border-t border-hairline pt-4 space-y-3">
                               <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Tentukan Lokasi Fisik Penyimpanan</h5>
                               <div className="mt-2">
@@ -2268,24 +2281,6 @@ export default function Dashboard() {
                                        </option>
                                     ))}
                                  </select>
-                              </div>
-                           </div>
-                        ) : (
-                           <div className="border-t border-hairline pt-4 space-y-3">
-                              <h5 className="text-[12px] font-bold text-ink uppercase tracking-wider">Lokasi Fisik Penyimpanan</h5>
-                              <div className="grid grid-cols-3 gap-3 text-center bg-canvas-soft border border-hairline p-3 rounded-xs">
-                                 <div>
-                                    <p className="text-ink-mute text-[10px] uppercase font-semibold">Gedung</p>
-                                    <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.gedung || "-"}</p>
-                                 </div>
-                                 <div>
-                                    <p className="text-ink-mute text-[10px] uppercase font-semibold">Lorong</p>
-                                    <p className="text-[14px] font-bold text-ink mt-0.5">{selectedDetailItem.lorong || "-"}</p>
-                                 </div>
-                                 <div>
-                                    <p className="text-ink-mute text-[10px] uppercase font-semibold">Rak</p>
-                                    <p className="text-[14px] font-bold text-ink mt-0.5 truncate px-1">{selectedDetailItem.rak || "-"}</p>
-                                 </div>
                               </div>
                            </div>
                         )}
