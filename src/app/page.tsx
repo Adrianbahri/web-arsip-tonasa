@@ -9,9 +9,14 @@ import GlobalNav from "@/components/GlobalNav";
 
 const getDirectImageUrl = (url: string) => {
   if (!url) return '';
+  // Jika URL dari Supabase atau sudah direct URL, langsung return
+  if (url.includes('supabase.co') || url.includes('supabase.in') || url.includes('imgur.com')) {
+     return url;
+  }
+  
+  // Jika URL Google Drive, konversi ke direct link
   const fileIdMatch = url.match(/[-\w]{25,}/);
-  if (fileIdMatch && fileIdMatch[0]) {
-    // Gunakan endpoint lh3.googleusercontent.com yang lebih stabil untuk embed gambar
+  if (url.includes('google.com') && fileIdMatch && fileIdMatch[0]) {
     return `https://lh3.googleusercontent.com/d/${fileIdMatch[0]}`;
   }
   return url;

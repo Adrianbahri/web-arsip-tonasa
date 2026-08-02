@@ -306,6 +306,32 @@ export default function SettingsView() {
       setLandingConfig((prev: any) => ({ ...prev, [name]: value }));
    };
 
+   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `${fieldName}/${fileName}`;
+
+      setMessage(`Mengunggah gambar...`);
+      
+      const { error: uploadError } = await supabase.storage
+         .from('landing_assets')
+         .upload(filePath, file);
+
+      if (uploadError) {
+         setMessage(`Gagal unggah: ${uploadError.message}`);
+         return;
+      }
+
+      const { data } = supabase.storage.from('landing_assets').getPublicUrl(filePath);
+      
+      setLandingConfig((prev: any) => ({ ...prev, [fieldName]: data.publicUrl }));
+      setMessage(`Gambar berhasil diunggah.`);
+      setTimeout(() => setMessage(""), 3000);
+   };
+
    return (
       <div className="space-y-6 pb-10 w-full">
          <div className="flex flex-col gap-2 mb-2">
@@ -718,7 +744,13 @@ export default function SettingsView() {
                   </div>
                   <div className="space-y-2">
                      <label className="text-[12px] font-medium text-ink-mute">URL Gambar Latar Belakang (Kosongkan untuk default)</label>
-                     <input type="text" name="hero_image_url" value={landingConfig.hero_image_url} onChange={handleLandingChange} placeholder="/hero-image.jpg" className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                     <div className="flex gap-2 items-center">
+                        <input type="text" name="hero_image_url" value={landingConfig.hero_image_url} onChange={handleLandingChange} placeholder="/hero-image.jpg" className="flex-1 bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                        <label className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-xs cursor-pointer text-[13px] font-medium transition-colors whitespace-nowrap">
+                           Upload Gambar
+                           <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'hero_image_url')} />
+                        </label>
+                     </div>
                   </div>
                </div>
 
@@ -731,8 +763,14 @@ export default function SettingsView() {
                         <input type="text" name="sambutan_title" value={landingConfig.sambutan_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Link GDrive/Imgur)</label>
-                        <input type="text" name="sambutan_photo_url" value={landingConfig.sambutan_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Otomatis terisi jika upload)</label>
+                        <div className="flex flex-col gap-2">
+                           <input type="text" name="sambutan_photo_url" value={landingConfig.sambutan_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                           <label className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-xs cursor-pointer text-[13px] font-medium transition-colors text-center w-full block">
+                              Upload Foto
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'sambutan_photo_url')} />
+                           </label>
+                        </div>
                      </div>
                   </div>
                   <div className="space-y-2">
@@ -829,8 +867,14 @@ export default function SettingsView() {
                         <input type="text" name="pic_title" value={landingConfig.pic_title} onChange={handleLandingChange} className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Link GDrive/Imgur)</label>
-                        <input type="text" name="pic_photo_url" value={landingConfig.pic_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                        <label className="text-[12px] font-medium text-ink-mute">URL Foto (Otomatis terisi jika upload)</label>
+                        <div className="flex flex-col gap-2">
+                           <input type="text" name="pic_photo_url" value={landingConfig.pic_photo_url} onChange={handleLandingChange} placeholder="https://..." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                           <label className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-xs cursor-pointer text-[13px] font-medium transition-colors text-center w-full block">
+                              Upload Foto
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'pic_photo_url')} />
+                           </label>
+                        </div>
                      </div>
                      <div className="space-y-2">
                         <label className="text-[12px] font-medium text-ink-mute">Nomor Whatsapp (Awali dengan https://wa.me/...)</label>
