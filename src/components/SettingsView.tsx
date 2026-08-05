@@ -482,14 +482,14 @@ export default function SettingsView() {
                   <ul className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                      {locations.map((l) => (
                         <li key={l.id} className="flex flex-col gap-2 bg-canvas-soft border border-hairline p-3 rounded-xs text-[13px]">
-                           <div className="flex justify-between items-center">
+                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2">
                               <span className="font-medium text-ink">
                                  Gedung {l.gedung} {l.lorong ? `- Lorong ${l.lorong} ` : ''}- Rak {l.rak} {l.baris ? `- Baris ${l.baris}` : ''}
                               </span>
-                              <div className="flex items-center gap-2">
-                                 <label className={`cursor-pointer text-primary hover:text-primary-deep p-1 bg-canvas hover:bg-primary-light/10 border border-hairline rounded-xs transition-colors flex items-center gap-1 ${uploadingMapId === l.id ? 'opacity-50 pointer-events-none' : ''}`}>
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
+                                 <label className={`cursor-pointer text-primary hover:text-primary-deep px-3 py-1.5 sm:p-1 bg-canvas hover:bg-primary-light/10 border border-hairline rounded-xs transition-colors flex items-center justify-center gap-1.5 sm:gap-1 flex-1 sm:flex-none ${uploadingMapId === l.id ? 'opacity-50 pointer-events-none' : ''}`}>
                                     <Upload size={14} />
-                                    <span className="text-[10px] font-semibold uppercase">{uploadingMapId === l.id ? 'Uploading...' : 'Upload Map'}</span>
+                                    <span className="text-[10px] font-semibold uppercase whitespace-nowrap">{uploadingMapId === l.id ? 'Uploading...' : 'Upload Map'}</span>
                                     <input 
                                        type="file" 
                                        accept="image/*" 
@@ -501,7 +501,7 @@ export default function SettingsView() {
                                        }}
                                     />
                                  </label>
-                                 <button onClick={() => deleteLocation(l.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors">
+                                 <button onClick={() => deleteLocation(l.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-3 py-1.5 sm:p-1 bg-canvas hover:bg-red-50 dark:hover:bg-red-500/10 border border-hairline rounded-xs transition-colors flex items-center justify-center">
                                     <Trash2 size={14} />
                                  </button>
                               </div>
