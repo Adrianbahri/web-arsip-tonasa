@@ -4161,12 +4161,14 @@ export default function Dashboard() {
                     <FileText size={16} /> Laporan Bulanan
                   </button>
                 )}
-                <button 
-                  onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
-                  className="btn-primary flex items-center gap-2"
-                >
-                  <Plus size={16} /> Tambah Arsip
-                </button>
+                {role !== 'user' && (
+                   <button 
+                     onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
+                     className="btn-primary flex items-center gap-2"
+                   >
+                     <Plus size={16} /> Tambah Arsip
+                   </button>
+                )}
              </div>
            </div>
 
