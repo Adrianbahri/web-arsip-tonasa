@@ -4022,17 +4022,6 @@ export default function Dashboard() {
                              Aktif
                           </span>
                        </div>
-                       {item.role !== 'superadmin' && (
-                          <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline">
-                             <button 
-                                onClick={(e) => {
-                                   e.stopPropagation();
-                                   setUserToChangeRole(item);
-                                   setNewRole(item.role);
-                                   setShowChangeRoleModal(true);
-                                }}
-                                className="flex-1 min-w-[30%] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
-                                title="Ubah Jabatan"
                         {item.role !== 'superadmin' && (
                            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-hairline mt-3">
                               <button 
