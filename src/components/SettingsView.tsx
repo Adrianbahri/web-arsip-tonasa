@@ -744,9 +744,9 @@ export default function SettingsView() {
                   </div>
                   <div className="space-y-2">
                      <label className="text-[12px] font-medium text-ink-mute">URL Gambar Latar Belakang (Kosongkan untuk default)</label>
-                     <div className="flex gap-2 items-center">
-                        <input type="text" name="hero_image_url" value={landingConfig.hero_image_url} onChange={handleLandingChange} placeholder="/hero-image.jpg" className="flex-1 bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
-                        <label className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-xs cursor-pointer text-[13px] font-medium transition-colors whitespace-nowrap">
+                     <div className="flex flex-col gap-2">
+                        <input type="text" name="hero_image_url" value={landingConfig.hero_image_url} onChange={handleLandingChange} placeholder="/hero-image.jpg" className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                        <label className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-xs cursor-pointer text-[13px] font-medium transition-colors text-center w-full block sm:w-auto">
                            Upload Gambar
                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'hero_image_url')} />
                         </label>

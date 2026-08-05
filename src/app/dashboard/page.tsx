@@ -4033,30 +4033,41 @@ export default function Dashboard() {
                                 }}
                                 className="flex-1 min-w-[30%] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
                                 title="Ubah Jabatan"
-                             >
-                                <Edit3 size={12} /> Ubah Jabatan
-                             </button>
-                             <button 
-                                onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
-                                className="flex-1 min-w-[30%] bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
-                                title="Reset Password"
-                             >
-                                <Key size={12} /> Reset Sandi
-                             </button>
-                             <button 
-                                onClick={(e) => {
-                                   e.stopPropagation();
-                                   if (confirm(`Apakah Anda yakin ingin MENCABUT AKSES pengguna ${item.name}?`)) {
-                                      handleBlockUser(item.id);
-                                   }
-                                }}
-                                className="flex-1 min-w-[30%] bg-rose-600 hover:bg-rose-700 text-white py-1.5 rounded-sm text-[11px] flex items-center justify-center gap-1.5"
-                                title="Cabut Akses"
-                             >
-                                <Trash2 size={12} /> Cabut Akses
-                             </button>
-                          </div>
-                       )}
+                        {item.role !== 'superadmin' && (
+                           <div className="grid grid-cols-3 gap-2 pt-3 border-t border-hairline mt-3">
+                              <button 
+                                 onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUserToChangeRole(item);
+                                    setNewRole(item.role);
+                                    setShowChangeRoleModal(true);
+                                 }}
+                                 className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
+                                 title="Ubah Jabatan"
+                              >
+                                 <Edit3 size={14} /> Ubah Jabatan
+                              </button>
+                              <button 
+                                 onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
+                                 className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
+                                 title="Reset Password"
+                              >
+                                 <Key size={14} /> Reset Sandi
+                              </button>
+                              <button 
+                                 onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`Apakah Anda yakin ingin MENCABUT AKSES pengguna ${item.name}?`)) {
+                                       handleBlockUser(item.id);
+                                    }
+                                 }}
+                                 className="bg-rose-600 hover:bg-rose-700 text-white py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight shadow-sm"
+                                 title="Cabut Akses"
+                              >
+                                 <Trash2 size={14} /> Cabut Akses
+                              </button>
+                           </div>
+                        )}
                     </div>
                  ))}
                </div>
