@@ -3840,7 +3840,7 @@ export default function Dashboard() {
                                             e.stopPropagation();
                                             handleRejectUser(item.id);
                                          }}
-                                         className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-sm text-xs transition-colors flex-1"
+                                         className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1 rounded-sm text-[11px] transition-colors flex items-center gap-1"
                                       >
                                          <UserX size={12} /> Tolak
                                       </button>
