@@ -3145,7 +3145,7 @@ export default function Dashboard() {
                           className="w-full bg-canvas border border-hairline text-[14px] rounded-xs px-3 py-2.5 focus:outline-none focus:border-ink text-ink"
                        />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="space-y-1.5">
                           <label className="block text-[13px] font-medium text-ink">Tanggal Peminjaman</label>
                           <input 
@@ -3172,7 +3172,7 @@ export default function Dashboard() {
                  </>
               ) : (
                  <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="space-y-1.5">
                           <label className="block text-[13px] font-medium text-ink">Tanggal Kunjungan</label>
                           <input 
