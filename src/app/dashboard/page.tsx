@@ -4155,21 +4155,7 @@ export default function Dashboard() {
                    Kelola arsip korporasi Anda dengan presisi.
                 </p>
              </div>
-             <div className="flex gap-3">
-                {(role === 'superadmin' || role === 'pic_gedung') && (
-                  <button className="btn-outline flex items-center gap-2">
-                    <FileText size={16} /> Laporan Bulanan
-                  </button>
-                )}
-                {role !== 'user' && (
-                   <button 
-                     onClick={() => { setIsCustomDept(false); setShowAddForm(true); }}
-                     className="btn-primary flex items-center gap-2"
-                   >
-                     <Plus size={16} /> Tambah Arsip
-                   </button>
-                )}
-             </div>
+
            </div>
 
            {/* Alerts for Pending Submissions and Pending User Approvals */}
