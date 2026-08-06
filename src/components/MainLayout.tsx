@@ -23,6 +23,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { role, setRole, user, logout, activeMenu, setActiveMenu } = useRole();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isPengaturanExpanded, setIsPengaturanExpanded] = useState(false);
+  const [mobileSubMenuOpen, setMobileSubMenuOpen] = useState<string | null>(null);
 
   const pathname = usePathname();
 
@@ -82,20 +83,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
            </button>
         </div>
         
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-1 z-10">
           {!isSidebarCollapsed && <p className="px-3 text-[11px] font-medium text-ink-mute-2 uppercase tracking-wider mb-4 mt-2">Menu Utama</p>}
           {allowedMenuItems.map(item => {
              const Icon = item.icon;
              const isActive = item.subMenus ? activeMenu.startsWith(item.name) : activeMenu === item.name;
              
              return (
-                <div key={item.name} className="w-full">
+                 <div key={item.name} className="w-full relative group">
                    <button
                       onClick={() => {
                          if (item.subMenus) {
-                            if (isSidebarCollapsed) setIsSidebarCollapsed(false);
-                            setIsPengaturanExpanded(!isPengaturanExpanded);
-                            if (!isPengaturanExpanded && !activeMenu.startsWith(item.name)) {
+                            if (!isSidebarCollapsed) {
+                               setIsPengaturanExpanded(!isPengaturanExpanded);
+                            }
+                            if (!activeMenu.startsWith(item.name)) {
                                setActiveMenu(item.subMenus[0].id);
                             }
                          } else {
@@ -118,6 +120,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       )}
                    </button>
                    
+                   {/* DESKTOP EXPANDED SUBMENU */}
                    {!isSidebarCollapsed && item.subMenus && (
                       <div 
                          className={`overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanExpanded ? 'max-h-60 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}
@@ -137,6 +140,25 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                </button>
                             ))}
                          </div>
+                      </div>
+                   )}
+
+                   {/* DESKTOP MINIMAL HOVER SUBMENU */}
+                   {isSidebarCollapsed && item.subMenus && (
+                      <div className="absolute left-full top-0 ml-2 hidden group-hover:block bg-canvas border border-hairline shadow-lg rounded-md py-2 w-48 z-50">
+                         {item.subMenus.map(sub => (
+                            <button
+                               key={sub.id}
+                               onClick={() => setActiveMenu(sub.id)}
+                               className={`w-full text-left py-2 px-4 text-[13px] transition-colors ${
+                                  activeMenu === sub.id 
+                                  ? 'text-primary font-medium bg-primary-soft/10' 
+                                  : 'text-ink-mute hover:text-ink hover:bg-canvas-soft'
+                               }`}
+                            >
+                               {sub.name}
+                            </button>
+                         ))}
                       </div>
                    )}
                 </div>
@@ -230,6 +252,28 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </main>
 
+      {/* MOBILE SUBMENU POPUP (SHOWN ABOVE BOTTOM NAV) */}
+      {mobileSubMenuOpen && (
+         <div className="md:hidden fixed bottom-16 inset-x-0 z-20 bg-canvas border-t border-hairline p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex gap-2 overflow-x-auto hide-scrollbar">
+            {allowedMenuItems.find(m => m.name === mobileSubMenuOpen)?.subMenus?.map(sub => (
+               <button
+                  key={sub.id}
+                  onClick={() => {
+                     setActiveMenu(sub.id);
+                     setMobileSubMenuOpen(null);
+                  }}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap text-[13px] transition-colors ${
+                     activeMenu === sub.id 
+                     ? 'bg-primary text-on-primary font-medium' 
+                     : 'bg-canvas-soft text-ink hover:bg-canvas-mute'
+                  }`}
+               >
+                  {sub.name}
+               </button>
+            ))}
+         </div>
+      )}
+
       {/* MOBILE BOTTOM NAVIGATION */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-canvas border-t border-hairline flex items-center h-16 px-2 z-30 overflow-x-auto hide-scrollbar gap-2">
          {allowedMenuItems.map(item => {
@@ -240,19 +284,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   key={item.name}
                   onClick={() => {
                      if (item.subMenus) {
-                        if (!activeMenu.startsWith(item.name)) {
-                           setActiveMenu(item.subMenus[0].id);
+                        if (mobileSubMenuOpen === item.name) {
+                           setMobileSubMenuOpen(null);
                         } else {
-                           // cycle through submenus on mobile
-                           const currentIndex = item.subMenus.findIndex(s => s.id === activeMenu);
-                           const nextIndex = (currentIndex + 1) % item.subMenus.length;
-                           setActiveMenu(item.subMenus[nextIndex].id);
+                           setMobileSubMenuOpen(item.name);
+                           if (!activeMenu.startsWith(item.name)) {
+                              setActiveMenu(item.subMenus[0].id);
+                           }
                         }
                      } else {
                         setActiveMenu(item.name);
+                        setMobileSubMenuOpen(null);
                      }
                   }}
-                  className={`flex flex-col items-center justify-center shrink-0 min-w-[72px] gap-1 p-2 ${isActive ? 'text-primary' : 'text-ink-mute hover:text-ink'}`}
+                  className={`flex flex-col items-center justify-center shrink-0 min-w-[72px] gap-1 p-2 transition-colors ${isActive ? 'text-primary' : 'text-ink-mute hover:text-ink'}`}
                >
                   <Icon size={20} />
                   <span className="text-[9px] font-medium mt-0.5 whitespace-nowrap">{item.name}</span>
