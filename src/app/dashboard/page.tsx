@@ -2097,7 +2097,7 @@ export default function Dashboard() {
                           handleResetUserPassword(selectedDetailItem.name, selectedDetailItem.email);
                           closeDetailModal();
                        }}
-                       className="flex-1 md:flex-none bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5 font-semibold"
+                       className="flex-1 md:flex-none bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 px-4 py-2 rounded-xs text-[13px] flex items-center justify-center gap-1.5 font-semibold"
                     >
                        <Key size={14} /> Reset Password
                     </button>
@@ -2297,8 +2297,8 @@ export default function Dashboard() {
                                  selectedDetailItem.status === 'Aktif' 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
                                  : selectedDetailItem.status === 'Nonaktif'
-                                 ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                 : 'bg-red-50 text-red-700 border border-red-200'
+                                 ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                                 : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'
                               }`}>
                                  {selectedDetailItem.status}
                               </span>
@@ -2395,7 +2395,7 @@ export default function Dashboard() {
                               <span className={`inline-block border text-[11px] px-2 py-0.5 rounded-full font-medium mt-1 ${
                                  selectedDetailItem.approved 
                                  ? 'bg-[#def7ec] text-[#03543f] border-[#bdf5db]' 
-                                 : 'bg-amber-50 text-amber-700 border-amber-200'
+                                 : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
                               }`}>
                                  {selectedDetailItem.approved ? 'Disetujui' : 'Menunggu ACC'}
                               </span>
@@ -2579,7 +2579,7 @@ export default function Dashboard() {
               </div>
               <div className="p-5 overflow-y-auto custom-scrollbar">
                  {addUserError && (
-                    <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xs text-[13px]">
+                    <div className="mb-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400 p-3 rounded-xs text-[13px]">
                        {addUserError}
                     </div>
                  )}
@@ -2867,7 +2867,7 @@ export default function Dashboard() {
            </div>
 
            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
                  </div>
@@ -3379,7 +3379,7 @@ export default function Dashboard() {
            </div>
 
            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
                  </div>
@@ -3561,7 +3561,7 @@ export default function Dashboard() {
                              <h4 className="font-bold text-[14px] text-ink mt-1.5">{archive.judulBerkas}</h4>
                              <p className="text-[12px] text-ink-mute mt-0.5 uppercase">{archive.jenisBerkas}</p>
                           </div>
-                          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                          <span className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] px-2 py-0.5 rounded-full font-medium">
                              {archive.status}
                           </span>
                        </div>
@@ -3643,7 +3643,7 @@ export default function Dashboard() {
            </div>
 
            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
                  </div>
@@ -3781,7 +3781,7 @@ export default function Dashboard() {
                           <div>
                              <h4 className="font-semibold text-[14px] text-ink">{req.user_name}</h4>
                              <span className={`inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-xs capitalize mt-1 ${
-                                req.type === 'peminjaman' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'
+                                req.type === 'peminjaman' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400'
                              }`}>
                                 {req.type === 'peminjaman' ? <BookOpen size={10} /> : <MapPin size={10} />}
                                 {req.type}
@@ -3889,7 +3889,7 @@ export default function Dashboard() {
            </div>
 
            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
                  </div>
@@ -4130,7 +4130,7 @@ export default function Dashboard() {
                                 {item.role === 'superadmin' ? 'Superadmin' : item.role === 'pic_gedung' ? 'Admin Gedung' : item.role === 'admin_dept' ? 'Admin Departemen' : 'Staf Biasa'}
                              </span>
                           </div>
-                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2 py-0.5 rounded-full font-medium">
+                          <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[9px] px-2 py-0.5 rounded-full font-medium">
                              Aktif
                           </span>
                        </div>
@@ -4143,14 +4143,14 @@ export default function Dashboard() {
                                     setNewRole(item.role);
                                     setShowChangeRoleModal(true);
                                  }}
-                                 className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
+                                 className="bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
                                  title="Ubah Jabatan"
                               >
                                  <Edit3 size={14} /> Ubah Jabatan
                               </button>
                               <button 
                                  onClick={(e) => { e.stopPropagation(); handleResetUserPassword(item.name, item.email); }}
-                                 className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
+                                 className="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 py-2 px-1 rounded-sm text-[10px] font-medium flex flex-col items-center justify-center gap-1 transition-colors text-center leading-tight"
                                  title="Reset Password"
                               >
                                  <Key size={14} /> Reset Sandi
@@ -4201,7 +4201,7 @@ export default function Dashboard() {
            </div>
 
            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3">
                  <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center">
                     <Check size={14} strokeWidth={3} />
                  </div>
@@ -4210,7 +4210,7 @@ export default function Dashboard() {
            )}
 
            {passwordError && (
-              <div className="bg-red-50 border border-red-200 text-primary text-[13px] rounded-xs p-3">
+              <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-primary dark:text-red-400 text-[13px] rounded-xs p-3">
                  {passwordError}
               </div>
            )}
@@ -4298,7 +4298,7 @@ export default function Dashboard() {
               )}
 
               {(role === 'superadmin' || role === 'pic_gedung') && pendingCount > 0 && (
-                 <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                 <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-400 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Clock className="text-amber-600" />
                        <div>
@@ -4308,7 +4308,7 @@ export default function Dashboard() {
                     </div>
                     <button 
                        onClick={() => setActiveMenu("Persetujuan (ACC)")}
-                       className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                       className="bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
                     >
                        Periksa Sekarang
                     </button>
@@ -4316,7 +4316,7 @@ export default function Dashboard() {
               )}
 
               {(role === 'superadmin' || role === 'pic_gedung') && pendingRequestsCount > 0 && (
-                 <div className="bg-purple-50 border border-purple-200 text-purple-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                 <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-800 dark:text-purple-400 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Calendar className="text-purple-600" />
                        <div>
@@ -4326,7 +4326,7 @@ export default function Dashboard() {
                     </div>
                     <button 
                        onClick={() => setActiveMenu("Layanan Arsip")}
-                       className="bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                       className="bg-purple-100 dark:bg-purple-500/20 hover:bg-purple-200 dark:hover:bg-purple-500/30 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
                     >
                        Tinjau Layanan
                     </button>
@@ -4334,7 +4334,7 @@ export default function Dashboard() {
               )}
 
               {role === 'superadmin' && pendingUsersCount > 0 && (
-                 <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-sm p-4 flex items-center justify-between gap-4">
+                 <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-800 dark:text-blue-400 rounded-sm p-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                        <Users className="text-blue-600" />
                        <div>
@@ -4344,7 +4344,7 @@ export default function Dashboard() {
                     </div>
                     <button 
                        onClick={() => setActiveMenu("Manajemen User")}
-                       className="bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
+                       className="bg-blue-100 dark:bg-blue-500/20 hover:bg-blue-200 dark:hover:bg-blue-500/30 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30 font-semibold text-[12px] px-3.5 py-1.5 rounded-sm transition-colors"
                     >
                        Aktivasi User
                     </button>
@@ -4732,7 +4732,7 @@ export default function Dashboard() {
       </div>
 
       {successMessage && (
-         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-sm p-4 flex items-center gap-3 mb-4">
+         <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-sm p-4 flex items-center gap-3 mb-4">
             <div className="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center shrink-0">
                <Check size={14} strokeWidth={3} />
             </div>
@@ -4741,7 +4741,7 @@ export default function Dashboard() {
       )}
 
       {isRecycleBin && (
-         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-sm text-red-800 text-[14px] flex items-center gap-2">
+         <div className="mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-sm text-red-800 dark:text-red-400 text-[14px] flex items-center gap-2">
             <Trash2 size={18} /> 
             <strong>Mode Tempat Sampah:</strong> Anda sedang melihat arsip yang telah dihapus.
          </div>
@@ -4993,7 +4993,7 @@ export default function Dashboard() {
                                        e.stopPropagation();
                                        handleRestoreArchive(archive.no || archive.id);
                                     }}
-                                    className="flex items-center gap-1 border border-emerald-600 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
+                                    className="flex items-center gap-1 border border-emerald-600 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-sm text-[10px] font-medium transition-colors"
                                  >
                                     <RefreshCw size={10} /> Pulihkan
                                  </button>

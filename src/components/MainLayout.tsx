@@ -106,7 +106,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                       }}
                       className={`w-full flex items-center justify-between ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3'} py-2.5 rounded-sm transition-all text-[14px] text-left ${
                          isActive 
-                         ? 'bg-primary text-on-primary font-medium' 
+                         ? 'bg-primary dark:bg-primary-soft/15 text-on-primary dark:text-primary font-medium' 
                          : 'text-ink-mute hover:bg-canvas-soft hover:text-ink'
                       }`}
                       title={isSidebarCollapsed ? item.name : undefined}
