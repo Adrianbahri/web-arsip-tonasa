@@ -160,6 +160,14 @@ export default function Dashboard() {
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [deleteCountdown, setDeleteCountdown] = useState(0);
+
+  useEffect(() => {
+    if (deleteCountdown > 0) {
+      const timer = setTimeout(() => setDeleteCountdown(deleteCountdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [deleteCountdown]);
 
   // Modal Detail States
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
@@ -1240,7 +1248,7 @@ export default function Dashboard() {
 
   // Delete active user completely and reassign their data to superadmin
   const submitDeleteUser = async () => {
-     if (!userToDelete || deleteConfirmationText !== "hapus") return;
+     if (!userToDelete || deleteConfirmationText !== "HAPUS") return;
      
      setIsDeletingUser(true);
      let supabaseSuccess = false;
@@ -2717,13 +2725,13 @@ export default function Dashboard() {
                 
                 <div className="mb-6">
                    <p className="text-xs text-center text-rose-600 font-medium mb-2">
-                      Ketik "<b>hapus</b>" pada kolom di bawah untuk mengonfirmasi.
+                      Ketik "<b>HAPUS</b>" pada kolom di bawah untuk mengonfirmasi.
                    </p>
                    <input 
                       type="text"
                       value={deleteConfirmationText}
                       onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                      placeholder="hapus"
+                      placeholder="HAPUS"
                       className="w-full border border-hairline rounded-xl px-3 py-2.5 text-center font-mono text-sm text-ink focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none bg-canvas-soft"
                       autoFocus
                    />
@@ -2743,11 +2751,11 @@ export default function Dashboard() {
                    </button>
                    <button
                       onClick={submitDeleteUser}
-                      disabled={deleteConfirmationText !== "hapus" || isDeletingUser}
+                      disabled={deleteConfirmationText !== "HAPUS" || isDeletingUser || deleteCountdown > 0}
                       className="flex-1 px-4 py-2.5 bg-rose-600 text-white font-medium rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                    >
                       {isDeletingUser ? <RefreshCw size={16} className="animate-spin" /> : null}
-                      Hapus
+                      {deleteCountdown > 0 ? `Hapus (${deleteCountdown})` : 'Hapus'}
                    </button>
                 </div>
              </div>
@@ -4080,6 +4088,7 @@ export default function Dashboard() {
                                                e.stopPropagation();
                                                setUserToDelete(item);
                                                setDeleteConfirmationText("");
+                                               setDeleteCountdown(5);
                                                setDeleteUserModalOpen(true);
                                             }}
                                             className="p-1 text-ink-mute hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-sm transition-colors"
