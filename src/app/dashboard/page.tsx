@@ -155,6 +155,12 @@ export default function Dashboard() {
   const [archiveToReject, setArchiveToReject] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
+  // User Delete Modal State
+  const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any | null>(null);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
   // Modal Detail States
   const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
   const [detailType, setDetailType] = useState<"archive" | "user" | "request" | null>(null);
@@ -1210,13 +1216,12 @@ export default function Dashboard() {
      try {
         const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
         if (!isMockUrl) {
-           const { error } = await supabase
-              .from('profiles')
-              .delete()
-              .eq('id', userId);
+           const { error } = await supabase.rpc('delete_user_and_reassign', { user_to_delete: userId });
            
            if (!error) {
               supabaseSuccess = true;
+           } else {
+              console.error("RPC Error (reject user):", error);
            }
         }
      } catch (err) {
@@ -1231,6 +1236,39 @@ export default function Dashboard() {
         setSuccessMessage("Pendaftaran ditolak (Simulasi)!");
      }
      setTimeout(() => setSuccessMessage(""), 1500);
+  };
+
+  // Delete active user completely and reassign their data to superadmin
+  const submitDeleteUser = async () => {
+     if (!userToDelete || deleteConfirmationText !== "hapus") return;
+     
+     setIsDeletingUser(true);
+     let supabaseSuccess = false;
+     try {
+        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co");
+        if (!isMockUrl) {
+           const { error } = await supabase.rpc('delete_user_and_reassign', { user_to_delete: userToDelete.id });
+           
+           if (!error) supabaseSuccess = true;
+           else console.error("RPC Error (delete active user):", error);
+        }
+     } catch (err) {
+        console.error(err);
+     } finally {
+        setIsDeletingUser(false);
+     }
+
+     if (supabaseSuccess) {
+        setSuccessMessage("Pengguna berhasil dihapus & datanya dialihkan ke Superadmin!");
+        fetchUsers();
+     } else {
+        setUsersList(prev => prev.filter(u => u.id !== userToDelete.id));
+        setSuccessMessage("Pengguna dihapus (Simulasi)!");
+     }
+     setDeleteUserModalOpen(false);
+     setUserToDelete(null);
+     setDeleteConfirmationText("");
+     setTimeout(() => setSuccessMessage(""), 2000);
   };
 
   // Cabut Akses (Blokir) Pengguna Aktif
@@ -2658,6 +2696,66 @@ export default function Dashboard() {
      );
   };
 
+  {/* DELETE USER CONFIRMATION MODAL */}
+  const renderDeleteUserModal = () => {
+    if (!deleteUserModalOpen || !userToDelete) return null;
+    return (
+       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 transition-all duration-300">
+          <div 
+             className="bg-canvas border border-hairline rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300"
+             onClick={(e) => e.stopPropagation()}
+          >
+             <div className="p-6">
+                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                   <AlertTriangle size={32} strokeWidth={2} />
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Hapus Pengguna?</h3>
+                <p className="text-gray-500 mb-4 text-center text-sm">
+                   Apakah Anda yakin ingin menghapus akun <b>{userToDelete.name}</b>? Segala data atau arsip yang terikat pada pengguna ini akan dialihkan ke Superadmin.
+                </p>
+                
+                <div className="mb-6">
+                   <p className="text-xs text-center text-rose-600 font-medium mb-2">
+                      Ketik "<b>hapus</b>" pada kolom di bawah untuk mengonfirmasi.
+                   </p>
+                   <input 
+                      type="text"
+                      value={deleteConfirmationText}
+                      onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                      placeholder="hapus"
+                      className="w-full border border-hairline rounded-xl px-3 py-2.5 text-center font-mono text-sm text-ink focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none bg-canvas-soft"
+                      autoFocus
+                   />
+                </div>
+                
+                <div className="flex gap-3 w-full">
+                   <button
+                      onClick={() => {
+                         setDeleteUserModalOpen(false);
+                         setUserToDelete(null);
+                         setDeleteConfirmationText("");
+                      }}
+                      disabled={isDeletingUser}
+                      className="flex-1 px-4 py-2.5 bg-canvas-soft text-ink font-medium rounded-xl hover:bg-hairline transition-colors disabled:opacity-50"
+                   >
+                      Batal
+                   </button>
+                   <button
+                      onClick={submitDeleteUser}
+                      disabled={deleteConfirmationText !== "hapus" || isDeletingUser}
+                      className="flex-1 px-4 py-2.5 bg-rose-600 text-white font-medium rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                   >
+                      {isDeletingUser ? <RefreshCw size={16} className="animate-spin" /> : null}
+                      Hapus
+                   </button>
+                </div>
+             </div>
+          </div>
+       </div>
+    );
+  };
+
   {/* REJECT CONFIRMATION MODAL */}
   const renderRejectModal = () => {
     if (!rejectModalOpen) return null;
@@ -3502,6 +3600,8 @@ export default function Dashboard() {
            {renderDetailModal()}
            {renderDeleteModal()}
            {renderRejectModal()}
+      {renderDeleteUserModal()}
+           {renderDeleteUserModal()}
         </div>
      );
   }
@@ -3738,6 +3838,9 @@ export default function Dashboard() {
             {renderDeleteModal()}
             {renderDeleteRequestModal()}
             {renderRejectModal()}
+      {renderDeleteUserModal()}
+           {renderDeleteUserModal()}
+            {renderDeleteUserModal()}
             {renderServiceRejectModal()}
          </div>
      );
@@ -3975,12 +4078,12 @@ export default function Dashboard() {
                                          <button 
                                             onClick={(e) => {
                                                e.stopPropagation();
-                                               if (confirm(`Apakah Anda yakin ingin MENCABUT AKSES (Blokir) pengguna ${item.name}?`)) {
-                                                  handleBlockUser(item.id);
-                                               }
+                                               setUserToDelete(item);
+                                               setDeleteConfirmationText("");
+                                               setDeleteUserModalOpen(true);
                                             }}
                                             className="p-1 text-ink-mute hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-sm transition-colors"
-                                            title="Cabut Akses Pengguna"
+                                            title="Hapus Permanen Pengguna"
                                          >
                                             <Trash2 size={14} className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300" />
                                          </button>
@@ -4063,6 +4166,10 @@ export default function Dashboard() {
                {renderDetailModal()}
                {renderDeleteModal()}
                {renderRejectModal()}
+      {renderDeleteUserModal()}
+           {renderDeleteUserModal()}
+            {renderDeleteUserModal()}
+               {renderDeleteUserModal()}
                {renderAddUserModal()}
                {renderChangeRoleModal()}
            </div>
@@ -4955,6 +5062,7 @@ export default function Dashboard() {
       {renderDetailModal()}
       {renderDeleteModal()}
       {renderRejectModal()}
+      {renderDeleteUserModal()}
       {renderAddUserModal()}
       
       {/* ZOOMED IMAGE OVERLAY */}
