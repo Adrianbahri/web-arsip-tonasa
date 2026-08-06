@@ -100,6 +100,7 @@ export default function SettingsView({ activeTabId }: { activeTabId?: string }) 
          setLandingConfig({
             hero_title: '', hero_subtitle: '', hero_image_url: '',
             sambutan_title: '', sambutan_text: '', sambutan_photo_url: '',
+            sambutan_pejabat: '', sambutan_jabatan: '',
             sop_title: '', sop_text: '', sop_items: [],
             pic_title: '', pic_text: '', pic_photo_url: '', pic_whatsapp: '', pic_email: ''
          });
@@ -743,6 +744,16 @@ export default function SettingsView({ activeTabId }: { activeTabId?: string }) 
                               Upload Foto
                               <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'sambutan_photo_url')} />
                            </label>
+                        </div>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <label className="text-[12px] font-medium text-ink-mute">Nama Pejabat</label>
+                           <input type="text" name="sambutan_pejabat" value={landingConfig.sambutan_pejabat || ''} onChange={handleLandingChange} placeholder="Contoh: M. DAHLAN, SE." className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-[12px] font-medium text-ink-mute">Jabatan</label>
+                           <input type="text" name="sambutan_jabatan" value={landingConfig.sambutan_jabatan || ''} onChange={handleLandingChange} placeholder="Contoh: KEPALA UNIT KEARSIPAN" className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-3 py-2 focus:border-ink" />
                         </div>
                      </div>
                   </div>

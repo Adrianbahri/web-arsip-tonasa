@@ -139,7 +139,10 @@ export default function LandingPage() {
                         </svg>
                      )}
                   </div>
-                  <p className="font-semibold text-ink text-[14px] uppercase tracking-wider">Kepala Unit Kearsipan</p>
+                  <div className="text-center mt-2">
+                     <p className="font-bold text-ink text-[15px]">{config.sambutan_pejabat || 'M. DAHLAN, SE.'}</p>
+                     <p className="font-semibold text-ink-mute text-[13px] uppercase tracking-wider mt-0.5">{config.sambutan_jabatan || 'Kepala Unit Kearsipan'}</p>
+                  </div>
                </div>
                <div className="md:col-span-8 space-y-5 md:space-y-6">
                   <h3 className="text-[28px] sm:text-[34px] md:text-[40px] font-semibold text-ink tracking-[-0.022em] leading-tight">
