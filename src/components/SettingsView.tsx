@@ -4,8 +4,15 @@ import { supabase } from "@/lib/supabase";
 import { Trash2, Plus, Building, MapPin, Grid, Settings, LayoutTemplate, Save, Clock, QrCode, X, Download, Upload, Image as ImageIcon, RefreshCw } from "lucide-react";
 import QRCode from "react-qr-code";
 
-export default function SettingsView() {
+export default function SettingsView({ activeTabId }: { activeTabId?: string }) {
    const [activeTab, setActiveTab] = useState<"master" | "landing" | "retensi" | "digital_mapping">("master");
+
+   useEffect(() => {
+      if (activeTabId === "Pengaturan - Data Master") setActiveTab("master");
+      else if (activeTabId === "Pengaturan - Jadwal Retensi") setActiveTab("retensi");
+      else if (activeTabId === "Pengaturan - Tampilan Website") setActiveTab("landing");
+      else if (activeTabId === "Pengaturan - Digital Mapping") setActiveTab("digital_mapping");
+   }, [activeTabId]);
    
    // Master Data State
    const [departments, setDepartments] = useState<any[]>([]);
@@ -343,41 +350,7 @@ export default function SettingsView() {
             </p>
          </div>
 
-         {/* Tabs Selector */}
-         <div className="flex gap-6 border-b border-hairline mb-6 overflow-x-auto hide-scrollbar">
-            <button 
-               onClick={() => setActiveTab("master")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "master" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
-               }`}
-            >
-               <Grid size={16} /> Data Master
-            </button>
-            <button 
-               onClick={() => setActiveTab("retensi")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "retensi" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
-               }`}
-            >
-               <Clock size={16} /> Jadwal Retensi (JRA)
-            </button>
-            <button 
-               onClick={() => setActiveTab("landing")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "landing" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
-               }`}
-            >
-               <LayoutTemplate size={16} /> Tampilan Website
-            </button>
-            <button 
-               onClick={() => setActiveTab("digital_mapping")}
-               className={`py-2 text-[14px] font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "digital_mapping" ? "border-primary text-primary" : "border-transparent text-ink-mute hover:text-ink"
-               }`}
-            >
-               <MapPin size={16} /> Digital Mapping
-            </button>
-         </div>
+
 
          {message && (
             <div className="bg-primary-light/10 border border-primary text-primary px-4 py-2 rounded-sm text-[13px] font-medium">

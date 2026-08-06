@@ -3847,8 +3847,8 @@ export default function Dashboard() {
   }
 
   // PENGATURAN SISTEM (MASTER DATA)
-  if (activeMenu === "Pengaturan" && role === 'superadmin') {
-     return <SettingsView />;
+  if (activeMenu.startsWith("Pengaturan") && role === 'superadmin') {
+     return <SettingsView activeTabId={activeMenu} />;
   }
 
   // AUDIT TRAIL (RIWAYAT LOG)

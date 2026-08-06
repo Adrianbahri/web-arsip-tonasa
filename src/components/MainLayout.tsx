@@ -15,12 +15,15 @@ import {
   ChevronLeft,
   ChevronRight,
   History,
-  Settings
+  Settings,
+  ChevronDown
 } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { role, setRole, user, logout, activeMenu, setActiveMenu } = useRole();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isPengaturanExpanded, setIsPengaturanExpanded] = useState(false);
+
   const pathname = usePathname();
 
   // Exclude login page, register page, landing page (/), and public pages (/lokasi, /cari) from sidebar & dashboard layout wrapper
@@ -41,7 +44,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: "Daftar Arsip", icon: FolderOpen, roles: ["superadmin", "pic_gedung", "admin_dept", "user", "guest"] },
     { name: "Layanan Arsip", icon: Calendar, roles: ["superadmin", "pic_gedung", "admin_dept", "user"] },
     { name: "Manajemen User", icon: Users, roles: ["superadmin"] },
-    { name: "Pengaturan", icon: Settings, roles: ["superadmin"] },
+    { 
+      name: "Pengaturan", 
+      icon: Settings, 
+      roles: ["superadmin"],
+      subMenus: [
+         { name: "Data Master", id: "Pengaturan - Data Master" },
+         { name: "Jadwal Retensi (JRA)", id: "Pengaturan - Jadwal Retensi" },
+         { name: "Tampilan Website", id: "Pengaturan - Tampilan Website" },
+         { name: "Digital Mapping", id: "Pengaturan - Digital Mapping" }
+      ]
+    },
     { name: "Riwayat Log", icon: History, roles: ["superadmin"] },
   ];
 
@@ -73,21 +86,60 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {!isSidebarCollapsed && <p className="px-3 text-[11px] font-medium text-ink-mute-2 uppercase tracking-wider mb-4 mt-2">Menu Utama</p>}
           {allowedMenuItems.map(item => {
              const Icon = item.icon;
-             const isActive = activeMenu === item.name;
+             const isActive = item.subMenus ? activeMenu.startsWith(item.name) : activeMenu === item.name;
+             
              return (
-                <button
-                   key={item.name}
-                   onClick={() => setActiveMenu(item.name)}
-                   className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-sm transition-all text-[14px] text-left ${
-                      isActive 
-                      ? 'bg-primary text-on-primary font-medium' 
-                      : 'text-ink-mute hover:bg-canvas-soft hover:text-ink'
-                   }`}
-                   title={isSidebarCollapsed ? item.name : undefined}
-                >
-                   <Icon size={18} />
-                   {!isSidebarCollapsed && item.name}
-                </button>
+                <div key={item.name} className="w-full">
+                   <button
+                      onClick={() => {
+                         if (item.subMenus) {
+                            if (isSidebarCollapsed) setIsSidebarCollapsed(false);
+                            setIsPengaturanExpanded(!isPengaturanExpanded);
+                            if (!isPengaturanExpanded && !activeMenu.startsWith(item.name)) {
+                               setActiveMenu(item.subMenus[0].id);
+                            }
+                         } else {
+                            setActiveMenu(item.name);
+                         }
+                      }}
+                      className={`w-full flex items-center justify-between ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3'} py-2.5 rounded-sm transition-all text-[14px] text-left ${
+                         isActive 
+                         ? 'bg-primary text-on-primary font-medium' 
+                         : 'text-ink-mute hover:bg-canvas-soft hover:text-ink'
+                      }`}
+                      title={isSidebarCollapsed ? item.name : undefined}
+                   >
+                      <div className="flex items-center gap-3">
+                         <Icon size={18} />
+                         {!isSidebarCollapsed && <span>{item.name}</span>}
+                      </div>
+                      {!isSidebarCollapsed && item.subMenus && (
+                         <ChevronDown size={14} className={`transition-transform duration-200 ${isPengaturanExpanded ? 'rotate-180' : ''}`} />
+                      )}
+                   </button>
+                   
+                   {!isSidebarCollapsed && item.subMenus && (
+                      <div 
+                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanExpanded ? 'max-h-60 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}
+                      >
+                         <div className="pl-9 pr-2 space-y-1 py-1">
+                            {item.subMenus.map(sub => (
+                               <button
+                                  key={sub.id}
+                                  onClick={() => setActiveMenu(sub.id)}
+                                  className={`w-full text-left py-2 px-3 rounded-sm text-[12.5px] transition-colors ${
+                                     activeMenu === sub.id 
+                                     ? 'text-primary font-medium bg-primary-soft/10' 
+                                     : 'text-ink-mute hover:text-ink hover:bg-canvas-soft'
+                                  }`}
+                               >
+                                  {sub.name}
+                               </button>
+                            ))}
+                         </div>
+                      </div>
+                   )}
+                </div>
              );
           })}
         </nav>
@@ -182,11 +234,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-canvas border-t border-hairline flex items-center h-16 px-2 z-30 overflow-x-auto hide-scrollbar gap-2">
          {allowedMenuItems.map(item => {
             const Icon = item.icon;
-            const isActive = activeMenu === item.name;
+            const isActive = item.subMenus ? activeMenu.startsWith(item.name) : activeMenu === item.name;
             return (
                <button 
                   key={item.name}
-                  onClick={() => setActiveMenu(item.name)}
+                  onClick={() => {
+                     if (item.subMenus) {
+                        if (!activeMenu.startsWith(item.name)) {
+                           setActiveMenu(item.subMenus[0].id);
+                        } else {
+                           // cycle through submenus on mobile
+                           const currentIndex = item.subMenus.findIndex(s => s.id === activeMenu);
+                           const nextIndex = (currentIndex + 1) % item.subMenus.length;
+                           setActiveMenu(item.subMenus[nextIndex].id);
+                        }
+                     } else {
+                        setActiveMenu(item.name);
+                     }
+                  }}
                   className={`flex flex-col items-center justify-center shrink-0 min-w-[72px] gap-1 p-2 ${isActive ? 'text-primary' : 'text-ink-mute hover:text-ink'}`}
                >
                   <Icon size={20} />
