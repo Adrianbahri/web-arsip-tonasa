@@ -1,6 +1,6 @@
-# Dokumentasi Lengkap Web Arsip Tonasa
+# Dokumentasi Lengkap Web Arsip PT Semen Tonasa
 
-Dokumentasi ini mencakup penjelasan menyeluruh mengenai teknologi, struktur database, pengaturan sistem, desain, dan panduan deployment dari proyek Web Arsip Tonasa.
+Dokumentasi ini mencakup penjelasan menyeluruh mengenai teknologi, struktur database, pengaturan sistem, desain, dan panduan deployment dari proyek Web Arsip PT Semen Tonasa.
 
 ---
 
@@ -106,7 +106,7 @@ Karena proyek ini menggunakan Next.js, metode deployment yang paling optimal, mu
 ### Langkah-langkah Deployment:
 1. **Push ke GitHub / GitLab:** Pastikan seluruh kode proyek Anda sudah di-push ke repositori Git.
 2. **Buka Vercel:** Login ke [Vercel](https://vercel.com/) dan buat proyek baru (Add New -> Project).
-3. **Import Repositori:** Pilih repositori Git dari Web Arsip Tonasa.
+3. **Import Repositori:** Pilih repositori Git dari Web Arsip PT Semen Tonasa.
 4. **Konfigurasi Environment Variables:** 
    Di halaman pengaturan deployment Vercel, buka bagian **Environment Variables** dan masukkan `NEXT_PUBLIC_SUPABASE_URL` beserta `NEXT_PUBLIC_SUPABASE_ANON_KEY` sesuai dengan proyek Supabase yang aktif (Production Database).
 5. **Deploy:** Klik tombol **Deploy**. Vercel akan otomatis mendeteksi bahwa ini adalah aplikasi Next.js (perintah `npm run build` otomatis dijalankan).

@@ -54,7 +54,7 @@ export default function Register() {
          <div className="text-center space-y-2">
             <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-12 h-12 object-contain mx-auto mb-2" />
             <h1 className="text-display-lg text-ink text-[28px] tracking-tight">
-               Arsip<span className="text-primary font-bold ml-1">Tonasa</span>
+               Web Arsip<span className="text-primary font-bold ml-1">PT Semen Tonasa</span>
             </h1>
             <p className="text-ink-mute text-[14px]">
                Daftar Akun Baru Kearsipan

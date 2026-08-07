@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Web Arsip Tonasa",
+  title: "Web Arsip PT Semen Tonasa",
   description: "Sistem Informasi Manajemen Arsip Korporasi",
 };
 

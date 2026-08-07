@@ -49,7 +49,7 @@ INSERT INTO public.landing_page_config (
     sop_items
 ) VALUES (
     'homepage',
-    'Selamat Datang di Website Arsip Semen Tonasa',
+    'Selamat Datang di Web Arsip PT Semen Tonasa',
     'Portal informasi, mekanisme pengarsipan dokumen fisik & digital PT Semen Tonasa secara terintegrasi dan aman.',
     '/hero-image.jpg',
     'Sambutan',

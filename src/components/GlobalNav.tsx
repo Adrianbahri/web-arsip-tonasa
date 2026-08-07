@@ -39,7 +39,7 @@ export default function GlobalNav() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 opacity-95 hover:opacity-100 transition-opacity">
             <img src="/logo-tonasa.png" alt="Logo" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-[16px] tracking-wide">Arsip Tonasa</span>
+            <span className="font-bold text-[16px] tracking-wide">Web Arsip PT Semen Tonasa</span>
           </Link>
 
           {/* Desktop Nav (Perfectly Centered) */}

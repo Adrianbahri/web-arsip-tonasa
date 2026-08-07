@@ -1,4 +1,4 @@
-# Panduan Integrasi Supabase: Autentikasi & CRUD Arsip Tonasa
+# Panduan Integrasi Supabase: Autentikasi & CRUD Web Arsip PT Semen Tonasa
 
 Panduan ini menjelaskan langkah demi langkah untuk menyambungkan aplikasi frontend Next.js ini ke proyek **Supabase** Anda agar fitur Login, Hak Akses (RBAC), Pengajuan Berkas, dan Persetujuan (ACC) berfungsi secara nyata dengan database.
 
