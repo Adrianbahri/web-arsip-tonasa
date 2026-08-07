@@ -2547,8 +2547,12 @@ export default function Dashboard() {
   };
 
   
+         {/* DELETE CONFIRMATION MODAL */}
+  const renderAdminResetModal = () => {
+
          {/* ADMIN RESET PASSWORD MODAL */}
-         {showAdminResetModal && (
+     if(!showAdminResetModal) return null;
+     return (
             <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                <div className="bg-canvas w-full max-w-md rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                   <div className="p-5 border-b border-hairline flex justify-between items-center bg-canvas-soft">
@@ -2605,9 +2609,10 @@ export default function Dashboard() {
                   </div>
                </div>
             </div>
-         )}
+         );
+  };
 
-         {/* DELETE CONFIRMATION MODAL */}
+
   const renderDeleteModal = () => {
     if (!deleteModalOpen) return null;
     return (
