@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
 import SettingsView from "@/components/SettingsView";
 import AuditLogView from "@/components/AuditLogView";
+import NotificationBell from "@/components/NotificationBell";
 import * as XLSX from "xlsx";
 import { 
   FileText, 
@@ -4519,23 +4520,26 @@ export default function Dashboard() {
                 </p>
              </div>
 
-             {showIot && (
-                 <button 
-                    onClick={() => setActiveMenu("IoT Monitoring")}
-                    className="flex items-center gap-3 bg-canvas border border-hairline rounded-full px-4 py-1.5 shadow-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-fit shrink-0 cursor-pointer"
-                    title="Buka IoT Monitoring"
-                 >
-                    <div className="flex items-center gap-1.5" title="Suhu Ruangan">
-                       <Thermometer size={14} className="text-orange-500" />
-                       <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.suhu}°C` : '--°C'}</span>
-                    </div>
-                    <div className="w-px h-4 bg-hairline"></div>
-                    <div className="flex items-center gap-1.5" title="Kelembaban">
-                       <Droplets size={14} className="text-blue-500" />
-                       <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.kelembaban}%` : '--%'}</span>
-                    </div>
-                 </button>
-             )}
+             <div className="flex items-center gap-2 md:gap-4 shrink-0">
+               {showIot && (
+                   <button 
+                      onClick={() => setActiveMenu("IoT Monitoring")}
+                      className="flex items-center gap-3 bg-canvas border border-hairline rounded-full px-4 py-1.5 shadow-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                      title="Buka IoT Monitoring"
+                   >
+                      <div className="flex items-center gap-1.5" title="Suhu Ruangan">
+                         <Thermometer size={14} className="text-orange-500" />
+                         <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.suhu}°C` : '--°C'}</span>
+                      </div>
+                      <div className="w-px h-4 bg-hairline"></div>
+                      <div className="flex items-center gap-1.5" title="Kelembaban">
+                         <Droplets size={14} className="text-blue-500" />
+                         <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.kelembaban}%` : '--%'}</span>
+                      </div>
+                   </button>
+               )}
+               <NotificationBell />
+             </div>
             </div>
 
             {/* Alerts for Pending Submissions and Pending User Approvals */}

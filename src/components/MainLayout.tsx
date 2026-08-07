@@ -189,10 +189,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                  </p>
               </div>
            )}
-           {/* Profile Actions: ThemeSwitcher, NotificationBell, Ganti Password (Key) & Keluar (LogOut) */}
+           {/* Profile Actions: ThemeSwitcher, Ganti Password (Key) & Keluar (LogOut) */}
            <div className={`flex items-center gap-1 flex-shrink-0 ${isSidebarCollapsed ? 'flex-col mt-2' : ''}`}>
               <ThemeSwitcher />
-              <NotificationBell />
               <button 
                  onClick={() => setActiveMenu("Ganti Password")}
                  className={`p-1.5 transition-colors rounded-xs ${
@@ -230,7 +229,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           
           <div className="flex items-center gap-2 md:gap-3">
              <ThemeSwitcher />
-             <NotificationBell />
              {/* Quick Role Toggle on Mobile Header Removed */}
              {/* Ganti Password on Mobile Header */}
              <button 
