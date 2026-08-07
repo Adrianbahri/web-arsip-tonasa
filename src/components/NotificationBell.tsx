@@ -49,21 +49,10 @@ export default function NotificationBell() {
 
     fetchNotifications();
 
-    // Setup realtime subscription — callbacks MUST be registered before .subscribe()
-    const channelName = 'notifications-' + Date.now();
-    const channel = supabase.channel(channelName);
-    
-    channel.on(
-      'postgres_changes' as any,
-      { event: '*', schema: 'public', table: 'notifications' },
-      () => { fetchNotifications(); }
-    );
-    
-    channel.subscribe();
+    // Polling setiap 30 detik sebagai pengganti realtime subscription
+    const interval = setInterval(fetchNotifications, 30000);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => clearInterval(interval);
   }, [role, isAuthorized]);
 
   useEffect(() => {
