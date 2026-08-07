@@ -36,7 +36,8 @@ import {
   RefreshCw,
   AlertTriangle,
   Thermometer,
-  Droplets
+  Droplets,
+  AlertCircle
 } from "lucide-react";
 
 const formatDate = (dateStr: string) => {
