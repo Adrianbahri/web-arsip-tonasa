@@ -41,7 +41,7 @@ export default function GlobalNav() {
             <img src="/logo-tonasa.png" alt="Logo" className="w-8 h-8 object-contain" />
             <div className="flex flex-col justify-center">
                <span className="font-bold text-[15px] leading-none tracking-wide text-white">Web Arsip</span>
-               <span className="font-bold text-[15px] leading-tight tracking-wide text-blue-400">PT Semen Tonasa</span>
+               <span className="font-bold text-[15px] leading-tight tracking-wide text-primary">PT Semen Tonasa</span>
             </div>
           </Link>
 
