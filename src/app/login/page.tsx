@@ -48,8 +48,9 @@ export default function Login() {
          {/* Logo / Header */}
          <div className="text-center space-y-2">
             <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-12 h-12 object-contain mx-auto mb-2" />
-            <h1 className="text-display-lg text-ink text-[28px] tracking-tight">
-               Web Arsip<span className="text-primary font-bold ml-1">PT Semen Tonasa</span>
+            <h1 className="text-display-lg text-ink text-[28px] leading-tight tracking-tight mt-2">
+               Web Arsip<br/>
+               <span className="text-primary font-bold">PT Semen Tonasa</span>
             </h1>
             <p className="text-ink-mute text-[14px]">
                Sistem Informasi Manajemen Arsip

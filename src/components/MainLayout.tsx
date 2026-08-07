@@ -71,7 +71,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
            <div className={`flex items-center gap-2.5 ${isSidebarCollapsed ? 'justify-center' : ''} w-full`}>
               <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-8 h-8 object-contain" />
               {!isSidebarCollapsed && (
-                 <h1 className="text-[20px] font-bold tracking-tight text-ink">Web Arsip<span className="text-primary ml-1">PT Semen Tonasa</span></h1>
+                 <h1 className="text-[18px] leading-tight font-bold tracking-tight text-ink">
+                    Web Arsip<br />
+                    <span className="text-primary">PT Semen Tonasa</span>
+                 </h1>
               )}
            </div>
            
@@ -217,7 +220,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <header className="md:hidden bg-canvas border-b border-hairline px-5 py-4 flex justify-between items-center sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
              <img src="/logo-tonasa.png" alt="Logo Semen Tonasa" className="w-7 h-7 object-contain" />
-             <h1 className="text-lg font-bold text-ink tracking-tight">Web Arsip<span className="text-primary ml-1">PT Semen Tonasa</span></h1>
+             <h1 className="text-lg leading-tight font-bold text-ink tracking-tight">
+                Web Arsip<br />
+                <span className="text-primary">PT Semen Tonasa</span>
+             </h1>
           </div>
           
           <div className="flex items-center gap-2 md:gap-3">

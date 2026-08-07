@@ -70,7 +70,10 @@ function SearchContent() {
             <div className="bg-blue-600 text-white p-2 rounded-lg">
               <Box size={20} />
             </div>
-            <h1 className="font-bold text-xl text-gray-900 tracking-tight">Web Arsip PT Semen Tonasa</h1>
+            <h1 className="font-bold text-lg leading-tight text-gray-900 tracking-tight">
+               Web Arsip<br />
+               <span className="text-blue-600">PT Semen Tonasa</span>
+            </h1>
           </Link>
           <Link href="/dashboard" className="text-gray-500 flex items-center gap-1 hover:text-blue-600 transition-colors text-sm font-medium">
              Login <ArrowRight size={16} />
