@@ -5,6 +5,21 @@ import { Bell, Archive, Calendar, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useRole } from "./RoleContext";
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 interface Notification {
   id: string;
   title: string;
@@ -20,6 +35,8 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPushSupported, setIsPushSupported] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Only show for pic_gedung and superadmin
@@ -54,6 +71,75 @@ export default function NotificationBell() {
 
     return () => clearInterval(interval);
   }, [role, isAuthorized]);
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setIsPushSupported(true);
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          registration.pushManager.getSubscription().then(subscription => {
+            setIsSubscribed(subscription !== null);
+          });
+        })
+        .catch(err => console.error('Service Worker registration failed:', err));
+    }
+  }, []);
+
+  const subscribeToPush = async () => {
+    if (!('serviceWorker' in navigator)) return;
+    
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+         alert('Izin notifikasi ditolak oleh browser.');
+         return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidPublicKey) {
+         console.error('VAPID public key not set');
+         return;
+      }
+      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey
+      });
+
+      // Simpan ke server
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscription,
+          userEmail: role === 'superadmin' ? 'superadmin@arsiptonasa.my.id' : 'admin@arsiptonasa.my.id'
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubscribed(true);
+        alert('Berhasil berlangganan push notification!');
+      } else {
+        alert('Gagal berlangganan push notification.');
+      }
+    } catch (err) {
+      console.error('Failed to subscribe:', err);
+      alert('Gagal berlangganan. Pastikan Anda mengizinkan notifikasi di browser.');
+    }
+  };
+
+  const testPush = async () => {
+     await fetch('/api/test-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+           title: 'Tes Notifikasi Web Arsip',
+           message: 'Push notification berhasil bekerja!'
+        })
+     });
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -111,7 +197,19 @@ export default function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 bottom-full md:bottom-auto md:top-full mb-2 md:mb-0 md:mt-2 w-80 sm:w-96 bg-canvas border border-hairline shadow-lg rounded-md overflow-hidden z-50">
           <div className="flex items-center justify-between p-3 border-b border-hairline bg-canvas-soft">
-            <h3 className="font-semibold text-sm text-ink">Notifikasi</h3>
+            <div className="flex flex-col gap-1">
+               <h3 className="font-semibold text-sm text-ink">Notifikasi</h3>
+               {isPushSupported && !isSubscribed && (
+                  <button onClick={subscribeToPush} className="text-[10px] text-left text-primary hover:underline font-medium">
+                     + Aktifkan Push Notif Desktop
+                  </button>
+               )}
+               {isSubscribed && (
+                  <button onClick={testPush} className="text-[10px] text-left text-emerald-600 hover:underline font-medium">
+                     Tes Notifikasi
+                  </button>
+               )}
+            </div>
             {notifications.length > 0 && (
               <button 
                 onClick={markAllAsRead}
