@@ -29,30 +29,40 @@ export default function NotificationBell() {
     if (!isAuthorized) return;
     
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (!error && data) {
-      setNotifications(data);
+      if (!error && data) {
+        setNotifications(data);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch notifications:", e);
     }
     setIsLoading(false);
   };
 
   useEffect(() => {
+    if (!isAuthorized) return;
+
     fetchNotifications();
 
-    // Setup realtime subscription
-    const subscription = supabase
-      .channel('public:notifications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
-        fetchNotifications();
-      })
-      .subscribe();
+    // Setup realtime subscription — callbacks MUST be registered before .subscribe()
+    const channelName = 'notifications-' + Date.now();
+    const channel = supabase.channel(channelName);
+    
+    channel.on(
+      'postgres_changes' as any,
+      { event: '*', schema: 'public', table: 'notifications' },
+      () => { fetchNotifications(); }
+    );
+    
+    channel.subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel);
     };
   }, [role, isAuthorized]);
 
