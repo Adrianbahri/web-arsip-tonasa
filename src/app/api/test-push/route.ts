@@ -2,14 +2,39 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import webpush from 'web-push';
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:admin@arsiptonasa.my.id',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-);
+let isVapidInitialized = false;
+
+function initVapid() {
+  if (isVapidInitialized) return true;
+  
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  
+  if (!publicKey || !privateKey) {
+    return false;
+  }
+  
+  try {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:admin@arsiptonasa.my.id',
+      publicKey,
+      privateKey
+    );
+    isVapidInitialized = true;
+    return true;
+  } catch (err) {
+    console.error('Failed to set VAPID details:', err);
+    return false;
+  }
+}
 
 export async function POST(request: Request) {
   try {
+    if (!initVapid()) {
+      console.error('VAPID keys are not configured');
+      return NextResponse.json({ success: false, error: 'Push notification credentials are not configured on the server.' }, { status: 500 });
+    }
+
     const { title, message } = await request.json();
 
     // Ambil semua subscription dari database
