@@ -77,13 +77,29 @@ export default function NotificationBell() {
       setIsPushSupported(true);
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
-          registration.pushManager.getSubscription().then(subscription => {
-            setIsSubscribed(subscription !== null);
+          registration.pushManager.getSubscription().then(async subscription => {
+            if (subscription) {
+              // Resync ke server bila tombol pernah tersimpan di browser
+              // tapi baris di database hilang (mis. gagal saat tabel belum ada).
+              const email = role === 'superadmin' ? 'superadmin@arsiptonasa.my.id' : 'admin@arsiptonasa.my.id';
+              try {
+                const res = await fetch('/api/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ subscription, userEmail: email }),
+                });
+                setIsSubscribed(res.ok);
+              } catch {
+                setIsSubscribed(false);
+              }
+            } else {
+              setIsSubscribed(false);
+            }
           });
         })
         .catch(err => console.error('Service Worker registration failed:', err));
     }
-  }, []);
+  }, [role]);
 
   const subscribeToPush = async () => {
     if (!('serviceWorker' in navigator)) return;
@@ -131,14 +147,25 @@ export default function NotificationBell() {
   };
 
   const testPush = async () => {
-     await fetch('/api/test-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-           title: 'Tes Notifikasi Web Arsip',
-           message: 'Push notification berhasil bekerja!'
-        })
-     });
+     try {
+        const res = await fetch('/api/test-push', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+              title: 'Tes Notifikasi Web Arsip',
+              message: 'Push notification berhasil bekerja!'
+           })
+        });
+        const data = await res.json();
+        if (data.success === false) {
+           alert('Gagal mengirim: ' + (data.error || data.message || 'unknown'));
+        } else {
+           alert(data.message || 'Notifikasi tes terkirim.');
+        }
+     } catch (err) {
+        console.error('Failed to send test push:', err);
+        alert('Gagal mengirim test push. Periksa jaringan / VAPID keys.');
+     }
   };
 
   useEffect(() => {
