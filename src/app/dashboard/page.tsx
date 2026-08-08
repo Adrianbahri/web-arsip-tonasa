@@ -4305,12 +4305,10 @@ export default function Dashboard() {
                {renderDetailModal()}
                {renderDeleteModal()}
                {renderRejectModal()}
-      {renderDeleteUserModal()}
-           {renderDeleteUserModal()}
-            {renderDeleteUserModal()}
                {renderDeleteUserModal()}
                {renderAddUserModal()}
                {renderChangeRoleModal()}
+               {renderAdminResetModal()}
            </div>
 
         </div>
@@ -5341,6 +5339,8 @@ export default function Dashboard() {
       {renderRejectModal()}
       {renderDeleteUserModal()}
       {renderAddUserModal()}
+      {renderChangeRoleModal()}
+      {renderAdminResetModal()}
       
       {/* ZOOMED IMAGE OVERLAY */}
       {zoomedImageUrl && (
