@@ -85,7 +85,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
 ### Inisiasi Database
-Jalankan file SQL yang sudah tersedia di folder proyek (seperti `supabase_final_setup_v2.sql`) ke dalam menu **SQL Editor** di Dashboard Supabase untuk membuat tabel, policy (RLS), dan trigger secara otomatis.
+Jalankan file SQL yang tersedia di folder proyek (`supabase_push_subscriptions.sql`, `supabase_harden_new_user.sql`) satu per satu ke dalam menu **SQL Editor** di Dashboard Supabase untuk membuat tabel/setting kebijakan (RLS) dan trigger.
 
 ---
 
