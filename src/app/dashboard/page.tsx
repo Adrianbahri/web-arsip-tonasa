@@ -25,7 +25,6 @@ import {
   ExternalLink,
   Download,
   ZoomIn,
-  ShieldAlert,
   UserCheck,
   UserX,
   Users,
@@ -36,8 +35,6 @@ import {
   X,
   RefreshCw,
   AlertTriangle,
-  Thermometer,
-  Droplets,
   AlertCircle
 } from "lucide-react";
 
@@ -119,28 +116,6 @@ export default function Dashboard() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 100;
-
-  const [showIot, setShowIot] = useState(true);
-  const [latestIotData, setLatestIotData] = useState<{suhu: number, kelembaban: number, created_at: string} | null>(null);
-  const [iotHistory, setIotHistory] = useState<any[]>([]);
-
-  useEffect(() => {
-     if (showIot) {
-         fetch('/api/monitoring')
-             .then(res => res.json())
-             .then(res => {
-                 if (res.success && res.data && res.data.length > 0) {
-                     setLatestIotData({
-                         suhu: res.data[0].suhu,
-                         kelembaban: res.data[0].kelembaban,
-                         created_at: res.data[0].created_at
-                     });
-                     setIotHistory(res.data);
-                 }
-             })
-             .catch(err => console.error("Failed to fetch IoT data", err));
-     }
-  }, [showIot, activeMenu]);
 
   useEffect(() => {
      setCurrentPage(1);
@@ -4382,124 +4357,6 @@ export default function Dashboard() {
      );
   }
 
-  // 3.5 VIEW: IoT Monitoring
-  if (activeMenu === "IoT Monitoring") {
-      let isOffline = true;
-      if (latestIotData?.created_at) {
-          const lastUpdate = new Date(latestIotData.created_at);
-          const now = new Date();
-          const diffDays = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 3600 * 24));
-          isOffline = diffDays > 7;
-      } else if (iotHistory.length === 0) {
-          // If no data is fetched yet but there is data, wait, if it's 0 length we say offline
-          isOffline = true;
-      }
-
-      return (
-         <div className="space-y-8 w-full max-w-5xl">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <div className="shrink-0">
-                 <h2 className="text-[18px] md:text-[24px] font-medium tracking-tight text-ink flex items-center gap-3">
-                    <Thermometer className="text-orange-500" />
-                    IoT Monitoring
-                 </h2>
-                 <p className="text-ink-mute text-[12px] md:text-[13px] mt-0.5">
-                    Pemantauan suhu dan kelembaban ruangan arsip.
-                 </p>
-              </div>
-              <button 
-                 onClick={() => setActiveMenu("Dashboard")} 
-                 className="flex items-center gap-2 text-ink-mute hover:text-ink transition-colors text-[13px] font-medium"
-              >
-                 <ArrowLeft size={16} />
-                 Kembali ke Dashboard
-              </button>
-            </div>
-
-            {isOffline ? (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm p-12 flex flex-col items-center justify-center text-center">
-                    <ShieldAlert size={48} className="text-red-500 mb-4" />
-                    <h3 className="text-xl font-bold text-red-800 dark:text-red-300 mb-2">IoT Sedang Mati / Offline</h3>
-                    <p className="text-red-700 dark:text-red-400 text-sm max-w-md">
-                        Sistem tidak menerima data dari perangkat IoT selama lebih dari 7 hari. Mohon periksa koneksi atau daya perangkat ESP Anda.
-                    </p>
-                </div>
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-canvas border border-hairline rounded-sm p-6 flex items-center gap-6 shadow-sm">
-                            <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center shrink-0">
-                                <Thermometer size={32} className="text-orange-600 dark:text-orange-400" />
-                            </div>
-                            <div>
-                                <p className="text-ink-mute text-sm font-medium mb-1">Suhu Ruangan</p>
-                                <div className="text-4xl font-bold text-ink">
-                                    {latestIotData?.suhu}<span className="text-2xl text-ink-mute">°C</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-canvas border border-hairline rounded-sm p-6 flex items-center gap-6 shadow-sm">
-                            <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center shrink-0">
-                                <Droplets size={32} className="text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                                <p className="text-ink-mute text-sm font-medium mb-1">Kelembaban</p>
-                                <div className="text-4xl font-bold text-ink">
-                                    {latestIotData?.kelembaban}<span className="text-2xl text-ink-mute">%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-canvas border border-hairline rounded-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-hairline flex items-center justify-between bg-surface">
-                            <h3 className="font-semibold text-[15px] text-ink">Riwayat Sensor</h3>
-                            <span className="text-[12px] text-ink-mute">{iotHistory.length} data terakhir</span>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-surface/50 border-b border-hairline text-[12px] uppercase text-ink-mute">
-                                        <th className="px-6 py-3 font-semibold">Waktu</th>
-                                        <th className="px-6 py-3 font-semibold">Suhu</th>
-                                        <th className="px-6 py-3 font-semibold">Kelembaban</th>
-                                        <th className="px-6 py-3 font-semibold">Keterangan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {iotHistory.map((item, index) => (
-                                        <tr key={item.id || index} className="border-b border-hairline last:border-0 hover:bg-surface/50 transition-colors text-[13px] text-ink">
-                                            <td className="px-6 py-3 whitespace-nowrap">
-                                                {new Date(item.created_at).toLocaleString('id-ID')}
-                                            </td>
-                                            <td className="px-6 py-3">
-                                                <span className="font-medium">{item.suhu}°C</span>
-                                            </td>
-                                            <td className="px-6 py-3">
-                                                <span className="font-medium">{item.kelembaban}%</span>
-                                            </td>
-                                            <td className="px-6 py-3 text-ink-mute">
-                                                {item.keterangan || "-"}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {iotHistory.length === 0 && (
-                                        <tr>
-                                            <td colSpan={4} className="px-6 py-8 text-center text-ink-mute text-sm">
-                                                Belum ada data riwayat sensor.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </>
-            )}
-         </div>
-      );
-  }
-
   // 4. VIEW: DASHBOARD (HOME SCREEN FOR ADMINS)
   if (activeMenu === "Dashboard") {
      const pendingCount = archives.filter(item => item.status === "Menunggu ACC").length;
@@ -4519,23 +4376,6 @@ export default function Dashboard() {
              </div>
 
              <div className="flex items-center gap-2 md:gap-4 shrink-0">
-               {showIot && (
-                   <button 
-                      onClick={() => setActiveMenu("IoT Monitoring")}
-                      className="flex items-center gap-3 bg-canvas border border-hairline rounded-full px-4 py-1.5 shadow-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-                      title="Buka IoT Monitoring"
-                   >
-                      <div className="flex items-center gap-1.5" title="Suhu Ruangan">
-                         <Thermometer size={14} className="text-orange-500" />
-                         <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.suhu}°C` : '--°C'}</span>
-                      </div>
-                      <div className="w-px h-4 bg-hairline"></div>
-                      <div className="flex items-center gap-1.5" title="Kelembaban">
-                         <Droplets size={14} className="text-blue-500" />
-                         <span className="text-[13px] font-medium text-ink">{latestIotData ? `${latestIotData.kelembaban}%` : '--%'}</span>
-                      </div>
-                   </button>
-               )}
                <NotificationBell />
              </div>
             </div>

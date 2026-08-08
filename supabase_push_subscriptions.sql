@@ -14,20 +14,17 @@ CREATE TABLE IF NOT EXISTS public.push_subscriptions (
 -- Aktifkan Row Level Security (RLS)
 ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Policy: User bisa insert subscription mereka sendiri
-CREATE POLICY "Users can insert their own subscriptions"
+-- Policy: Server API (route handler Next.js) memakai anon key tanpa session,
+-- jadi akses diizinkan untuk role public/anon agar /api/subscribe,
+-- /api/test-push (SELECT) dan pembersihan sensor expired bisa berjalan.
+CREATE POLICY "Allow push subscription insert"
 ON public.push_subscriptions FOR INSERT
-TO authenticated
 WITH CHECK (true);
 
--- Policy: User bisa baca subscription mereka sendiri
-CREATE POLICY "Users can view subscriptions"
+CREATE POLICY "Allow push subscription read"
 ON public.push_subscriptions FOR SELECT
-TO authenticated
 USING (true);
 
--- Policy: User bisa hapus
-CREATE POLICY "Users can delete subscriptions"
+CREATE POLICY "Allow push subscription delete"
 ON public.push_subscriptions FOR DELETE
-TO authenticated
 USING (true);
