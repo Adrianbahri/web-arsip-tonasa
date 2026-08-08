@@ -35,7 +35,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Push notification credentials are not configured on the server.' }, { status: 500 });
     }
 
-    const { title, message } = await request.json();
+    const body = await request.json();
+    const title = body.record?.title || body.title || 'Notifikasi Baru';
+    const message = body.record?.message || body.message || 'Pesan percobaan';
 
     // Ambil semua subscription dari database
     const { data: subscriptions, error } = await supabase
