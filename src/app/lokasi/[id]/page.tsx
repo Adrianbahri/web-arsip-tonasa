@@ -13,7 +13,6 @@ import {
   VolumeX,
   X
 } from "lucide-react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRole } from "@/components/RoleContext";
 import GlobalNav from "@/components/GlobalNav";
@@ -136,10 +135,7 @@ export default function LokasiDetailPage() {
          />
          <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-canvas-soft/50 to-canvas-soft" />
          
-         <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+         <div 
             className="relative z-10"
          >
            <p className="text-[#bf4800] text-[12px] font-semibold tracking-widest uppercase mb-4 shadow-sm inline-block px-3 py-1 bg-canvas/50 backdrop-blur-sm rounded-full border border-hairline">Lokasi Anda Saat Ini</p>
@@ -150,7 +146,7 @@ export default function LokasiDetailPage() {
               <Box size={20} className="text-primary" />
               <span>{mappingData.ruang}</span>
            </div>
-         </motion.div>
+         </div>
       </section>
 
       <main className="max-w-[1200px] mx-auto px-4 pb-12">
@@ -158,10 +154,7 @@ export default function LokasiDetailPage() {
         
         {/* Map Card */}
         {mappingData.map_url && (
-          <motion.div 
-             initial={{ opacity: 0, x: -30 }}
-             animate={{ opacity: 1, x: 0 }}
-             transition={{ duration: 0.6, delay: 0.2 }}
+          <div 
              className="w-full lg:w-2/3 bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 md:p-10 overflow-hidden border border-hairline"
           >
              <h3 className="text-[20px] sm:text-[24px] font-semibold tracking-[-0.37px] mb-4 sm:mb-6">Peta Lokasi</h3>
@@ -180,14 +173,11 @@ export default function LokasiDetailPage() {
                    </div>
                 </div>
              </div>
-          </motion.div>
+          </div>
         )}
         
         {/* Info Card */}
-        <motion.div 
-           initial={{ opacity: 0, x: 30 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ duration: 0.6, delay: 0.3 }}
+        <div 
            className={`w-full ${mappingData.map_url ? 'lg:w-1/3' : 'max-w-3xl'} bg-canvas rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] p-6 sm:p-8 transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-hairline flex flex-col gap-6 sm:gap-8`}
         >
            <div className="space-y-4">
@@ -199,7 +189,7 @@ export default function LokasiDetailPage() {
                  {mappingData.deskripsi}
               </p>
            </div>
-        </motion.div>
+        </div>
         
         </div>
       </main>

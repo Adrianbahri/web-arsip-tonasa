@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRole } from "@/components/RoleContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Mail, User, ShieldAlert, Check } from "lucide-react";
+import { Lock, Mail, User, Check } from "lucide-react";
 
 export default function Register() {
   const { signUp } = useRole();
@@ -12,7 +12,6 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<'superadmin' | 'pic_gedung' | 'admin_dept' | 'user'>('user');
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +24,7 @@ export default function Register() {
      setSuccess(false);
 
      try {
-        const res = await signUp(email, password, name, selectedRole);
+        const res = await signUp(email, password, name);
         if (res.success) {
            setSuccess(true);
            setName("");
@@ -130,23 +129,13 @@ export default function Register() {
                      className="w-full bg-canvas border border-hairline text-[14px] rounded-xs pl-9 pr-3 py-2.5 focus:outline-none focus:border-ink placeholder:text-ink-faint text-ink"
                   />
                </div>
-            </div>
+</div>
 
-            {/* Role Dropdown */}
-            <div className="space-y-1.5 bg-canvas-soft border border-hairline p-3 rounded-xs">
-               <div className="flex items-center gap-1.5 text-ink-mute mb-2">
-                  <ShieldAlert size={14} />
-                  <label className="text-[12px] font-medium">Pilih Jabatan (Role)</label>
-               </div>
-               <select 
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as any)}
-                  className="w-full bg-canvas border border-hairline text-[13px] rounded-xs px-2.5 py-1.5 outline-none font-medium text-ink focus:border-ink"
-               >
-                  <option value="user">User Biasa (Staff)</option>
-                  <option value="admin_dept">Admin Departemen (HRD/Keuangan)</option>
-                  <option value="pic_gedung">Admin Gedung (PIC Arsip)</option>
-               </select>
+             {/* Public registration is always a standard "user" account; pic_gedung is granted via ACC */}
+             <div className="space-y-1 bg-canvas-soft border border-hairline p-3 rounded-xs">
+               <p className="text-[12px] text-ink-mute">
+                  Akun dibuat sebagai <b>User Biasa (Staff)</b> dan menunggu persetujuan (ACC) Admin PIC Gedung Arsip sebelum dapat digunakan.
+               </p>
             </div>
 
             {/* Register Button */}

@@ -19,9 +19,9 @@ interface RoleContextType {
   role: Role;
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
-  login: (email: string, role: Role, password?: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginAsGuest: (gedung: string) => void;
-  signUp: (email: string, password: string, name: string, role: Role) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setRole: (role: Role) => void;
 }
@@ -34,134 +34,108 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   const [activeMenu, setActiveMenu] = useState<string>("Daftar Arsip");
   const router = useRouter();
 
-  // Load session from localStorage on client mount
+  // Load session from localStorage on client mount, but always re-validate
+  // against real Supabase session + DB profile. localStorage role is forgeable.
   useEffect(() => {
-    const savedUser = localStorage.getItem("arsip_session");
-    if (savedUser) {
-       const parsedUser = JSON.parse(savedUser) as UserProfile;
-       setUser(parsedUser);
-       setRoleState(parsedUser.role);
+    let savedUser: UserProfile | null = null;
+    try {
+      savedUser = JSON.parse(localStorage.getItem("arsip_session") || "null");
+    } catch {
+      localStorage.removeItem("arsip_session");
     }
+    if (!savedUser) return;
+
+    if (savedUser.role === 'guest') {
+      setUser(savedUser);
+      setRoleState('guest');
+      return;
+    }
+
+    (async () => {
+      const { data: authData } = await supabase.auth.getSession();
+      if (!authData.session) {
+        localStorage.removeItem("arsip_session");
+        setUser(null);
+        return;
+      }
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, name, approved')
+        .eq('id', authData.session.user.id)
+        .single();
+      if (error || !profile || !profile.approved) {
+        localStorage.removeItem("arsip_session");
+        setUser(null);
+        return;
+      }
+      const realUser: UserProfile = {
+        email: authData.session.user.email || savedUser.email,
+        role: profile.role as Role,
+        name: profile.name || authData.session.user.email?.split('@')[0] || savedUser.name,
+        approved: profile.approved,
+      };
+      localStorage.setItem("arsip_session", JSON.stringify(realUser));
+      setUser(realUser);
+      setRoleState(realUser.role);
+    })();
   }, []);
 
-  const login = async (email: string, selectedRole: Role, password?: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
      try {
-        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
-        
-        if (!isMockUrl) {
-           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-              email,
-              password: password || "12345678"
-           });
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+           email,
+           password
+        });
 
-           if (authError) {
-              return { success: false, error: authError.message };
-           }
-
-           if (authData.user) {
-              // Ambil profile role & approved status dari tabel profiles
-              const { data: profile, error: profileError } = await supabase
-                 .from('profiles')
-                 .select('role, name, approved')
-                 .eq('id', authData.user.id)
-                 .single();
-
-              if (profileError) {
-                 return { 
-                    success: false, 
-                    error: "Login berhasil di Auth, tetapi gagal memuat profil dari database. Pastikan skema tabel profiles dan approved sudah dijalankan di Supabase SQL Editor." 
-                 };
-              }
-
-              // BLOKIR LOGIN JIKA USER BELUM DI-ACC OLEH PIC
-              if (!profile.approved) {
-                 await supabase.auth.signOut();
-                 return {
-                    success: false,
-                    error: "Akun Anda belum disetujui (ACC) oleh Admin PIC Gedung Arsip. Hubungi PIC untuk melakukan aktivasi akun."
-                 };
-              }
-
-              if (profile) {
-                 const realUser: UserProfile = {
-                    email: authData.user.email || email,
-                    role: profile.role as Role,
-                    name: profile.name || email.split("@")[0],
-                    approved: profile.approved
-                 };
-                 localStorage.setItem("arsip_session", JSON.stringify(realUser));
-                 setUser(realUser);
-                 setRoleState(realUser.role);
-                 setActiveMenu(realUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
-                 return { success: true };
-              }
-           }
+        if (authError) {
+           return { success: false, error: authError.message };
         }
-     } catch (e: any) {
-        console.error("Supabase Auth connection error:", e);
-        
-        // JIKA FETCH ERROR (Gagal Terhubung / Offline), AKTIFKAN FALLBACK SIMULASI LOKAL AGAR WEB TIDAK CRASH
-        const errString = e.toString() || "";
-        if (errString.includes("Failed to fetch")) {
-           // Jika email demo admin, otomatis approved, lainnya butuh acc
-           const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur") || email.includes("superadmin");
-           
-           if (!isApproved && selectedRole === 'user') {
-              return {
-                 success: false,
-                 error: `Mode Simulasi: Akun staf biasa ini belum disetujui (ACC). Error detail: ${errString}`
+
+        if (authData.user) {
+           // Ambil profile role & approved status dari tabel profiles
+           const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('role, name, approved')
+              .eq('id', authData.user.id)
+              .single();
+
+           if (profileError) {
+              return { 
+                 success: false, 
+                 error: "Login berhasil di Auth, tetapi gagal memuat profil dari database. Pastikan skema tabel profiles dan approved sudah dijalankan di Supabase SQL Editor." 
               };
            }
 
-           const mockUser: UserProfile = {
-              id: 'mock-id-' + Math.random().toString(36).substring(7),
-              email: email,
-              role: selectedRole,
-              name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
-              approved: true
+           // BLOKIR LOGIN JIKA USER BELUM DI-ACC OLEH PIC
+           if (!profile.approved) {
+              await supabase.auth.signOut();
+              return {
+                 success: false,
+                 error: "Akun Anda belum disetujui (ACC) oleh Admin PIC Gedung Arsip. Hubungi PIC untuk melakukan aktivasi akun."
+              };
+           }
+
+           const realUser: UserProfile = {
+              email: authData.user.email || email,
+              role: profile.role as Role,
+              name: profile.name || email.split("@")[0],
+              approved: profile.approved
            };
-           localStorage.setItem("arsip_session", JSON.stringify(mockUser));
-           setUser(mockUser);
-           setRoleState(mockUser.role);
-           setActiveMenu(mockUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
-           return { 
-              success: true, 
-              error: "Mode Simulasi: Gagal menghubungi server Supabase (Failed to fetch). Sistem otomatis beralih menggunakan simulasi offline." 
-           };
+           localStorage.setItem("arsip_session", JSON.stringify(realUser));
+           setUser(realUser);
+           setRoleState(realUser.role);
+           setActiveMenu(realUser.role === 'user' ? "Daftar Arsip" : "Dashboard");
+           return { success: true };
         }
-        return { success: false, error: e.message || "Gagal menghubungi server database Supabase." };
+
+        return { success: false, error: "Akun tidak ditemukan." };
+     } catch (e: any) {
+        console.error("Supabase Auth connection error:", e);
+        return { success: false, error: e?.message || "Gagal menghubungi server database Supabase." };
      }
+};
 
-     // FALLBACK SIMULASI MURNI JIKA URL MOCK
-     const isApproved = email.includes("admin") || email.includes("pic") || email.includes("syukur") || email.includes("superadmin");
-     if (!isApproved && selectedRole === 'user') {
-        return {
-           success: false,
-           error: "Mode Simulasi (URL Kosong/Mock): Akun staf biasa ini belum disetujui (ACC) oleh PIC Gedung."
-        };
-     }
-
-     const mockUser: UserProfile = {
-        id: 'mock-id-' + Math.random().toString(36).substring(7),
-        email: email,
-        role: selectedRole,
-        name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
-        approved: true
-     };
-
-     localStorage.setItem("arsip_session", JSON.stringify(mockUser));
-     setUser(mockUser);
-     setRoleState(mockUser.role);
-     
-     if (mockUser.role === 'user') {
-        setActiveMenu("Daftar Arsip");
-     } else {
-        setActiveMenu("Dashboard");
-     }
-     return { success: true };
-  };
-
-  const loginAsGuest = (gedung: string) => {
+   const loginAsGuest = (gedung: string) => {
      const guestUser: UserProfile = {
         id: 'guest-' + Math.random().toString(36).substring(7),
         email: 'tamu@public',
@@ -177,29 +151,18 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
      setActiveMenu("Daftar Arsip");
   };
 
-  const signUp = async (email: string, password: string, name: string, selectedRole: Role): Promise<{ success: boolean; error?: string }> => {
+  const signUp = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
      try {
-        const isMockUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("mock.supabase.co") || !process.env.NEXT_PUBLIC_SUPABASE_URL;
-        
-        if (isMockUrl) {
-           return { 
-              success: false, 
-              error: "Supabase belum terkonfigurasi. Mohon isi variabel env terlebih dahulu." 
-           };
-        }
-
-        // SignUp ke Supabase Auth dengan metadata nama, role, dan default approved = false
-        // PIC Gedung diset otomatis approved = true agar bisa menyetujui user lain
-        const isPic = selectedRole === 'pic_gedung' || selectedRole === 'superadmin';
-        
+        // Public registration only creates a standard user account.
+        // Admin roles (pic_gedung/admin_dept) are granted by PIC, never via self-registration.
         const { data, error } = await supabase.auth.signUp({
            email,
            password,
            options: {
               data: {
                  name,
-                 role: selectedRole,
-                 approved: isPic ? true : false
+                 role: 'user',
+                 approved: false
               }
            }
         });

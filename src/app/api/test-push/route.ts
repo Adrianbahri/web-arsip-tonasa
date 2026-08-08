@@ -30,6 +30,13 @@ function initVapid() {
 
 export async function POST(request: Request) {
   try {
+    // ponytail: gate only when a secret is configured (env on Vercel). The
+    // webhook must then send x-push-secret. Upgrade later to real auth/session.
+    const secret = process.env.PUSH_SECRET;
+    if (secret && request.headers.get('x-push-secret') !== secret) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     if (!initVapid()) {
       console.error('VAPID keys are not configured');
       return NextResponse.json({ success: false, error: 'Push notification credentials are not configured on the server.' }, { status: 500 });

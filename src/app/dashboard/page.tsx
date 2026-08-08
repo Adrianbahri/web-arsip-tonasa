@@ -462,7 +462,8 @@ export default function Dashboard() {
                      isiBundel: item.isi_bundel ? (typeof item.isi_bundel === 'string' ? JSON.parse(item.isi_bundel) : item.isi_bundel) : [],
                      status: currentStatus,
                      linkBerkas: item.link_berkas,
-                     alasanPenolakan: item.alasan_penolakan || ""
+                     alasanPenolakan: item.alasan_penolakan || "",
+                     deleted_at: item.deleted_at
                   };
                });
                setArchives(formatted);
@@ -1716,7 +1717,7 @@ export default function Dashboard() {
         const matchesSearch = searchQuery === "" || item._searchScore > 0;
         const matchesDept = departemenFilter.length === 0 || departemenFilter.includes(item.departemen);
         
-        const matchesYear = yearFilter === "" || (item.kurunWaktu && item.kurunWaktu.toString().includes(yearFilter));
+        const matchesYear = yearFilter === "" || (item.tahun && item.tahun.toString().includes(yearFilter));
         const matchesGedung = gedungFilter === "" || (item.gedung && item.gedung.trim().toUpperCase() === gedungFilter.trim().toUpperCase());
         const matchesLorong = lorongFilter === "" || item.lorong === lorongFilter;
 

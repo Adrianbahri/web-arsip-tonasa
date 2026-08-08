@@ -21,7 +21,7 @@ export default function Login() {
      setInfoMessage("");
 
      try {
-        const res = await login(email, 'user', password);
+        const res = await login(email, password);
         if (res.success) {
            if (res.error) {
               setInfoMessage(res.error);

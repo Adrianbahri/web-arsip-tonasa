@@ -23,10 +23,11 @@ BEGIN
   );
 
   -- Mengirim HTTP POST request ke server Next.js secara async (tidak menghalangi insert)
+  -- Ganti SECRET_HERE dengan nilai yang sama dengan env PUSH_SECRET di Vercel
   PERFORM net.http_post(
     url := 'https://www.arsiptonasa.my.id/api/test-push',
     body := payload,
-    headers := '{"Content-Type": "application/json"}'::jsonb
+    headers := '{"Content-Type": "application/json", "x-push-secret": "SECRET_HERE"}'::jsonb
   );
 
   RETURN NEW;
